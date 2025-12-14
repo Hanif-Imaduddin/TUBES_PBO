@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - Dikoding Muda Nusantara'">Buat Kursus - Dikoding Muda Nusantara</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    
+    <style>
+         :root{--color-primary:#1a56db;--color-primary-dark:#1e40af;--color-primary-light:#e0e7ff;--color-text:#111827;--color-text-secondary:#6b7280;--color-text-muted:#9ca3af;--color-bg:#fff;--color-bg-subtle:#f9fafb;--color-border:#e5e7eb;--color-success:#059669;--color-success-light:#d1fae5;--color-warning:#d97706;--color-warning-light:#fef3c7;--color-error:#dc2626;--color-error-light:#fee2e2;--font-primary:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;--shadow-md:0 4px 6px -1px rgb(0 0 0/0.07);--radius-sm:6px;--radius-md:10px;--transition:all .2s ease;--sidebar-width:260px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-primary);color:var(--color-text);background:var(--color-bg-subtle);font-size:15px;-webkit-font-smoothing:antialiased}a{text-decoration:none;color:inherit}.dashboard-layout{display:flex;min-height:100vh}.sidebar{width:var(--sidebar-width);background:var(--color-bg);border-right:1px solid var(--color-border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}.sidebar-header{padding:1.5rem;border-bottom:1px solid var(--color-border)}.sidebar-logo{font-weight:700;font-size:1.25rem;color:var(--color-text)}.sidebar-logo span{color:var(--color-primary)}.sidebar-nav{padding:1rem 0}.nav-section{padding:0 1rem;margin-bottom:1.5rem}.nav-section-title{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);padding:0 .75rem;margin-bottom:.5rem}.nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:var(--radius-sm);color:var(--color-text-secondary);font-weight:500;font-size:.9375rem;margin-bottom:.25rem}.nav-item:hover{background:var(--color-bg-subtle);color:var(--color-text)}.nav-item.active{background:var(--color-primary-light);color:var(--color-primary)}.nav-item svg{width:20px;height:20px}.sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--color-border)}.user-profile{display:flex;align-items:center;gap:.75rem}.user-avatar{width:40px;height:40px;border-radius:50%;background:var(--color-primary-light);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--color-primary);font-size:.875rem}.user-name{font-weight:600;font-size:.875rem}.user-role{font-size:.75rem;color:var(--color-text-muted)}.main-content{flex:1;margin-left:var(--sidebar-width)}.top-header{background:var(--color-bg);border-bottom:1px solid var(--color-border);padding:1rem 2rem;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}.header-left{display:flex;align-items:center;gap:1rem}.back-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg);display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary)}.back-btn:hover{background:var(--color-bg-subtle);color:var(--color-text)}.page-title{font-size:1.25rem;font-weight:700}.header-actions{display:flex;gap:.75rem}.btn-secondary{padding:.625rem 1.25rem;border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-bg);font-size:.875rem;font-weight:600;color:var(--color-text);cursor:pointer}.btn-secondary:hover{background:var(--color-bg-subtle)}.btn-primary-custom{background:var(--color-primary);color:#fff;font-weight:600;font-size:.875rem;padding:.625rem 1.25rem;border-radius:var(--radius-sm);border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem}.btn-primary-custom:hover{background:var(--color-primary-dark)}.content-area{padding:2rem;max-width:900px}.form-section{background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:1.5rem}.form-section-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border)}.form-section-title{font-size:1rem;font-weight:600;margin-bottom:.25rem}.form-section-desc{font-size:.8125rem;color:var(--color-text-muted)}.form-section-body{padding:1.5rem}.form-group{margin-bottom:1.5rem}.form-group:last-child{margin-bottom:0}.form-label{display:block;font-size:.875rem;font-weight:500;margin-bottom:.5rem}.form-label .required{color:var(--color-error)}.form-input{width:100%;padding:.75rem 1rem;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:.9375rem;font-family:inherit;background:var(--color-bg);transition:var(--transition)}.form-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-light)}.form-input::placeholder{color:var(--color-text-muted)}.form-input.is-invalid{border-color:var(--color-error)}.invalid-feedback{color:var(--color-error);font-size:.8125rem;margin-top:.25rem}.form-textarea{min-height:120px;resize:vertical}.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem;cursor:pointer}.form-hint{font-size:.8125rem;color:var(--color-text-muted);margin-top:.375rem}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.thumbnail-upload{border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:2rem;text-align:center;cursor:pointer;transition:var(--transition)}.thumbnail-upload:hover{border-color:var(--color-primary);background:var(--color-primary-light)}.thumbnail-upload input{display:none}.thumbnail-icon{width:48px;height:48px;background:var(--color-bg-subtle);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--color-text-muted)}.thumbnail-text{font-size:.9375rem;margin-bottom:.25rem}.thumbnail-text span{color:var(--color-primary);font-weight:600}.thumbnail-hint{font-size:.8125rem;color:var(--color-text-muted)}.thumbnail-preview{width:100%;max-height:200px;object-fit:cover;border-radius:var(--radius-sm);margin-top:1rem}.price-input-wrapper{position:relative}.price-prefix{position:absolute;left:1rem;top:50%;transform:translateY(-50%);font-size:.9375rem;color:var(--color-text-muted)}.price-input{padding-left:2.75rem}.toggle-wrapper{display:flex;align-items:center;justify-content:space-between;padding:1rem;border:1px solid var(--color-border);border-radius:var(--radius-sm)}.toggle-label{font-size:.9375rem;font-weight:500}.toggle-desc{font-size:.8125rem;color:var(--color-text-muted);margin-top:.25rem}.toggle-switch{position:relative;width:48px;height:26px}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--color-border);transition:var(--transition);border-radius:26px}.toggle-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;transition:var(--transition);border-radius:50%}.toggle-switch input:checked+.toggle-slider{background:var(--color-primary)}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(22px)}.section-builder{border:1px solid var(--color-border);border-radius:var(--radius-md)}.section-item{border-bottom:1px solid var(--color-border)}.section-item:last-child{border-bottom:none}.section-header{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--color-bg-subtle);cursor:pointer}.section-header:hover{background:#f3f4f6}.section-drag{color:var(--color-text-muted);cursor:grab}.section-toggle{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);transition:var(--transition)}.section-toggle.open{transform:rotate(180deg)}.section-title-input{flex:1;padding:.5rem .75rem;border:1px solid transparent;border-radius:var(--radius-sm);font-size:.9375rem;font-weight:600;background:transparent}.section-title-input:focus{outline:none;border-color:var(--color-primary);background:var(--color-bg)}.section-actions{display:flex;gap:.5rem}.section-action-btn{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-muted)}.section-action-btn:hover{background:var(--color-bg);color:var(--color-text)}.section-action-btn.delete:hover{background:var(--color-error-light);color:var(--color-error)}.section-content{padding:1.25rem;display:none}.section-content.open{display:block}.lesson-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid var(--color-border);border-radius:var(--radius-sm);margin-bottom:.5rem;background:var(--color-bg)}.lesson-item:hover{border-color:var(--color-primary)}.lesson-drag{color:var(--color-text-muted);cursor:grab}.lesson-type{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center}.lesson-type.video{background:var(--color-primary-light);color:var(--color-primary)}.lesson-type.text{background:var(--color-success-light);color:var(--color-success)}.lesson-type.pdf{background:var(--color-error-light);color:var(--color-error)}.lesson-type.quiz{background:var(--color-warning-light);color:var(--color-warning)}.lesson-info{flex:1}.lesson-title{font-size:.875rem;font-weight:500}.lesson-meta{font-size:.75rem;color:var(--color-text-muted)}.lesson-actions{display:flex;gap:.25rem}.btn-add-lesson{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.75rem;border:1px dashed var(--color-border);border-radius:var(--radius-sm);background:transparent;font-size:.875rem;font-weight:500;color:var(--color-text-secondary);cursor:pointer}.btn-add-lesson:hover{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-primary-light)}.btn-add-section{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:1rem;border:2px dashed var(--color-border);border-radius:var(--radius-md);background:transparent;font-size:.9375rem;font-weight:600;color:var(--color-text-secondary);cursor:pointer;margin-top:1rem}.btn-add-section:hover{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-primary-light)}.alert{padding:1rem;border-radius:var(--radius-sm);margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}.alert-success{background:var(--color-success-light);color:var(--color-success)}.alert-error{background:var(--color-error-light);color:var(--color-error)}.modal-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;visibility:hidden;transition:var(--transition)}.modal-backdrop.show{opacity:1;visibility:visible}.modal-content{background:var(--color-bg);border-radius:var(--radius-md);width:100%;max-width:500px;transform:scale(.95);transition:var(--transition)}.modal-backdrop.show .modal-content{transform:scale(1)}.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between}.modal-title{font-size:1.125rem;font-weight:600}.modal-close{width:32px;height:32px;border-radius:var(--radius-sm);border:none;background:transparent;cursor:pointer;color:var(--color-text-muted);display:flex;align-items:center;justify-content:center}.modal-close:hover{background:var(--color-bg-subtle)}.modal-body{padding:1.5rem}.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--color-border);display:flex;gap:.75rem;justify-content:flex-end}.lesson-type-selector{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem}.lesson-type-option{padding:1rem;border:1px solid var(--color-border);border-radius:var(--radius-sm);text-align:center;cursor:pointer}.lesson-type-option:hover{border-color:var(--color-primary)}.lesson-type-option.active{border-color:var(--color-primary);background:var(--color-primary-light)}.lesson-type-option input{display:none}.lesson-type-icon{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin:0 auto .5rem}.lesson-type-option.video .lesson-type-icon{background:var(--color-primary-light);color:var(--color-primary)}.lesson-type-option.text .lesson-type-icon{background:var(--color-success-light);color:var(--color-success)}.lesson-type-option.pdf .lesson-type-icon{background:var(--color-error-light);color:var(--color-error)}.lesson-type-option.quiz .lesson-type-icon{background:var(--color-warning-light);color:var(--color-warning)}.lesson-type-name{font-size:.875rem;font-weight:600}.upload-progress{margin-top:.5rem;display:none}.upload-progress.show{display:block}.progress-bar-custom{height:6px;background:var(--color-border);border-radius:3px;overflow:hidden}.progress-fill{height:100%;background:var(--color-primary);width:0%;transition:width .3s}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main-content{margin-left:0}.top-header{padding:1rem}.content-area{padding:1rem}.form-row{grid-template-columns:1fr}.header-actions{display:none}.mobile-toggle{display:flex}.lesson-type-selector{grid-template-columns:repeat(2,1fr)}}.mobile-toggle{display:none;width:40px;height:40px;border:1px solid var(--color-border);border-radius:var(--radius-sm);background:var(--color-bg);align-items:center;justify-content:center;cursor:pointer}
+         .file-upload-area {
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--color-primary);
+        }
+
+        .file-upload-placeholder {
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .file-upload-placeholder svg {
+            color: var(--color-text-muted);
+            margin-bottom: .5rem;
+        }
+
+        .file-upload-placeholder p {
+            font-size: .9375rem;
+            font-weight: 500;
+            margin-bottom: .25rem;
+        }
+
+        .file-upload-placeholder small {
+            font-size: .8125rem;
+            color: var(--color-text-muted);
+        }
+
+        .file-upload-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--color-success-light);
+            border-radius: var(--radius-sm);
+        }
+
+        .file-upload-info .file-name {
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--color-success);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 300px;
+        }
+
+        .btn-remove-file {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: var(--color-error);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-remove-file:hover {
+            background: var(--color-error);
+            opacity: .8;
+        }
+
+        .quiz-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            padding: 1rem;
+            background: var(--color-warning-light);
+            border-radius: var(--radius-sm);
+            color: var(--color-warning);
+        }
+
+        .quiz-notice svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .quiz-notice p {
+            font-size: .875rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><a href="/" class="sidebar-logo">Dikoding<span>Muda</span></a></div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Menu Utama</div>
+                    <a href="/lecturer/dashboard" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+                    <a href="/lecturer/courses" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Kursus Saya</a>
+                    <a href="/lecturer/courses/create" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>Buat Kursus</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Lainnya</div>
+                    <a href="/logout" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Keluar</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" th:text="${user != null ? user.firstName.substring(0,1) + user.lastName.substring(0,1) : 'U'}">BS</div>
+                    <div class="user-info">
+                        <div class="user-name" th:text="${user != null ? user.firstName + ' ' + user.lastName : 'User'}">Budi Santoso</div>
+                        <div class="user-role">Pengajar</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="mobile-toggle" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+                    <a href="/lecturer/courses" class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></a>
+                    <h1 class="page-title" th:text="${pageTitle}">Buat Kursus Baru</h1>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="btn-secondary" onclick="saveDraft()">Simpan Draft</button>
+                    <button type="submit" form="courseForm" class="btn-primary-custom" th:text="${isEdit} ? 'Update Kursus' : 'Publish Kursus'">Publish Kursus</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="alert alert-success" th:if="${success}"><span th:text="${success}">Berhasil</span></div>
+                <div class="alert alert-error" th:if="${error}"><span th:text="${error}">Error</span></div>
+
+                <!-- FORM TANPA enctype multipart/form-data -->
+                <form id="courseForm" th:action="@{/lecturer/courses/save}" th:object="${courseDTO}" method="POST">
+                    <input type="hidden" th:field="*{courseId}">
+                    <input type="hidden" th:field="*{status}" id="courseStatus">
+                    <input type="hidden" th:field="*{existingThumbnailUrl}" id="existingThumbnailUrl">
+                    <input type="hidden" name="sectionsJson" id="sectionsJson">
+
+                    <div class="form-section">
+                        <div class="form-section-header"><h2 class="form-section-title">Informasi Dasar</h2><p class="form-section-desc">Detail utama tentang kursus Anda</p></div>
+                        <div class="form-section-body">
+                            <div class="form-group">
+                                <label class="form-label" for="title">Judul Kursus <span class="required">*</span></label>
+                                <input type="text" class="form-input" th:classappend="${#fields.hasErrors('title')} ? ' is-invalid' : ''" id="title" th:field="*{title}" placeholder="Contoh: Belajar JavaScript dari Nol" required>
+                                <p class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Error</p>
+                                <p class="form-hint">Judul yang jelas akan meningkatkan minat pelajar</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="shortDescription">Deskripsi Singkat</label>
+                                <input type="text" class="form-input" id="shortDescription" th:field="*{shortDescription}" placeholder="Ringkasan singkat (maks 500 karakter)" maxlength="500">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="description">Deskripsi Lengkap <span class="required">*</span></label>
+                                <textarea class="form-input form-textarea" th:classappend="${#fields.hasErrors('description')} ? ' is-invalid' : ''" id="description" th:field="*{description}" placeholder="Jelaskan apa yang akan dipelajari..." required></textarea>
+                                <p class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Error</p>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="categoryId">Kategori <span class="required">*</span></label>
+                                    <select class="form-input form-select" th:classappend="${#fields.hasErrors('categoryId')} ? ' is-invalid' : ''" id="categoryId" th:field="*{categoryId}" required>
+                                        <option value="">Pilih Kategori</option>
+                                        <option th:each="cat : ${categories}" th:value="${cat.categoryId}" th:text="${cat.name}">Kategori</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="level">Level <span class="required">*</span></label>
+                                    <select class="form-input form-select" th:classappend="${#fields.hasErrors('level')} ? ' is-invalid' : ''" id="level" th:field="*{level}" required>
+                                        <option value="">Pilih Level</option>
+                                        <option value="beginner">Pemula</option>
+                                        <option value="intermediate">Menengah</option>
+                                        <option value="advanced">Mahir</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- THUMBNAIL UPLOAD VIA AJAX (TERPISAH DARI FORM UTAMA) -->
+                            <div class="form-group">
+                                <label class="form-label">Thumbnail Kursus</label>
+                                <label class="thumbnail-upload" id="thumbnailDropzone">
+                                    <input type="file" id="thumbnailInput" accept="image/*">
+                                    <div class="thumbnail-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                                    <p class="thumbnail-text"><span>Klik untuk upload</span></p>
+                                    <p class="thumbnail-hint">PNG, JPG hingga 2MB</p>
+                                </label>
+                                <div class="upload-progress" id="thumbnailProgress">
+                                    <div class="progress-bar-custom"><div class="progress-fill" id="thumbnailProgressBar"></div></div>
+                                    <small class="text-muted">Mengupload...</small>
+                                </div>
+                                <img id="thumbnailPreview" class="thumbnail-preview" th:src="${courseDTO.existingThumbnailUrl}" th:style="${courseDTO.existingThumbnailUrl != null} ? 'display:block' : 'display:none'" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-header"><h2 class="form-section-title">Harga</h2><p class="form-section-desc">Tentukan harga untuk kursus Anda</p></div>
+                        <div class="form-section-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="price">Harga <span class="required">*</span></label>
+                                    <div class="price-input-wrapper">
+                                        <span class="price-prefix">Rp</span>
+                                        <input type="number" class="form-input price-input" id="price" th:field="*{price}" placeholder="0" min="0" required>
+                                    </div>
+                                    <p class="form-hint">Masukkan 0 untuk kursus gratis</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="discountPrice">Harga Diskon</label>
+                                    <div class="price-input-wrapper">
+                                        <span class="price-prefix">Rp</span>
+                                        <input type="number" class="form-input price-input" id="discountPrice" th:field="*{discountPrice}" placeholder="0" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="toggle-wrapper">
+                                    <div><div class="toggle-label">Kursus Gratis</div><div class="toggle-desc">Aktifkan jika kursus ini gratis</div></div>
+                                    <label class="toggle-switch"><input type="checkbox" th:field="*{isFree}" onchange="toggleFreePrice(this)"><span class="toggle-slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-header"><h2 class="form-section-title">Kurikulum</h2><p class="form-section-desc">Susun materi pembelajaran</p></div>
+                        <div class="form-section-body">
+                            <div class="section-builder" id="sectionBuilder">
+                                <th:block th:each="section, sectionStat : ${courseDTO.sections}">
+                                    <div class="section-item" th:data-section="${sectionStat.index}">
+                                        <div class="section-header" th:onclick="'toggleSection(' + ${sectionStat.index} + ')'">
+                                            <span class="section-drag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                                            <span class="section-toggle open" th:id="'toggle-' + ${sectionStat.index}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span>
+                                            <input type="text" class="section-title-input" th:value="${section.title}" th:data-section-id="${section.sectionId}" onclick="event.stopPropagation()">
+                                            <div class="section-actions" onclick="event.stopPropagation()">
+                                                <button type="button" class="section-action-btn delete" th:onclick="'deleteSection(' + ${sectionStat.index} + ')'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                            </div>
+                                        </div>
+                                        <div class="section-content open" th:id="'content-' + ${sectionStat.index}">
+                                            <div class="lesson-list" th:id="'lessons-' + ${sectionStat.index}">
+                                                <th:block th:each="lesson : ${section.lessons}">
+                                                    <div class="lesson-item" th:data-lesson-id="${lesson.lessonId}">
+                                                        <span class="lesson-drag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                                                        <div class="lesson-type" th:classappend="${lesson.contentType}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                                                        <div class="lesson-info"><div class="lesson-title" th:text="${lesson.title}">Materi</div><div class="lesson-meta" th:text="${lesson.contentTypeDisplay} + ' - ' + ${lesson.duration} + ' menit'">Video - 5 menit</div></div>
+                                                        <div class="lesson-actions">
+                                                            <button type="button" class="section-action-btn delete" onclick="this.closest('.lesson-item').remove();updateSectionsJson()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                                                        </div>
+                                                    </div>
+                                                </th:block>
+                                            </div>
+                                            <button type="button" class="btn-add-lesson" th:onclick="'showAddLessonModal(' + ${sectionStat.index} + ')'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Tambah Materi</button>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+                            <button type="button" class="btn-add-section" onclick="addSection()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Tambah Section Baru</button>
+                        </div>
+                    </div>
+
+                    <div class="d-md-none mt-4">
+                        <button type="button" class="btn-secondary w-100 mb-2" onclick="saveDraft()">Simpan Draft</button>
+                        <button type="submit" class="btn-primary-custom w-100">Publish Kursus</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tambah Materi -->
+    <div class="modal-backdrop" id="lessonModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Tambah Materi</h3>
+                <button type="button" class="modal-close" onclick="hideAddLessonModal()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <div class="lesson-type-selector">
+                    <label class="lesson-type-option video active" onclick="selectLessonType('video')"><input type="radio" name="lessonType" value="video" checked><div class="lesson-type-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div class="lesson-type-name">Video</div></label>
+                    <label class="lesson-type-option text" onclick="selectLessonType('text')"><input type="radio" name="lessonType" value="text"><div class="lesson-type-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="lesson-type-name">Teks</div></label>
+                    <label class="lesson-type-option pdf" onclick="selectLessonType('pdf')"><input type="radio" name="lessonType" value="pdf"><div class="lesson-type-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="lesson-type-name">PDF</div></label>
+                    <label class="lesson-type-option quiz" onclick="selectLessonType('quiz')"><input type="radio" name="lessonType" value="quiz"><div class="lesson-type-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg></div><div class="lesson-type-name">Quiz</div></label>
+                </div>
+                <div class="form-group"><label class="form-label">Judul Materi <span class="required">*</span></label><input type="text" class="form-input" id="lessonTitle" placeholder="Masukkan judul materi"></div>
+                <div class="form-group"><label class="form-label">Durasi (menit)</label><input type="number" class="form-input" id="lessonDuration" placeholder="0" min="0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="hideAddLessonModal()">Batal</button>
+                <button type="button" class="btn-primary-custom" onclick="addLesson()">Simpan Materi</button>
+            </div>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:inline="javascript">
+        let sectionCount = /*[[${courseDTO.sections.size()}]]*/ 0;
+        let currentSectionIndex = null;
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function toggleSection(idx) { document.getElementById('content-' + idx).classList.toggle('open'); document.getElementById('toggle-' + idx).classList.toggle('open'); }
+        function deleteSection(idx) { if(confirm('Hapus section ini?')) document.querySelector('[data-section="'+idx+'"]').remove(); updateSectionsJson(); }
+        
+        function addSection() {
+            sectionCount++;
+            const html = `<div class="section-item" data-section="${sectionCount}"><div class="section-header" onclick="toggleSection(${sectionCount})"><span class="section-drag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span><span class="section-toggle open" id="toggle-${sectionCount}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span><input type="text" class="section-title-input" value="Section ${sectionCount+1}: Judul" onclick="event.stopPropagation()"><div class="section-actions" onclick="event.stopPropagation()"><button type="button" class="section-action-btn delete" onclick="deleteSection(${sectionCount})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div><div class="section-content open" id="content-${sectionCount}"><div class="lesson-list" id="lessons-${sectionCount}"></div><button type="button" class="btn-add-lesson" onclick="showAddLessonModal(${sectionCount})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Tambah Materi</button></div></div>`;
+            document.getElementById('sectionBuilder').insertAdjacentHTML('beforeend', html);
+            updateSectionsJson();
+        }
+
+        // Store uploaded file URL temporarily
+        let currentLessonContentUrl = '';
+        let currentLessonContentText = '';
+        
+        function showAddLessonModal(idx) { 
+            currentSectionIndex = idx; 
+            currentLessonContentUrl = '';
+            currentLessonContentText = '';
+            document.getElementById('lessonTitle').value = ''; 
+            document.getElementById('lessonDuration').value = ''; 
+            selectLessonType('video');
+            document.getElementById('lessonModal').classList.add('show'); 
+        }
+        
+        function hideAddLessonModal() { 
+            document.getElementById('lessonModal').classList.remove('show'); 
+            currentLessonContentUrl = '';
+            currentLessonContentText = '';
+        }
+        
+        function selectLessonType(type) { 
+            document.querySelectorAll('.lesson-type-option').forEach(o => o.classList.remove('active'));
+            document.querySelector('.lesson-type-option.' + type).classList.add('active');
+            document.querySelector('input[name="lessonType"][value="' + type + '"]').checked = true;
+            
+            currentLessonContentUrl = '';
+            currentLessonContentText = '';
+            
+            let contentContainer = document.getElementById('lessonContentContainer');
+            if (!contentContainer) {
+                contentContainer = document.createElement('div');
+                contentContainer.id = 'lessonContentContainer';
+                contentContainer.className = 'form-group';
+                document.getElementById('lessonDuration').closest('.form-group').after(contentContainer);
+            }
+            
+            if (type === 'video') {
+                contentContainer.innerHTML = `
+                    <label class="form-label">File Video <span class="required">*</span></label>
+                    <div class="file-upload-area" id="videoUploadArea">
+                        <input type="file" id="lessonVideoInput" accept="video/*" style="display:none">
+                        <div class="file-upload-placeholder" onclick="document.getElementById('lessonVideoInput').click()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <p>Klik untuk upload video</p>
+                            <small>MP4, WebM, MKV (Maks 500MB)</small>
+                        </div>
+                        <div class="file-upload-info" id="videoUploadInfo" style="display:none">
+                            <span class="file-name" id="videoFileName"></span>
+                            <button type="button" class="btn-remove-file" onclick="removeUploadedFile('video')">x</button>
+                        </div>
+                        <div class="upload-progress" id="videoProgress">
+                            <div class="progress-bar-custom"><div class="progress-fill" id="videoProgressBar"></div></div>
+                            <small>Mengupload...</small>
+                        </div>
+                    </div>`;
+                setTimeout(() => {
+                    document.getElementById('lessonVideoInput').addEventListener('change', (e) => uploadLessonFile(e, 'video'));
+                }, 0);
+            } 
+            else if (type === 'pdf') {
+                contentContainer.innerHTML = `
+                    <label class="form-label">File PDF <span class="required">*</span></label>
+                    <div class="file-upload-area" id="pdfUploadArea">
+                        <input type="file" id="lessonPdfInput" accept=".pdf" style="display:none">
+                        <div class="file-upload-placeholder" onclick="document.getElementById('lessonPdfInput').click()">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            <p>Klik untuk upload PDF</p>
+                            <small>File PDF (Maks 50MB)</small>
+                        </div>
+                        <div class="file-upload-info" id="pdfUploadInfo" style="display:none">
+                            <span class="file-name" id="pdfFileName"></span>
+                            <button type="button" class="btn-remove-file" onclick="removeUploadedFile('pdf')">x</button>
+                        </div>
+                        <div class="upload-progress" id="pdfProgress">
+                            <div class="progress-bar-custom"><div class="progress-fill" id="pdfProgressBar"></div></div>
+                            <small>Mengupload...</small>
+                        </div>
+                    </div>`;
+                setTimeout(() => {
+                    document.getElementById('lessonPdfInput').addEventListener('change', (e) => uploadLessonFile(e, 'pdf'));
+                }, 0);
+            } 
+            else if (type === 'text') {
+                contentContainer.innerHTML = `
+                    <label class="form-label">Konten Teks <span class="required">*</span></label>
+                    <textarea class="form-input form-textarea" id="lessonTextContent" placeholder="Tulis konten materi di sini..." rows="6"></textarea>
+                    <p class="form-hint">Mendukung format teks biasa</p>`;
+            } 
+            else if (type === 'quiz') {
+                contentContainer.innerHTML = `
+                    <div class="quiz-notice">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <p>Fitur quiz akan segera hadir. Silakan pilih tipe materi lain.</p>
+                    </div>`;
+            }
+        }
+        
+        function uploadLessonFile(e, type) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const maxSize = type === 'video' ? 500 * 1024 * 1024 : 50 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('Ukuran file maksimal ' + (type === 'video' ? '500MB' : '50MB'));
+                return;
+            }
+            
+            if (type === 'video' && !file.type.startsWith('video/')) {
+                alert('File harus berupa video');
+                return;
+            }
+            if (type === 'pdf' && file.type !== 'application/pdf') {
+                alert('File harus berupa PDF');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', type);
+            
+            const progressEl = document.getElementById(type + 'Progress');
+            const progressBar = document.getElementById(type + 'ProgressBar');
+            const placeholder = document.querySelector('#' + type + 'UploadArea .file-upload-placeholder');
+            const fileInfo = document.getElementById(type + 'UploadInfo');
+            const fileName = document.getElementById(type + 'FileName');
+            
+            progressEl.classList.add('show');
+            placeholder.style.display = 'none';
+            
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percent + '%';
+                }
+            });
+            
+            xhr.addEventListener('load', function() {
+                progressEl.classList.remove('show');
+                progressBar.style.width = '0%';
+                
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            currentLessonContentUrl = response.data.path;
+                            fileName.textContent = file.name;
+                            fileInfo.style.display = 'flex';
+                            if (type === 'video') detectVideoDuration(file);
+                        } else {
+                            alert('Upload gagal: ' + response.message);
+                            placeholder.style.display = 'block';
+                        }
+                    } catch(err) {
+                        alert('Upload gagal');
+                        placeholder.style.display = 'block';
+                    }
+                } else {
+                    alert('Upload gagal');
+                    placeholder.style.display = 'block';
+                }
+            });
+            
+            xhr.addEventListener('error', function() {
+                progressEl.classList.remove('show');
+                placeholder.style.display = 'block';
+                alert('Upload error');
+            });
+            
+            xhr.open('POST', '/files/upload/temp/' + type);
+            xhr.send(formData);
+        }
+        
+        function removeUploadedFile(type) {
+            currentLessonContentUrl = '';
+            const placeholder = document.querySelector('#' + type + 'UploadArea .file-upload-placeholder');
+            const fileInfo = document.getElementById(type + 'UploadInfo');
+            const inputId = 'lesson' + type.charAt(0).toUpperCase() + type.slice(1) + 'Input';
+            const input = document.getElementById(inputId);
+            
+            placeholder.style.display = 'block';
+            fileInfo.style.display = 'none';
+            if (input) input.value = '';
+        }
+        
+        function detectVideoDuration(file) {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = function() {
+                window.URL.revokeObjectURL(video.src);
+                const duration = Math.round(video.duration / 60);
+                document.getElementById('lessonDuration').value = duration;
+            };
+            video.src = URL.createObjectURL(file);
+        }
+
+        function addLesson() {
+            const title = document.getElementById('lessonTitle').value.trim();
+            const duration = document.getElementById('lessonDuration').value || '0';
+            const type = document.querySelector('input[name="lessonType"]:checked').value;
+            
+            if (!title) { 
+                alert('Masukkan judul materi'); 
+                return; 
+            }
+            
+            if (type === 'video' || type === 'pdf') {
+                if (!currentLessonContentUrl) {
+                    alert('Silakan upload file terlebih dahulu');
+                    return;
+                }
+            } else if (type === 'text') {
+                const textContent = document.getElementById('lessonTextContent');
+                if (textContent && !textContent.value.trim()) {
+                    alert('Silakan isi konten teks');
+                    return;
+                }
+                currentLessonContentText = textContent.value.trim();
+            } else if (type === 'quiz') {
+                alert('Fitur quiz belum tersedia');
+                return;
+            }
+            
+            const icons = { 
+                video: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>', 
+                text: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>', 
+                pdf: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>', 
+                quiz: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>' 
+            };
+            const types = { video: 'Video', text: 'Teks', pdf: 'PDF', quiz: 'Quiz' };
+            
+            const contentUrl = currentLessonContentUrl ? encodeURIComponent(currentLessonContentUrl) : '';
+            const contentText = currentLessonContentText ? encodeURIComponent(currentLessonContentText) : '';
+            
+            const html = `<div class="lesson-item" data-type="${type}" data-duration="${duration}" data-content-url="${contentUrl}" data-content-text="${contentText}">
+                <span class="lesson-drag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+                <div class="lesson-type ${type}">${icons[type]}</div>
+                <div class="lesson-info">
+                    <div class="lesson-title">${title}</div>
+                    <div class="lesson-meta">${types[type]} - ${duration} menit</div>
+                </div>
+                <div class="lesson-actions">
+                    <button type="button" class="section-action-btn delete" onclick="this.closest('.lesson-item').remove();updateSectionsJson()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>`;
+            
+            document.getElementById('lessons-' + currentSectionIndex).insertAdjacentHTML('beforeend', html);
+            updateSectionsJson();
+            hideAddLessonModal();
+        }
+
+        function toggleFreePrice(cb) { document.getElementById('price').disabled = cb.checked; document.getElementById('discountPrice').disabled = cb.checked; if(cb.checked) document.getElementById('price').value = '0'; }
+
+        function updateSectionsJson() {
+            const sections = [];
+            document.querySelectorAll('.section-item').forEach((el, idx) => {
+                const lessons = [];
+                el.querySelectorAll('.lesson-item').forEach((lEl, lIdx) => {
+                    const type = lEl.dataset.type || lEl.querySelector('.lesson-type').classList[1];
+                    const duration = lEl.dataset.duration || parseInt(lEl.querySelector('.lesson-meta').textContent.split('-')[1]) || 0;
+                    const contentUrl = lEl.dataset.contentUrl ? decodeURIComponent(lEl.dataset.contentUrl) : '';
+                    const contentText = lEl.dataset.contentText ? decodeURIComponent(lEl.dataset.contentText) : '';
+                    lessons.push({ 
+                        title: lEl.querySelector('.lesson-title').textContent, 
+                        contentType: type, 
+                        contentUrl: contentUrl,
+                        contentText: contentText,
+                        duration: parseInt(duration), 
+                        sortOrder: lIdx 
+                    });
+                });
+                sections.push({ 
+                    title: el.querySelector('.section-title-input').value, 
+                    sortOrder: idx, 
+                    lessons: lessons 
+                });
+            });
+            document.getElementById('sectionsJson').value = JSON.stringify(sections);
+        }
+
+        function saveDraft() { 
+            updateSectionsJson(); 
+            document.getElementById('courseStatus').value = 'draft'; 
+            document.getElementById('courseForm').submit(); 
+        }
+        
+        // Thumbnail Upload via AJAX (terpisah dari form utama)
+        document.getElementById('thumbnailInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Validasi ukuran (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran file maksimal 2MB');
+                return;
+            }
+            
+            // Validasi tipe file
+            if (!file.type.startsWith('image/')) {
+                alert('File harus berupa gambar');
+                return;
+            }
+            
+            // Preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('thumbnailPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            
+            // Upload via AJAX
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const progress = document.getElementById('thumbnailProgress');
+            const progressBar = document.getElementById('thumbnailProgressBar');
+            progress.classList.add('show');
+            
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percent + '%';
+                }
+            });
+            
+            xhr.addEventListener('load', function() {
+                progress.classList.remove('show');
+                progressBar.style.width = '0%';
+                
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            // Set URL ke hidden field
+                            document.getElementById('existingThumbnailUrl').value = response.data.path;
+                            console.log('Thumbnail uploaded:', response.data.path);
+                        } else {
+                            alert('Upload gagal: ' + response.message);
+                        }
+                    } catch(e) {
+                        alert('Upload gagal');
+                    }
+                } else {
+                    alert('Upload gagal');
+                }
+            });
+            
+            xhr.addEventListener('error', function() {
+                progress.classList.remove('show');
+                alert('Upload error');
+            });
+            
+            xhr.open('POST', '/files/upload/thumbnail');
+            xhr.send(formData);
+        });
+
+        document.getElementById('courseForm').addEventListener('submit', function(e) {
+            updateSectionsJson();
+        });
+        
+        document.getElementById('lessonModal').addEventListener('click', e => { if(e.target.id === 'lessonModal') hideAddLessonModal(); });
+        
+        document.addEventListener('DOMContentLoaded', () => { 
+            updateSectionsJson(); 
+            if(document.querySelector('input[name="isFree"]')?.checked) toggleFreePrice(document.querySelector('input[name="isFree"]')); 
+        });
+    </script>
+</body>
+</html>

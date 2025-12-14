@@ -119,20 +119,4 @@ public class AuthController {
         redirectAttributes.addFlashAttribute("success", "Anda telah logout.");
         return "redirect:/login";
     }
-
-    // ==================== DASHBOARD ====================
-
-    @GetMapping("/dashboard")
-    public String showDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        
-        if (user == null) {
-            return "redirect:/login";
-        }
-        
-        model.addAttribute("user", user);
-        model.addAttribute("role", session.getAttribute("userRole"));
-        
-        return "dashboard";
-    }
 }

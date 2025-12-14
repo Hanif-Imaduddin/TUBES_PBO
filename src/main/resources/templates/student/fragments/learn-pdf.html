@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Fragment: PDF Content -->
+<div th:fragment="pdf-content" class="pdf-container">
+    <div class="pdf-wrapper" id="pdfWrapper">
+        <!-- PDF Toolbar -->
+        <div class="pdf-toolbar">
+            <div class="pdf-toolbar-left">
+                <button class="btn-pdf" onclick="pdfPrevPage()" title="Halaman Sebelumnya">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+                <span class="pdf-page-info">
+                    <input type="number" id="pdfPageInput" min="1" value="1" onchange="pdfGoToPage(this.value)">
+                    <span> / </span>
+                    <span id="pdfTotalPages">1</span>
+                </span>
+                <button class="btn-pdf" onclick="pdfNextPage()" title="Halaman Selanjutnya">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="pdf-toolbar-center">
+                <span class="pdf-filename" th:text="${lesson.title}">Document.pdf</span>
+            </div>
+            
+            <div class="pdf-toolbar-right">
+                <button class="btn-pdf" onclick="pdfZoomOut()" title="Perkecil">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <span class="pdf-zoom-level" id="pdfZoomLevel">100%</span>
+                <button class="btn-pdf" onclick="pdfZoomIn()" title="Perbesar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="11" y1="8" x2="11" y2="14"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <button class="btn-pdf" onclick="pdfFitWidth()" title="Sesuaikan Lebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M9 3v18M15 3v18"/>
+                    </svg>
+                </button>
+                <a class="btn-pdf" th:href="@{/files/download(path=${lesson.contentUrl})}" title="Download PDF">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </a>
+                <button class="btn-pdf" onclick="pdfFullscreen()" title="Fullscreen">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- PDF Viewer -->
+        <div class="pdf-viewer" id="pdfViewer">
+            <!-- Using Browser's native PDF viewer via iframe -->
+            <iframe 
+                th:src="@{/files/view(path=${lesson.contentUrl})}" 
+                id="pdfFrame"
+                class="pdf-frame"
+                allowfullscreen>
+            </iframe>
+            
+            <!-- Alternative: Canvas rendering with PDF.js (for more control) -->
+            <div class="pdf-canvas-container" id="pdfCanvasContainer" style="display:none">
+                <canvas id="pdfCanvas"></canvas>
+            </div>
+            
+            <!-- Loading -->
+            <div class="pdf-loading" id="pdfLoading">
+                <div class="spinner"></div>
+                <p>Memuat PDF...</p>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .pdf-container {
+            background: var(--color-bg-subtle);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pdf-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - var(--header-height) - 300px);
+            min-height: 500px;
+        }
+        
+        .pdf-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .75rem 1rem;
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            gap: 1rem;
+        }
+        
+        .pdf-toolbar-left, .pdf-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        
+        .pdf-toolbar-center {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .pdf-filename {
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--color-text);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .btn-pdf {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-secondary);
+            transition: var(--transition);
+        }
+        
+        .btn-pdf:hover {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+            border-color: var(--color-primary);
+        }
+        
+        .pdf-page-info {
+            display: flex;
+            align-items: center;
+            gap: .375rem;
+            font-size: .875rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .pdf-page-info input {
+            width: 48px;
+            padding: .375rem .5rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: .875rem;
+            font-family: inherit;
+        }
+        
+        .pdf-page-info input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+        
+        .pdf-zoom-level {
+            font-size: .8125rem;
+            color: var(--color-text-muted);
+            min-width: 48px;
+            text-align: center;
+        }
+        
+        .pdf-viewer {
+            flex: 1;
+            position: relative;
+            background: #525659;
+            overflow: auto;
+        }
+        
+        .pdf-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .pdf-canvas-container {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .pdf-canvas-container canvas {
+            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+        }
+        
+        .pdf-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #fff;
+            display: none;
+        }
+        
+        .pdf-loading.show {
+            display: block;
+        }
+        
+        .pdf-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        .pdf-loading p {
+            font-size: .875rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .pdf-toolbar {
+                flex-wrap: wrap;
+                gap: .5rem;
+            }
+            
+            .pdf-toolbar-center {
+                order: -1;
+                flex-basis: 100%;
+                text-align: left;
+            }
+            
+            .pdf-filename {
+                max-width: none;
+            }
+        }
+    </style>
+    
+    <script>
+        let pdfCurrentPage = 1;
+        let pdfTotalPages = 1;
+        let pdfZoom = 100;
+        
+        // Note: These functions are for the PDF.js implementation
+        // The iframe version uses browser's native PDF viewer
+        
+        function pdfPrevPage() {
+            if (pdfCurrentPage > 1) {
+                pdfCurrentPage--;
+                updatePdfPage();
+            }
+        }
+        
+        function pdfNextPage() {
+            if (pdfCurrentPage < pdfTotalPages) {
+                pdfCurrentPage++;
+                updatePdfPage();
+            }
+        }
+        
+        function pdfGoToPage(page) {
+            const pageNum = parseInt(page);
+            if (pageNum >= 1 && pageNum <= pdfTotalPages) {
+                pdfCurrentPage = pageNum;
+                updatePdfPage();
+            }
+        }
+        
+        function pdfZoomIn() {
+            if (pdfZoom < 200) {
+                pdfZoom += 25;
+                updatePdfZoom();
+            }
+        }
+        
+        function pdfZoomOut() {
+            if (pdfZoom > 50) {
+                pdfZoom -= 25;
+                updatePdfZoom();
+            }
+        }
+        
+        function pdfFitWidth() {
+            pdfZoom = 100;
+            updatePdfZoom();
+        }
+        
+        function updatePdfPage() {
+            document.getElementById('pdfPageInput').value = pdfCurrentPage;
+            // If using PDF.js, render the page here
+        }
+        
+        function updatePdfZoom() {
+            document.getElementById('pdfZoomLevel').textContent = pdfZoom + '%';
+            
+            // Apply zoom to iframe
+            const frame = document.getElementById('pdfFrame');
+            if (frame) {
+                frame.style.transform = `scale(${pdfZoom / 100})`;
+                frame.style.transformOrigin = 'top left';
+                frame.style.width = `${100 / (pdfZoom / 100)}%`;
+                frame.style.height = `${100 / (pdfZoom / 100)}%`;
+            }
+        }
+        
+        function pdfFullscreen() {
+            const wrapper = document.getElementById('pdfWrapper');
+            
+            if (!document.fullscreenElement) {
+                wrapper.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Track reading progress for PDF
+        document.getElementById('pdfFrame').addEventListener('load', function() {
+            document.getElementById('pdfLoading').classList.remove('show');
+            
+            // Save progress when viewing PDF
+            saveProgress();
+        });
+        
+        function saveProgress() {
+            fetch('/api/learn/progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    lessonId: lessonId, 
+                    completed: false,
+                    lastPage: pdfCurrentPage
+                })
+            }).catch(err => console.error(err));
+        }
+        
+        // Show loading on initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('pdfLoading').classList.add('show');
+        });
+    </script>
+</div>
+
+</html>

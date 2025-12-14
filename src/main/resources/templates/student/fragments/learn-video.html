@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Fragment: Video Content -->
+<div th:fragment="video-content" class="video-container" id="videoContainer">
+    <video id="videoPlayer" 
+           th:src="@{/files/stream(path=${lesson.contentUrl})}"
+           preload="metadata"
+           onclick="togglePlay()">
+        Browser Anda tidak mendukung video.
+    </video>
+    
+    <!-- Loading Spinner -->
+    <div class="video-loading" id="videoLoading">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Play Button Overlay -->
+    <div class="video-play-overlay" id="playOverlay" onclick="togglePlay()">
+        <div class="play-button">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+        </div>
+    </div>
+    
+    <!-- Custom Controls -->
+    <div class="video-controls" id="videoControls">
+        <!-- Progress Bar -->
+        <div class="video-progress" id="videoProgress" onclick="seekVideo(event)">
+            <div class="video-progress-fill" id="videoProgressFill" style="width: 0%"></div>
+            <div class="video-buffered" id="videoBuffered"></div>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div class="video-buttons">
+            <div class="video-buttons-left">
+                <!-- Play/Pause -->
+                <button class="btn-video" id="btnPlay" onclick="togglePlay()">
+                    <svg id="iconPlay" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <svg id="iconPause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                        <rect x="6" y="4" width="4" height="16"/>
+                        <rect x="14" y="4" width="4" height="16"/>
+                    </svg>
+                </button>
+                
+                <!-- Skip Backward -->
+                <button class="btn-video" onclick="skipVideo(-10)" title="Mundur 10 detik">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 17l-5-5 5-5"/>
+                        <path d="M18 17l-5-5 5-5"/>
+                    </svg>
+                </button>
+                
+                <!-- Skip Forward -->
+                <button class="btn-video" onclick="skipVideo(10)" title="Maju 10 detik">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 17l5-5-5-5"/>
+                        <path d="M6 17l5-5-5-5"/>
+                    </svg>
+                </button>
+                
+                <!-- Volume -->
+                <div class="volume-control">
+                    <button class="btn-video" id="btnVolume" onclick="toggleMute()">
+                        <svg id="iconVolumeOn" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        </svg>
+                        <svg id="iconVolumeMute" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                            <line x1="23" y1="9" x2="17" y2="15"/>
+                            <line x1="17" y1="9" x2="23" y2="15"/>
+                        </svg>
+                    </button>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1" onchange="setVolume(this.value)">
+                </div>
+                
+                <!-- Time Display -->
+                <span class="video-time">
+                    <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                </span>
+            </div>
+            
+            <div class="video-buttons-right">
+                <!-- Speed -->
+                <div class="speed-selector">
+                    <button class="speed-btn" id="speedBtn" onclick="toggleSpeedMenu()">1x</button>
+                    <div class="speed-menu" id="speedMenu">
+                        <div class="speed-option" onclick="setSpeed(0.5)">0.5x</div>
+                        <div class="speed-option" onclick="setSpeed(0.75)">0.75x</div>
+                        <div class="speed-option active" onclick="setSpeed(1)">1x</div>
+                        <div class="speed-option" onclick="setSpeed(1.25)">1.25x</div>
+                        <div class="speed-option" onclick="setSpeed(1.5)">1.5x</div>
+                        <div class="speed-option" onclick="setSpeed(2)">2x</div>
+                    </div>
+                </div>
+                
+                <!-- Fullscreen -->
+                <button class="btn-video" onclick="toggleFullscreen()" title="Fullscreen">
+                    <svg id="iconFullscreen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                    <svg id="iconExitFullscreen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .video-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        
+        .video-loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .video-play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .video-play-overlay.hidden {
+            display: none;
+        }
+        
+        .play-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+            transition: transform .2s ease, background .2s ease;
+        }
+        
+        .play-button:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+        
+        .play-button svg {
+            margin-left: 4px;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: .25rem;
+        }
+        
+        .volume-slider {
+            width: 0;
+            opacity: 0;
+            transition: width .2s ease, opacity .2s ease;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+        
+        .volume-control:hover .volume-slider {
+            width: 80px;
+            opacity: 1;
+        }
+        
+        .video-buffered {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(255,255,255,.2);
+            pointer-events: none;
+        }
+        
+        .video-progress {
+            position: relative;
+        }
+    </style>
+    
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const playOverlay = document.getElementById('playOverlay');
+        const videoLoading = document.getElementById('videoLoading');
+        const progressFill = document.getElementById('videoProgressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const iconPlay = document.getElementById('iconPlay');
+        const iconPause = document.getElementById('iconPause');
+        const speedBtn = document.getElementById('speedBtn');
+        const speedMenu = document.getElementById('speedMenu');
+        
+        // Format time
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Toggle Play/Pause
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playOverlay.classList.add('hidden');
+                iconPlay.style.display = 'none';
+                iconPause.style.display = 'block';
+            } else {
+                video.pause();
+                iconPlay.style.display = 'block';
+                iconPause.style.display = 'none';
+            }
+        }
+        
+        // Skip Video
+        function skipVideo(seconds) {
+            video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + seconds));
+        }
+        
+        // Seek Video
+        function seekVideo(e) {
+            const rect = e.target.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+        }
+        
+        // Toggle Mute
+        function toggleMute() {
+            video.muted = !video.muted;
+            document.getElementById('iconVolumeOn').style.display = video.muted ? 'none' : 'block';
+            document.getElementById('iconVolumeMute').style.display = video.muted ? 'block' : 'none';
+            document.getElementById('volumeSlider').value = video.muted ? 0 : video.volume;
+        }
+        
+        // Set Volume
+        function setVolume(value) {
+            video.volume = value;
+            video.muted = value == 0;
+            document.getElementById('iconVolumeOn').style.display = value > 0 ? 'block' : 'none';
+            document.getElementById('iconVolumeMute').style.display = value > 0 ? 'none' : 'block';
+        }
+        
+        // Toggle Speed Menu
+        function toggleSpeedMenu() {
+            speedMenu.classList.toggle('show');
+        }
+        
+        // Set Speed
+        function setSpeed(speed) {
+            video.playbackRate = speed;
+            speedBtn.textContent = speed + 'x';
+            speedMenu.classList.remove('show');
+            
+            document.querySelectorAll('.speed-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        // Toggle Fullscreen
+        function toggleFullscreen() {
+            const container = document.getElementById('videoContainer');
+            
+            if (!document.fullscreenElement) {
+                container.requestFullscreen();
+                document.getElementById('iconFullscreen').style.display = 'none';
+                document.getElementById('iconExitFullscreen').style.display = 'block';
+            } else {
+                document.exitFullscreen();
+                document.getElementById('iconFullscreen').style.display = 'block';
+                document.getElementById('iconExitFullscreen').style.display = 'none';
+            }
+        }
+        
+        // Video Events
+        video.addEventListener('loadstart', () => {
+            videoLoading.classList.add('show');
+        });
+        
+        video.addEventListener('canplay', () => {
+            videoLoading.classList.remove('show');
+        });
+        
+        video.addEventListener('waiting', () => {
+            videoLoading.classList.add('show');
+        });
+        
+        video.addEventListener('playing', () => {
+            videoLoading.classList.remove('show');
+        });
+        
+        video.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(video.duration);
+        });
+        
+        video.addEventListener('timeupdate', () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(video.currentTime);
+            
+            // Save progress every 5 seconds
+            if (Math.floor(video.currentTime) % 5 === 0) {
+                saveVideoProgress(video.currentTime);
+            }
+        });
+        
+        video.addEventListener('ended', () => {
+            playOverlay.classList.remove('hidden');
+            iconPlay.style.display = 'block';
+            iconPause.style.display = 'none';
+            
+            // Auto mark as complete when video ends
+            const completeBtn = document.querySelector('.btn-complete');
+            if (completeBtn && !completeBtn.classList.contains('completed')) {
+                toggleComplete(completeBtn);
+            }
+        });
+        
+        video.addEventListener('progress', () => {
+            if (video.buffered.length > 0) {
+                const buffered = (video.buffered.end(video.buffered.length - 1) / video.duration) * 100;
+                document.getElementById('videoBuffered').style.width = buffered + '%';
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+            
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'ArrowLeft':
+                    skipVideo(-10);
+                    break;
+                case 'ArrowRight':
+                    skipVideo(10);
+                    break;
+                case 'ArrowUp':
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    break;
+                case 'ArrowDown':
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    break;
+                case 'f':
+                    toggleFullscreen();
+                    break;
+                case 'm':
+                    toggleMute();
+                    break;
+            }
+        });
+        
+        // Close speed menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.speed-selector')) {
+                speedMenu.classList.remove('show');
+            }
+        });
+        
+        // Save video progress
+        function saveVideoProgress(time) {
+            fetch('/api/learn/video-progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    lessonId: lessonId, 
+                    currentTime: time,
+                    duration: video.duration
+                })
+            }).catch(err => console.error(err));
+        }
+        
+        // Load saved progress
+        function loadVideoProgress() {
+            fetch('/api/learn/video-progress/' + lessonId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.currentTime && data.currentTime > 0) {
+                    video.currentTime = data.currentTime;
+                }
+            })
+            .catch(err => console.error(err));
+        }
+        
+        // Load progress on page load
+        video.addEventListener('loadedmetadata', loadVideoProgress);
+    </script>
+</div>
+
+</html>

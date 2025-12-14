@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pengajar - Dikoding Muda Nusantara</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    
+    <style>
+        :root {
+            --color-primary: #1a56db;
+            --color-primary-dark: #1e40af;
+            --color-primary-light: #e0e7ff;
+            --color-text: #111827;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-bg: #ffffff;
+            --color-bg-subtle: #f9fafb;
+            --color-border: #e5e7eb;
+            --color-success: #059669;
+            --color-success-light: #d1fae5;
+            --color-warning: #d97706;
+            --color-warning-light: #fef3c7;
+            --color-error: #dc2626;
+            --color-error-light: #fee2e2;
+            --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --transition: all 0.2s ease;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            color: var(--color-text);
+            background-color: var(--color-bg-subtle);
+            line-height: 1.6;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        /* Layout */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--color-bg);
+            border-right: 1px solid var(--color-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--color-text);
+        }
+
+        .sidebar-logo span {
+            color: var(--color-primary);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            padding: 0 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+            padding: 0 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            margin-bottom: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .nav-item:hover {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+        }
+
+        .nav-item.active {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--color-border);
+            margin-top: auto;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 0.875rem;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+        }
+
+        /* Top Header */
+        .top-header {
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .btn-icon:hover {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+        }
+
+        .btn-icon .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background: var(--color-error);
+            color: white;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary-custom {
+            background: var(--color-primary);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--color-primary-dark);
+            color: white;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon.blue {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+
+        .stat-icon.green {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+
+        .stat-icon.yellow {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+
+        .stat-icon.red {
+            background: var(--color-error-light);
+            color: var(--color-error);
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .stat-trend.up {
+            color: var(--color-success);
+        }
+
+        .stat-trend.down {
+            color: var(--color-error);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Card */
+        .card {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .card-link {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .card-link:hover {
+            color: var(--color-primary-dark);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Course List */
+        .course-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .course-item:first-child {
+            padding-top: 0;
+        }
+
+        .course-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .course-thumb {
+            width: 80px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            background: var(--color-bg-subtle);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .course-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .course-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+        }
+
+        .course-status {
+            padding: 0.25rem 0.625rem;
+            border-radius: 100px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-published {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+
+        .status-draft {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+
+        /* Activity List */
+        .activity-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.875rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .activity-item:first-child {
+            padding-top: 0;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-bg-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--color-text-muted);
+        }
+
+        .activity-icon.sale {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+
+        .activity-icon.review {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+
+        .activity-icon.enroll {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 0.875rem;
+            color: var(--color-text);
+            margin-bottom: 0.125rem;
+        }
+
+        .activity-text strong {
+            font-weight: 600;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Chart Placeholder */
+        .chart-placeholder {
+            height: 250px;
+            background: var(--color-bg-subtle);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-header {
+                padding: 1rem;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+        }
+
+        .mobile-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-bg);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-logo">Dikoding<span>Muda</span></a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Menu Utama</div>
+                    <a href="/lecturer/dashboard" class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="/lecturer/courses" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Kursus Saya
+                    </a>
+                    <a href="/lecturer/courses/create" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 8v8"></path>
+                            <path d="M8 12h8"></path>
+                        </svg>
+                        Buat Kursus
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Analitik</div>
+                    <a href="/lecturer/statistics" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10"></path>
+                            <path d="M12 20V4"></path>
+                            <path d="M6 20v-6"></path>
+                        </svg>
+                        Statistik
+                    </a>
+                    <a href="/lecturer/earnings" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Pendapatan
+                    </a>
+                    <a href="/lecturer/reviews" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        Ulasan
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Lainnya</div>
+                    <a href="/lecturer/settings" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v10"></path>
+                            <path d="m4.22 10.22 4.24 4.24m7.07-7.07 4.24 4.24"></path>
+                            <path d="m1 12h6m6 0h10"></path>
+                            <path d="m4.22 13.78 4.24-4.24m7.07 7.07 4.24-4.24"></path>
+                        </svg>
+                        Pengaturan
+                    </a>
+                    <a href="/logout" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Keluar
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}"></div>
+                    <div class="user-info">
+                        <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}"></div>
+                        <div class="user-role" th:text="${role}"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="mobile-toggle" onclick="toggleSidebar()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="badge">3</span>
+                    </button>
+                    <a href="/lecturer/courses/create" class="btn-primary-custom">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+                        Buat Kursus
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon blue">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                            </div>
+                            <span class="stat-trend up">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                                +2
+                            </span>
+                        </div>
+                        <div class="stat-value" th:text="${totalCourses}">12</div>
+                        <div class="stat-label">Total Kursus</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon green">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                            <span class="stat-trend up">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                                +156
+                            </span>
+                        </div>
+                        <div class="stat-value" th:text="${totalStudents}">2,456</div>
+                        <div class="stat-label">Total Pelajar</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon yellow">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <span class="stat-trend up">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                                +12%
+                            </span>
+                        </div>
+                        <div class="stat-value" th:text="'Rp ' + ${#numbers.formatDecimal(totalEarnings, 0, 'COMMA', 0, 'POINT')}">Rp 15.450.000</div>
+                        <div class="stat-label">Total Pendapatan</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon red">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                            </div>
+                            <span class="stat-trend up">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                                +0.2
+                            </span>
+                        </div>
+                        <div class="stat-value" th:text="${averageRating}">4.8</div>
+                        <div class="stat-label">Rating Rata-rata</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Left Column -->
+                    <div>
+                        <!-- Earnings Chart -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h2 class="card-title">Pendapatan Bulanan</h2>
+                                <a href="/lecturer/earnings" class="card-link">Lihat Detail</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-placeholder">
+                                    Grafik Pendapatan
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Courses -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Kursus Saya</h2>
+                                <a href="/lecturer/courses" class="card-link">Lihat Semua</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="course-item" th:each="course : ${courses}">
+                                    <div class="course-thumb">Thumb</div>
+                                    <div class="course-info">
+                                        <h3 class="course-title" th:text="${course.title}">Belajar Dasar Pemrograman JavaScript</h3>
+                                        <div class="course-meta">
+                                            <span th:text="${course.students} + ' pelajar'">1,234 pelajar</span>
+                                            <span th:text="${course.rating} + ' rating'">4.8 rating</span>
+                                        </div>
+                                    </div>
+                                    <span class="course-status status-published" th:text="${course.status}">Published</span>
+                                </div>
+
+                                <!-- Dummy Data -->
+                                <div class="course-item">
+                                    <div class="course-thumb">Thumb</div>
+                                    <div class="course-info">
+                                        <h3 class="course-title">Belajar Dasar Pemrograman JavaScript</h3>
+                                        <div class="course-meta">
+                                            <span>1,234 pelajar</span>
+                                            <span>4.8 rating</span>
+                                        </div>
+                                    </div>
+                                    <span class="course-status status-published">Published</span>
+                                </div>
+
+                                <div class="course-item">
+                                    <div class="course-thumb">Thumb</div>
+                                    <div class="course-info">
+                                        <h3 class="course-title">React.js untuk Pemula</h3>
+                                        <div class="course-meta">
+                                            <span>856 pelajar</span>
+                                            <span>4.9 rating</span>
+                                        </div>
+                                    </div>
+                                    <span class="course-status status-published">Published</span>
+                                </div>
+
+                                <div class="course-item">
+                                    <div class="course-thumb">Thumb</div>
+                                    <div class="course-info">
+                                        <h3 class="course-title">Node.js Backend Development</h3>
+                                        <div class="course-meta">
+                                            <span>0 pelajar</span>
+                                            <span>- rating</span>
+                                        </div>
+                                    </div>
+                                    <span class="course-status status-draft">Draft</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <!-- Recent Activity -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Aktivitas Terbaru</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-item">
+                                    <div class="activity-icon sale">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-text"><strong>Ahmad Rizky</strong> membeli kursus JavaScript</div>
+                                        <div class="activity-time">5 menit yang lalu</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-icon review">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-text"><strong>Siti Nurhaliza</strong> memberi rating 5 bintang</div>
+                                        <div class="activity-time">1 jam yang lalu</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-icon enroll">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="8.5" cy="7" r="4"></circle>
+                                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-text"><strong>12 pelajar baru</strong> bergabung hari ini</div>
+                                        <div class="activity-time">3 jam yang lalu</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-icon sale">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-text"><strong>Dewi Anggraini</strong> membeli kursus React.js</div>
+                                        <div class="activity-time">5 jam yang lalu</div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-icon review">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-text"><strong>Budi Hartono</strong> menambahkan ulasan baru</div>
+                                        <div class="activity-time">Kemarin</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
