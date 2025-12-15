@@ -6,8 +6,6 @@ import koding_muda_nusantara.koding_muda_belajar.dto.SectionDTO;
 import koding_muda_nusantara.koding_muda_belajar.model.*;
 import koding_muda_nusantara.koding_muda_belajar.repository.*;
 
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +21,8 @@ import java.util.regex.Pattern;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseLevel;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseStatus;
 import koding_muda_nusantara.koding_muda_belajar.enums.LessonContentType;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class CourseService {
@@ -169,10 +169,11 @@ public class CourseService {
                 .orElseThrow(() -> new RuntimeException("Kategori tidak ditemukan"));
 
         // Update fields
+        String oldTitle = course.getTitle();
         course.setTitle(dto.getTitle());
         
         // Update slug jika title berubah
-        if (!course.getTitle().equals(dto.getTitle())) {
+        if (!oldTitle.equals(dto.getTitle())) {
             course.setSlug(generateUniqueSlug(dto.getTitle(), course.getCourseId()));
         }
         
@@ -201,12 +202,9 @@ public class CourseService {
         // Simpan course
         course = courseRepository.save(course);
 
-        // Update sections dan lessons
+        // Update sections dan lessons dengan smart merge (bukan hapus semua)
         if (dto.getSections() != null) {
-            // Hapus sections lama
-            sectionRepository.deleteByCourse(course);
-            // Simpan sections baru
-            saveSectionsAndLessons(course, dto.getSections());
+            updateSectionsAndLessons(course, dto.getSections());
         }
 
         // Update total lessons dan duration
@@ -217,6 +215,194 @@ public class CourseService {
 
     // ==================== HELPER METHODS ====================
 
+    /**
+     * Update sections dan lessons dengan smart merge:
+     * - Section yang sudah ada (by sectionId) -> update
+     * - Section baru (tanpa sectionId) -> create
+     * - Section yang tidak ada di DTO -> hapus
+     * - Sama untuk lessons
+     */
+    private void updateSectionsAndLessons(Course course, List<SectionDTO> sectionDTOs) {
+        // Ambil semua section existing untuk course ini
+        List<Section> existingSections = sectionRepository.findByCourseOrderBySortOrder(course);
+        
+        // Track section IDs yang masih digunakan
+        List<Integer> usedSectionIds = new ArrayList<>();
+        
+        for (int i = 0; i < sectionDTOs.size(); i++) {
+            SectionDTO sectionDTO = sectionDTOs.get(i);
+            Section section;
+            
+            // Cek apakah section sudah ada (by sectionId)
+            if (sectionDTO.getSectionId() != null && sectionDTO.getSectionId() > 0) {
+                // Cari section existing
+                Optional<Section> existingSection = existingSections.stream()
+                        .filter(s -> s.getSectionId().equals(sectionDTO.getSectionId()))
+                        .findFirst();
+                
+                if (existingSection.isPresent()) {
+                    // Update section yang sudah ada
+                    section = existingSection.get();
+                    section.setTitle(sectionDTO.getTitle());
+                    section.setDescription(sectionDTO.getDescription());
+                    section.setSortOrder(i);
+                    section = sectionRepository.save(section);
+                    usedSectionIds.add(section.getSectionId());
+                } else {
+                    // Section ID tidak ditemukan, buat baru
+                    section = createNewSection(course, sectionDTO, i);
+                    usedSectionIds.add(section.getSectionId());
+                }
+            } else {
+                // Section baru (tanpa ID)
+                section = createNewSection(course, sectionDTO, i);
+                usedSectionIds.add(section.getSectionId());
+            }
+            
+            // Update lessons untuk section ini
+            if (sectionDTO.getLessons() != null) {
+                updateLessonsForSection(section, sectionDTO.getLessons(), course.getCourseId());
+            }
+        }
+        
+        // Hapus sections yang tidak ada di DTO (sudah dihapus user)
+        for (Section existingSection : existingSections) {
+            if (!usedSectionIds.contains(existingSection.getSectionId())) {
+                // Hapus lessons dulu, lalu section
+                lessonRepository.deleteBySection(existingSection);
+                sectionRepository.delete(existingSection);
+            }
+        }
+    }
+
+    /**
+     * Buat section baru
+     */
+    private Section createNewSection(Course course, SectionDTO sectionDTO, int sortOrder) {
+        Section section = new Section();
+        section.setCourse(course);
+        section.setTitle(sectionDTO.getTitle());
+        section.setDescription(sectionDTO.getDescription());
+        section.setSortOrder(sortOrder);
+        section.setCreatedAt(LocalDateTime.now());
+        return sectionRepository.save(section);
+    }
+
+    /**
+     * Update lessons untuk section tertentu dengan smart merge:
+     * - Lesson yang sudah ada (by lessonId) -> update sortOrder dan data lainnya
+     * - Lesson baru (tanpa lessonId) -> create
+     * - Lesson yang tidak ada di DTO -> hapus
+     */
+    private void updateLessonsForSection(Section section, List<LessonDTO> lessonDTOs, Integer courseId) {
+        // Ambil semua lesson existing untuk section ini
+        List<Lesson> existingLessons = lessonRepository.findBySectionOrderBySortOrder(section);
+        
+        // Track lesson IDs yang masih digunakan
+        List<Integer> usedLessonIds = new ArrayList<>();
+        
+        for (int j = 0; j < lessonDTOs.size(); j++) {
+            LessonDTO lessonDTO = lessonDTOs.get(j);
+            Lesson lesson;
+            
+            // Cek apakah lesson sudah ada (by lessonId)
+            if (lessonDTO.getLessonId() != null && lessonDTO.getLessonId() > 0) {
+                // Cari lesson existing
+                Optional<Lesson> existingLesson = existingLessons.stream()
+                        .filter(l -> l.getLessonId().equals(lessonDTO.getLessonId()))
+                        .findFirst();
+                
+                if (existingLesson.isPresent()) {
+                    // Update lesson yang sudah ada (hanya sortOrder dan title)
+                    lesson = existingLesson.get();
+                    lesson.setTitle(lessonDTO.getTitle());
+                    lesson.setSortOrder(j);
+                    lesson.setUpdatedAt(LocalDateTime.now());
+                    
+                    // Update duration jika ada
+                    if (lessonDTO.getDuration() != null) {
+                        lesson.setDuration(lessonDTO.getDuration());
+                    }
+                    
+                    // Update content type jika ada perubahan
+                    if (lessonDTO.getContentType() != null && !lessonDTO.getContentType().isEmpty()) {
+                        lesson.setContentType(LessonContentType.valueOf(lessonDTO.getContentType()));
+                    }
+                    
+                    // Update contentText jika ada
+                    if (lessonDTO.getContentText() != null) {
+                        lesson.setContentText(lessonDTO.getContentText());
+                    }
+                    
+                    // Update contentUrl hanya jika ada nilai baru (file baru diupload)
+                    if (lessonDTO.getContentUrl() != null && !lessonDTO.getContentUrl().isEmpty()) {
+                        String contentUrl = lessonDTO.getContentUrl();
+                        if (tempFileService.isTempPath(contentUrl)) {
+                            try {
+                                contentUrl = tempFileService.moveFromTemp(contentUrl, courseId, lessonDTO.getContentType());
+                            } catch (Exception e) {
+                                System.err.println("Gagal memindahkan file dari temp: " + e.getMessage());
+                            }
+                        }
+                        lesson.setContentUrl(contentUrl);
+                    }
+                    
+                    lesson = lessonRepository.save(lesson);
+                    usedLessonIds.add(lesson.getLessonId());
+                } else {
+                    // Lesson ID tidak ditemukan, buat baru
+                    lesson = createNewLesson(section, lessonDTO, j, courseId);
+                    usedLessonIds.add(lesson.getLessonId());
+                }
+            } else {
+                // Lesson baru (tanpa ID)
+                lesson = createNewLesson(section, lessonDTO, j, courseId);
+                usedLessonIds.add(lesson.getLessonId());
+            }
+        }
+        
+        // Hapus lessons yang tidak ada di DTO (sudah dihapus user)
+        for (Lesson existingLesson : existingLessons) {
+            if (!usedLessonIds.contains(existingLesson.getLessonId())) {
+                lessonRepository.delete(existingLesson);
+            }
+        }
+    }
+
+    /**
+     * Buat lesson baru
+     */
+    private Lesson createNewLesson(Section section, LessonDTO lessonDTO, int sortOrder, Integer courseId) {
+        Lesson lesson = new Lesson();
+        lesson.setSection(section);
+        lesson.setTitle(lessonDTO.getTitle());
+        lesson.setContentType(LessonContentType.valueOf(lessonDTO.getContentType()));
+        
+        // Jika contentUrl adalah temp path, pindahkan ke folder permanent
+        String contentUrl = lessonDTO.getContentUrl();
+        if (contentUrl != null && tempFileService.isTempPath(contentUrl)) {
+            try {
+                contentUrl = tempFileService.moveFromTemp(contentUrl, courseId, lessonDTO.getContentType());
+            } catch (Exception e) {
+                System.err.println("Gagal memindahkan file dari temp: " + e.getMessage());
+            }
+        }
+        lesson.setContentUrl(contentUrl);
+        
+        lesson.setContentText(lessonDTO.getContentText());
+        lesson.setDuration(lessonDTO.getDuration() != null ? lessonDTO.getDuration() : 0);
+        lesson.setSortOrder(sortOrder);
+        lesson.setPreview(lessonDTO.getIsPreview() != null ? lessonDTO.getIsPreview() : false);
+        lesson.setLocked(lessonDTO.getIsLocked() != null ? lessonDTO.getIsLocked() : true);
+        lesson.setCreatedAt(LocalDateTime.now());
+        lesson.setUpdatedAt(LocalDateTime.now());
+        
+        return lessonRepository.save(lesson);
+    }
+
+    /**
+     * Simpan sections dan lessons untuk course baru
+     */
     private void saveSectionsAndLessons(Course course, List<SectionDTO> sectionDTOs) {
         for (int i = 0; i < sectionDTOs.size(); i++) {
             SectionDTO sectionDTO = sectionDTOs.get(i);
@@ -234,33 +420,7 @@ public class CourseService {
             if (sectionDTO.getLessons() != null) {
                 for (int j = 0; j < sectionDTO.getLessons().size(); j++) {
                     LessonDTO lessonDTO = sectionDTO.getLessons().get(j);
-
-                    Lesson lesson = new Lesson();
-                    lesson.setSection(section);
-                    lesson.setTitle(lessonDTO.getTitle());
-                    lesson.setContentType(LessonContentType.valueOf(lessonDTO.getContentType()));
-                    
-                    // Jika contentUrl adalah temp path, pindahkan ke folder permanent
-                    String contentUrl = lessonDTO.getContentUrl();
-                    if (contentUrl != null && tempFileService.isTempPath(contentUrl)) {
-                        try {
-                            contentUrl = tempFileService.moveFromTemp(contentUrl, course.getCourseId(), lessonDTO.getContentType());
-                        } catch (Exception e) {
-                            // Log error tapi tetap lanjut dengan path asli
-                            System.err.println("Gagal memindahkan file dari temp: " + e.getMessage());
-                        }
-                    }
-                    lesson.setContentUrl(contentUrl);
-                    
-                    lesson.setContentText(lessonDTO.getContentText());
-                    lesson.setDuration(lessonDTO.getDuration() != null ? lessonDTO.getDuration() : 0);
-                    lesson.setSortOrder(j);
-                    lesson.setPreview(lessonDTO.getIsPreview() != null ? lessonDTO.getIsPreview() : false);
-                    lesson.setLocked(lessonDTO.getIsLocked() != null ? lessonDTO.getIsLocked() : true);
-                    lesson.setCreatedAt(LocalDateTime.now());
-                    lesson.setUpdatedAt(LocalDateTime.now());
-
-                    lessonRepository.save(lesson);
+                    createNewLesson(section, lessonDTO, j, course.getCourseId());
                 }
             }
         }

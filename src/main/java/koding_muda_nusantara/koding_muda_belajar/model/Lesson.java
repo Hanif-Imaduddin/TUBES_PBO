@@ -51,6 +51,9 @@ public class Lesson {
     // Menggunakan LONGTEXT agar bisa menampung artikel panjang
     @Column(name = "content_text", columnDefinition = "LONGTEXT")
     private String contentText;
+    
+    @Column(name = "description", columnDefinition = "LONGTEXT")
+    private String description;
 
     @Column(nullable = false)
     private Integer duration = 0; // Dalam detik atau menit

@@ -78,6 +78,46 @@
             justify-content: center;
         }
 
+        /* Modal Fixed Height dengan Scroll */
+        .modal-content {
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(90vh - 140px);
+        }
+
+        .modal-footer {
+            flex-shrink: 0;
+        }
+
+        /* Scrollbar styling untuk modal */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: var(--color-bg-subtle);
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-muted);
+        }
+
         .btn-remove-file:hover {
             background: var(--color-error);
             opacity: .8;
@@ -139,8 +179,8 @@
                     <h1 class="page-title" th:text="${pageTitle}">Buat Kursus Baru</h1>
                 </div>
                 <div class="header-actions">
-                    <button type="button" class="btn-secondary" onclick="saveDraft()">Simpan Draft</button>
-                    <button type="submit" form="courseForm" class="btn-primary-custom" th:text="${isEdit} ? 'Update Kursus' : 'Publish Kursus'">Publish Kursus</button>
+                    <button type="submit" form="courseForm" name="action" value="draft" class="btn-secondary">Simpan Draft</button>
+                    <button type="submit" form="courseForm" name="action" value="publish" class="btn-primary-custom" th:text="${isEdit} ? 'Update Kursus' : 'Publish Kursus'">Publish Kursus</button>
                 </div>
             </header>
 
@@ -148,10 +188,8 @@
                 <div class="alert alert-success" th:if="${success}"><span th:text="${success}">Berhasil</span></div>
                 <div class="alert alert-error" th:if="${error}"><span th:text="${error}">Error</span></div>
 
-                <!-- FORM TANPA enctype multipart/form-data -->
                 <form id="courseForm" th:action="@{/lecturer/courses/save}" th:object="${courseDTO}" method="POST">
                     <input type="hidden" th:field="*{courseId}">
-                    <input type="hidden" th:field="*{status}" id="courseStatus">
                     <input type="hidden" th:field="*{existingThumbnailUrl}" id="existingThumbnailUrl">
                     <input type="hidden" name="sectionsJson" id="sectionsJson">
 
@@ -192,7 +230,6 @@
                                 </div>
                             </div>
                             
-                            <!-- THUMBNAIL UPLOAD VIA AJAX (TERPISAH DARI FORM UTAMA) -->
                             <div class="form-group">
                                 <label class="form-label">Thumbnail Kursus</label>
                                 <label class="thumbnail-upload" id="thumbnailDropzone">
@@ -256,7 +293,13 @@
                                         <div class="section-content open" th:id="'content-' + ${sectionStat.index}">
                                             <div class="lesson-list" th:id="'lessons-' + ${sectionStat.index}">
                                                 <th:block th:each="lesson : ${section.lessons}">
-                                                    <div class="lesson-item" th:data-lesson-id="${lesson.lessonId}">
+                                                    <div class="lesson-item" 
+                                                         th:data-lesson-id="${lesson.lessonId}"
+                                                         th:data-type="${lesson.contentType}"
+                                                         th:data-duration="${lesson.duration}"
+                                                         th:data-content-url="${lesson.contentUrl}"
+                                                         th:data-content-text="${lesson.contentText}"
+                                                         th:data-description="${lesson.description}">
                                                         <span class="lesson-drag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                                                         <div class="lesson-type" th:classappend="${lesson.contentType}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
                                                         <div class="lesson-info"><div class="lesson-title" th:text="${lesson.title}">Materi</div><div class="lesson-meta" th:text="${lesson.contentTypeDisplay} + ' - ' + ${lesson.duration} + ' menit'">Video - 5 menit</div></div>
@@ -276,8 +319,8 @@
                     </div>
 
                     <div class="d-md-none mt-4">
-                        <button type="button" class="btn-secondary w-100 mb-2" onclick="saveDraft()">Simpan Draft</button>
-                        <button type="submit" class="btn-primary-custom w-100">Publish Kursus</button>
+                        <button type="submit" name="action" value="draft" class="btn-secondary w-100 mb-2">Simpan Draft</button>
+                        <button type="submit" name="action" value="publish" class="btn-primary-custom w-100">Publish Kursus</button>
                     </div>
                 </form>
             </div>
@@ -299,6 +342,7 @@
                     <label class="lesson-type-option quiz" onclick="selectLessonType('quiz')"><input type="radio" name="lessonType" value="quiz"><div class="lesson-type-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg></div><div class="lesson-type-name">Quiz</div></label>
                 </div>
                 <div class="form-group"><label class="form-label">Judul Materi <span class="required">*</span></label><input type="text" class="form-input" id="lessonTitle" placeholder="Masukkan judul materi"></div>
+                <div class="form-group"><label class="form-label">Deskripsi <span class="required">*</span></label><textarea class="form-input form-textarea" id="lessonDescription" placeholder="Tulis deskripsi materi di sini..." rows="6"></textarea></div>
                 <div class="form-group"><label class="form-label">Durasi (menit)</label><input type="number" class="form-input" id="lessonDuration" placeholder="0" min="0"></div>
             </div>
             <div class="modal-footer">
@@ -333,6 +377,7 @@
             currentLessonContentUrl = '';
             currentLessonContentText = '';
             document.getElementById('lessonTitle').value = ''; 
+            document.getElementById('lessonDescription').value = ''; 
             document.getElementById('lessonDuration').value = ''; 
             selectLessonType('video');
             document.getElementById('lessonModal').classList.add('show'); 
@@ -522,11 +567,17 @@
 
         function addLesson() {
             const title = document.getElementById('lessonTitle').value.trim();
+            const description = document.getElementById('lessonDescription').value.trim();
             const duration = document.getElementById('lessonDuration').value || '0';
             const type = document.querySelector('input[name="lessonType"]:checked').value;
             
             if (!title) { 
                 alert('Masukkan judul materi'); 
+                return; 
+            }
+            
+            if (!description) { 
+                alert('Masukkan deskripsi materi'); 
                 return; 
             }
             
@@ -557,8 +608,10 @@
             
             const contentUrl = currentLessonContentUrl ? encodeURIComponent(currentLessonContentUrl) : '';
             const contentText = currentLessonContentText ? encodeURIComponent(currentLessonContentText) : '';
+            const encodedDescription = encodeURIComponent(description);
+
             
-            const html = `<div class="lesson-item" data-type="${type}" data-duration="${duration}" data-content-url="${contentUrl}" data-content-text="${contentText}">
+            const html = `<div class="lesson-item" data-type="${type}" data-duration="${duration}" data-description="${encodedDescription}" data-content-url="${contentUrl}" data-content-text="${contentText}">
                 <span class="lesson-drag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
                 <div class="lesson-type ${type}">${icons[type]}</div>
                 <div class="lesson-info">
@@ -582,34 +635,40 @@
         function updateSectionsJson() {
             const sections = [];
             document.querySelectorAll('.section-item').forEach((el, idx) => {
+                // Ambil sectionId dari data attribute (jika ada)
+                const sectionInput = el.querySelector('.section-title-input');
+                const sectionId = sectionInput.dataset.sectionId ? parseInt(sectionInput.dataset.sectionId) : null;
+                
                 const lessons = [];
                 el.querySelectorAll('.lesson-item').forEach((lEl, lIdx) => {
+                    // Ambil lessonId dari data attribute (jika ada)
+                    const lessonId = lEl.dataset.lessonId ? parseInt(lEl.dataset.lessonId) : null;
+                    
                     const type = lEl.dataset.type || lEl.querySelector('.lesson-type').classList[1];
                     const duration = lEl.dataset.duration || parseInt(lEl.querySelector('.lesson-meta').textContent.split('-')[1]) || 0;
                     const contentUrl = lEl.dataset.contentUrl ? decodeURIComponent(lEl.dataset.contentUrl) : '';
                     const contentText = lEl.dataset.contentText ? decodeURIComponent(lEl.dataset.contentText) : '';
+                    const description = lEl.dataset.description ? decodeURIComponent(lEl.dataset.description) : '';
+                    
                     lessons.push({ 
+                        lessonId: lessonId,
                         title: lEl.querySelector('.lesson-title').textContent, 
                         contentType: type, 
                         contentUrl: contentUrl,
                         contentText: contentText,
+                        description: description,
                         duration: parseInt(duration), 
                         sortOrder: lIdx 
                     });
                 });
                 sections.push({ 
+                    sectionId: sectionId,
                     title: el.querySelector('.section-title-input').value, 
                     sortOrder: idx, 
                     lessons: lessons 
                 });
             });
             document.getElementById('sectionsJson').value = JSON.stringify(sections);
-        }
-
-        function saveDraft() { 
-            updateSectionsJson(); 
-            document.getElementById('courseStatus').value = 'draft'; 
-            document.getElementById('courseForm').submit(); 
         }
         
         // Thumbnail Upload via AJAX (terpisah dari form utama)
@@ -685,6 +744,7 @@
             xhr.send(formData);
         });
 
+        // Update sectionsJson sebelum submit
         document.getElementById('courseForm').addEventListener('submit', function(e) {
             updateSectionsJson();
         });

@@ -130,6 +130,125 @@ public class FileController {
         }
     }
 
+    /**
+     * Streaming PDF untuk PDF.js viewer
+     * URL: /files/stream/pdf?path=/uploads/documents/xxx.pdf
+     * 
+     * Endpoint ini khusus untuk PDF dengan header yang tepat agar
+     * PDF.js bisa membaca file tanpa CORS issues
+     */
+    @GetMapping("/stream/pdf")
+    public ResponseEntity<Resource> streamPdf(@RequestParam String path) {
+        try {
+            // Log untuk debugging
+            System.out.println("PDF Stream request for path: " + path);
+            
+            Path filePath = fileStorageService.getFilePath(path);
+            System.out.println("Resolved file path: " + filePath.toAbsolutePath());
+
+            if (!Files.exists(filePath)) {
+                System.out.println("PDF file not found: " + filePath.toAbsolutePath());
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!Files.isReadable(filePath)) {
+                System.out.println("PDF file not readable: " + filePath.toAbsolutePath());
+                return ResponseEntity.status(403).build();
+            }
+
+            // Validasi bahwa file adalah PDF
+            String filename = filePath.getFileName().toString().toLowerCase();
+            if (!filename.endsWith(".pdf")) {
+                System.out.println("File is not PDF: " + filename);
+                return ResponseEntity.badRequest().build();
+            }
+
+            Resource resource = new UrlResource(filePath.toUri());
+            long fileSize = Files.size(filePath);
+            
+            System.out.println("Serving PDF, size: " + fileSize + " bytes");
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .contentLength(fileSize)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filePath.getFileName().toString() + "\"")
+                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .header(HttpHeaders.CACHE_CONTROL, "no-cache")
+                    .header("Access-Control-Allow-Origin", "*")
+                    .body(resource);
+
+        } catch (IOException e) {
+            System.out.println("Error streaming PDF: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Streaming PDF dengan Range Request support (untuk file PDF besar)
+     * URL: /files/stream/pdf/range?path=/uploads/documents/xxx.pdf
+     */
+    @GetMapping("/stream/pdf/range")
+    public ResponseEntity<Resource> streamPdfWithRange(
+            @RequestParam String path,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader
+    ) {
+        try {
+            Path filePath = fileStorageService.getFilePath(path);
+
+            if (!Files.exists(filePath) || !Files.isReadable(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Validasi bahwa file adalah PDF
+            String filename = filePath.getFileName().toString().toLowerCase();
+            if (!filename.endsWith(".pdf")) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            long fileSize = Files.size(filePath);
+            Resource resource = new UrlResource(filePath.toUri());
+
+            // Jika tidak ada Range header, kirim seluruh file
+            if (rangeHeader == null || rangeHeader.isEmpty()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_PDF)
+                        .contentLength(fileSize)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filePath.getFileName().toString() + "\"")
+                        .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                        .body(resource);
+            }
+
+            // Parse Range header
+            String[] ranges = rangeHeader.replace("bytes=", "").split("-");
+            long start = Long.parseLong(ranges[0]);
+            long end = ranges.length > 1 && !ranges[1].isEmpty() 
+                    ? Long.parseLong(ranges[1]) 
+                    : fileSize - 1;
+
+            if (start >= fileSize) {
+                return ResponseEntity.status(416).build(); // Range Not Satisfiable
+            }
+
+            long contentLength = end - start + 1;
+
+            // Buat partial resource
+            byte[] data = Files.readAllBytes(filePath);
+            byte[] partialData = new byte[(int) contentLength];
+            System.arraycopy(data, (int) start, partialData, 0, (int) contentLength);
+
+            return ResponseEntity.status(206)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .contentLength(contentLength)
+                    .header(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileSize)
+                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .body(new org.springframework.core.io.ByteArrayResource(partialData));
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // ==================== FILE UPLOAD ====================
 
     /**

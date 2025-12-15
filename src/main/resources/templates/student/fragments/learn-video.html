@@ -388,20 +388,20 @@
         
         // Save video progress
         function saveVideoProgress(time) {
-            fetch('/api/learn/video-progress', {
+            fetch('/learn/api/video-progress', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     lessonId: lessonId, 
-                    currentTime: time,
-                    duration: video.duration
+                    currentTime: Math.floor(time),
+                    duration: Math.floor(video.duration)
                 })
             }).catch(err => console.error(err));
         }
         
         // Load saved progress
         function loadVideoProgress() {
-            fetch('/api/learn/video-progress/' + lessonId)
+            fetch('/learn/api/video-progress/' + lessonId)
             .then(response => response.json())
             .then(data => {
                 if (data.currentTime && data.currentTime > 0) {

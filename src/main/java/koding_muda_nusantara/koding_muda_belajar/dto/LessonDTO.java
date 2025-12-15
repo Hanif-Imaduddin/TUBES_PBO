@@ -39,6 +39,8 @@ public class LessonDTO {
     private Boolean isLocked = true;
 
     private MultipartFile contentFile;
+    
+    private String description = "";
 
     // Constructors
     public LessonDTO() {}
@@ -127,6 +129,14 @@ public class LessonDTO {
 
     public void setContentFile(MultipartFile contentFile) {
         this.contentFile = contentFile;
+    }
+    
+    public void setDescription(String description){
+        this.description = description;
+    }
+    
+    public String getDescription(){
+        return this.description;
     }
 
     // Helper method untuk mendapatkan tipe display

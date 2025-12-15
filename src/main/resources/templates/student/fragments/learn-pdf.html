@@ -1,64 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!-- Fragment: PDF Content -->
+<!-- Fragment: PDF Content dengan Base64 Data URL -->
 <div th:fragment="pdf-content" class="pdf-container">
+    <!-- Hidden input untuk URL -->
+    <input type="hidden" id="pdfSourceUrl" th:value="@{/files/stream/pdf(path=${lesson.contentUrl})}">
+    <input type="hidden" id="pdfDownloadUrl" th:value="@{/files/download(path=${lesson.contentUrl})}">
+    
     <div class="pdf-wrapper" id="pdfWrapper">
         <!-- PDF Toolbar -->
         <div class="pdf-toolbar">
             <div class="pdf-toolbar-left">
-                <button class="btn-pdf" onclick="pdfPrevPage()" title="Halaman Sebelumnya">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="m15 18-6-6 6-6"/>
-                    </svg>
-                </button>
-                <span class="pdf-page-info">
-                    <input type="number" id="pdfPageInput" min="1" value="1" onchange="pdfGoToPage(this.value)">
-                    <span> / </span>
-                    <span id="pdfTotalPages">1</span>
-                </span>
-                <button class="btn-pdf" onclick="pdfNextPage()" title="Halaman Selanjutnya">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="m9 18 6-6-6-6"/>
-                    </svg>
-                </button>
-            </div>
-            
-            <div class="pdf-toolbar-center">
                 <span class="pdf-filename" th:text="${lesson.title}">Document.pdf</span>
             </div>
             
             <div class="pdf-toolbar-right">
-                <button class="btn-pdf" onclick="pdfZoomOut()" title="Perkecil">
+                <a class="btn-pdf" id="btnOpenNew" href="#" target="_blank" title="Buka di Tab Baru">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        <line x1="8" y1="11" x2="14" y2="11"/>
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
                     </svg>
-                </button>
-                <span class="pdf-zoom-level" id="pdfZoomLevel">100%</span>
-                <button class="btn-pdf" onclick="pdfZoomIn()" title="Perbesar">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        <line x1="11" y1="8" x2="11" y2="14"/>
-                        <line x1="8" y1="11" x2="14" y2="11"/>
-                    </svg>
-                </button>
-                <button class="btn-pdf" onclick="pdfFitWidth()" title="Sesuaikan Lebar">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <path d="M9 3v18M15 3v18"/>
-                    </svg>
-                </button>
-                <a class="btn-pdf" th:href="@{/files/download(path=${lesson.contentUrl})}" title="Download PDF">
+                </a>
+                <a class="btn-pdf" id="btnDownload" href="#" download title="Download PDF">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         <polyline points="7 10 12 15 17 10"/>
                         <line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
                 </a>
-                <button class="btn-pdf" onclick="pdfFullscreen()" title="Fullscreen">
+                <button type="button" class="btn-pdf" id="btnFullscreen" title="Fullscreen">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                     </svg>
@@ -66,32 +37,37 @@
             </div>
         </div>
         
-        <!-- PDF Viewer -->
+        <!-- PDF Viewer Container -->
         <div class="pdf-viewer" id="pdfViewer">
-            <!-- Using Browser's native PDF viewer via iframe -->
-            <iframe 
-                th:src="@{/files/view(path=${lesson.contentUrl})}" 
-                id="pdfFrame"
-                class="pdf-frame"
-                allowfullscreen>
-            </iframe>
-            
-            <!-- Alternative: Canvas rendering with PDF.js (for more control) -->
-            <div class="pdf-canvas-container" id="pdfCanvasContainer" style="display:none">
-                <canvas id="pdfCanvas"></canvas>
-            </div>
+            <!-- PDF akan ditampilkan di sini -->
+            <iframe id="pdfFrame" class="pdf-frame"></iframe>
             
             <!-- Loading -->
-            <div class="pdf-loading" id="pdfLoading">
+            <div class="pdf-loading show" id="pdfLoading">
                 <div class="spinner"></div>
-                <p>Memuat PDF...</p>
+                <p id="loadingText">Memuat PDF...</p>
+            </div>
+            
+            <!-- Error / Fallback -->
+            <div class="pdf-error" id="pdfError">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <h3>PDF tidak dapat ditampilkan</h3>
+                <p id="errorMessage">Terjadi kesalahan saat memuat PDF</p>
+                <div class="pdf-error-actions">
+                    <button type="button" class="btn-retry" id="btnRetry">Coba Lagi</button>
+                    <a class="btn-open" id="btnOpenFallback" href="#" target="_blank">Buka di Tab Baru</a>
+                    <a class="btn-download-alt" id="btnDownloadFallback" href="#" download>Download PDF</a>
+                </div>
             </div>
         </div>
     </div>
     
     <style>
         .pdf-container {
-            background: var(--color-bg-subtle);
+            background: var(--color-bg-subtle, #f9fafb);
             min-height: 600px;
             display: flex;
             flex-direction: column;
@@ -101,8 +77,19 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            height: calc(100vh - var(--header-height) - 300px);
+            height: calc(100vh - 300px);
             min-height: 500px;
+        }
+        
+        .pdf-wrapper.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            height: 100vh;
+            background: #333;
         }
         
         .pdf-toolbar {
@@ -110,106 +97,71 @@
             align-items: center;
             justify-content: space-between;
             padding: .75rem 1rem;
-            background: var(--color-bg);
-            border-bottom: 1px solid var(--color-border);
+            background: var(--color-bg, #fff);
+            border-bottom: 1px solid var(--color-border, #e5e7eb);
             gap: 1rem;
+            flex-shrink: 0;
         }
         
-        .pdf-toolbar-left, .pdf-toolbar-right {
+        .pdf-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+        
+        .pdf-toolbar-right {
             display: flex;
             align-items: center;
             gap: .5rem;
         }
         
-        .pdf-toolbar-center {
-            flex: 1;
-            text-align: center;
-        }
-        
         .pdf-filename {
-            font-size: .875rem;
-            font-weight: 500;
-            color: var(--color-text);
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-size: .9375rem;
+            font-weight: 600;
+            color: var(--color-text, #111827);
         }
         
         .btn-pdf {
             width: 36px;
             height: 36px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border);
-            background: var(--color-bg);
+            border-radius: 6px;
+            border: 1px solid var(--color-border, #e5e7eb);
+            background: var(--color-bg, #fff);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--color-text-secondary);
-            transition: var(--transition);
+            color: var(--color-text-secondary, #6b7280);
+            transition: all .2s ease;
+            text-decoration: none;
         }
         
         .btn-pdf:hover {
-            background: var(--color-bg-subtle);
-            color: var(--color-text);
-            border-color: var(--color-primary);
-        }
-        
-        .pdf-page-info {
-            display: flex;
-            align-items: center;
-            gap: .375rem;
-            font-size: .875rem;
-            color: var(--color-text-secondary);
-        }
-        
-        .pdf-page-info input {
-            width: 48px;
-            padding: .375rem .5rem;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            text-align: center;
-            font-size: .875rem;
-            font-family: inherit;
-        }
-        
-        .pdf-page-info input:focus {
-            outline: none;
-            border-color: var(--color-primary);
-        }
-        
-        .pdf-zoom-level {
-            font-size: .8125rem;
-            color: var(--color-text-muted);
-            min-width: 48px;
-            text-align: center;
+            background: var(--color-bg-subtle, #f9fafb);
+            color: var(--color-text, #111827);
+            border-color: var(--color-primary, #1a56db);
         }
         
         .pdf-viewer {
             flex: 1;
             position: relative;
             background: #525659;
-            overflow: auto;
+            overflow: hidden;
         }
         
         .pdf-frame {
             width: 100%;
             height: 100%;
             border: none;
+            display: none;
+            background: #525659;
         }
         
-        .pdf-canvas-container {
-            display: flex;
-            justify-content: center;
-            padding: 1rem;
+        .pdf-frame.loaded {
+            display: block;
         }
         
-        .pdf-canvas-container canvas {
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
-        }
-        
-        .pdf-loading {
+        .pdf-loading, .pdf-error {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -219,7 +171,7 @@
             display: none;
         }
         
-        .pdf-loading.show {
+        .pdf-loading.show, .pdf-error.show {
             display: block;
         }
         
@@ -233,8 +185,60 @@
             margin: 0 auto 1rem;
         }
         
-        .pdf-loading p {
+        .pdf-error svg {
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+        
+        .pdf-error h3 {
+            font-size: 1.125rem;
+            margin-bottom: .5rem;
+        }
+        
+        .pdf-error p {
             font-size: .875rem;
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .pdf-error-actions {
+            display: flex;
+            gap: .75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-retry, .btn-open, .btn-download-alt {
+            padding: .625rem 1.25rem;
+            border-radius: 6px;
+            font-size: .875rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        
+        .btn-retry {
+            background: var(--color-primary, #1a56db);
+            color: #fff;
+            border: none;
+        }
+        
+        .btn-open {
+            background: rgba(255,255,255,.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.3);
+        }
+        
+        .btn-download-alt {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.3);
+        }
+        
+        .btn-retry:hover { opacity: 0.9; }
+        .btn-open:hover, .btn-download-alt:hover {
+            background: rgba(255,255,255,.2);
         }
         
         @keyframes spin {
@@ -242,124 +246,183 @@
         }
         
         @media (max-width: 768px) {
-            .pdf-toolbar {
-                flex-wrap: wrap;
-                gap: .5rem;
-            }
-            
-            .pdf-toolbar-center {
-                order: -1;
-                flex-basis: 100%;
-                text-align: left;
-            }
-            
-            .pdf-filename {
-                max-width: none;
-            }
+            .pdf-toolbar { padding: .5rem .75rem; }
+            .pdf-filename { font-size: .875rem; }
+            .btn-pdf { width: 32px; height: 32px; }
+            .pdf-error-actions { flex-direction: column; }
         }
     </style>
     
     <script>
-        let pdfCurrentPage = 1;
-        let pdfTotalPages = 1;
-        let pdfZoom = 100;
+    (function() {
+        // Get URLs
+        var pdfUrl = document.getElementById('pdfSourceUrl').value;
+        var downloadUrl = document.getElementById('pdfDownloadUrl').value;
         
-        // Note: These functions are for the PDF.js implementation
-        // The iframe version uses browser's native PDF viewer
+        console.log('=== PDF Viewer Debug ===');
+        console.log('PDF URL:', pdfUrl);
+        console.log('Download URL:', downloadUrl);
         
-        function pdfPrevPage() {
-            if (pdfCurrentPage > 1) {
-                pdfCurrentPage--;
-                updatePdfPage();
+        // Elements
+        var pdfFrame = document.getElementById('pdfFrame');
+        var pdfLoading = document.getElementById('pdfLoading');
+        var pdfError = document.getElementById('pdfError');
+        var loadingText = document.getElementById('loadingText');
+        var errorMessage = document.getElementById('errorMessage');
+        var btnOpenNew = document.getElementById('btnOpenNew');
+        var btnDownload = document.getElementById('btnDownload');
+        var btnOpenFallback = document.getElementById('btnOpenFallback');
+        var btnDownloadFallback = document.getElementById('btnDownloadFallback');
+        var btnRetry = document.getElementById('btnRetry');
+        var btnFullscreen = document.getElementById('btnFullscreen');
+        
+        // Set download URLs
+        btnDownload.href = downloadUrl;
+        btnDownloadFallback.href = downloadUrl;
+        btnOpenNew.href = pdfUrl;
+        btnOpenFallback.href = pdfUrl;
+        
+        // Show functions
+        function showLoading(text) {
+            pdfLoading.classList.add('show');
+            pdfError.classList.remove('show');
+            pdfFrame.classList.remove('loaded');
+            loadingText.textContent = text || 'Memuat PDF...';
+        }
+        
+        function showError(message) {
+            pdfLoading.classList.remove('show');
+            pdfError.classList.add('show');
+            pdfFrame.classList.remove('loaded');
+            errorMessage.textContent = message || 'Terjadi kesalahan saat memuat PDF';
+        }
+        
+        function showPdf() {
+            pdfLoading.classList.remove('show');
+            pdfError.classList.remove('show');
+            pdfFrame.classList.add('loaded');
+        }
+        
+        // Convert ArrayBuffer to Base64
+        function arrayBufferToBase64(buffer) {
+            var binary = '';
+            var bytes = new Uint8Array(buffer);
+            var len = bytes.byteLength;
+            for (var i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
             }
+            return window.btoa(binary);
         }
         
-        function pdfNextPage() {
-            if (pdfCurrentPage < pdfTotalPages) {
-                pdfCurrentPage++;
-                updatePdfPage();
-            }
-        }
-        
-        function pdfGoToPage(page) {
-            const pageNum = parseInt(page);
-            if (pageNum >= 1 && pageNum <= pdfTotalPages) {
-                pdfCurrentPage = pageNum;
-                updatePdfPage();
-            }
-        }
-        
-        function pdfZoomIn() {
-            if (pdfZoom < 200) {
-                pdfZoom += 25;
-                updatePdfZoom();
-            }
-        }
-        
-        function pdfZoomOut() {
-            if (pdfZoom > 50) {
-                pdfZoom -= 25;
-                updatePdfZoom();
-            }
-        }
-        
-        function pdfFitWidth() {
-            pdfZoom = 100;
-            updatePdfZoom();
-        }
-        
-        function updatePdfPage() {
-            document.getElementById('pdfPageInput').value = pdfCurrentPage;
-            // If using PDF.js, render the page here
-        }
-        
-        function updatePdfZoom() {
-            document.getElementById('pdfZoomLevel').textContent = pdfZoom + '%';
+        // Load PDF
+        function loadPdf() {
+            showLoading('Mengunduh PDF...');
             
-            // Apply zoom to iframe
-            const frame = document.getElementById('pdfFrame');
-            if (frame) {
-                frame.style.transform = `scale(${pdfZoom / 100})`;
-                frame.style.transformOrigin = 'top left';
-                frame.style.width = `${100 / (pdfZoom / 100)}%`;
-                frame.style.height = `${100 / (pdfZoom / 100)}%`;
-            }
+            console.log('Fetching PDF...');
+            
+            fetch(pdfUrl)
+                .then(function(response) {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:');
+                    response.headers.forEach(function(value, key) {
+                        console.log('  ' + key + ':', value);
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Server error: ' + response.status + ' ' + response.statusText);
+                    }
+                    
+                    showLoading('Memproses PDF...');
+                    return response.arrayBuffer();
+                })
+                .then(function(arrayBuffer) {
+                    console.log('ArrayBuffer size:', arrayBuffer.byteLength, 'bytes');
+                    
+                    if (arrayBuffer.byteLength === 0) {
+                        throw new Error('File PDF kosong');
+                    }
+                    
+                    // Check PDF signature
+                    var arr = new Uint8Array(arrayBuffer);
+                    var header = String.fromCharCode(arr[0], arr[1], arr[2], arr[3]);
+                    console.log('File header:', header);
+                    
+                    if (header !== '%PDF') {
+                        console.warn('File mungkin bukan PDF valid, header:', header);
+                    }
+                    
+                    showLoading('Menampilkan PDF...');
+                    
+                    // Convert to base64
+                    var base64 = arrayBufferToBase64(arrayBuffer);
+                    var dataUrl = 'data:application/pdf;base64,' + base64;
+                    
+                    console.log('Data URL length:', dataUrl.length);
+                    
+                    // Set iframe source
+                    pdfFrame.src = dataUrl;
+                })
+                .catch(function(error) {
+                    console.error('Error loading PDF:', error);
+                    showError(error.message);
+                });
         }
         
-        function pdfFullscreen() {
-            const wrapper = document.getElementById('pdfWrapper');
+        // Handle iframe load
+        pdfFrame.onload = function() {
+            console.log('Iframe loaded');
+            // Small delay to ensure rendering
+            setTimeout(function() {
+                showPdf();
+                console.log('PDF displayed successfully');
+            }, 100);
+        };
+        
+        // Handle iframe error
+        pdfFrame.onerror = function(e) {
+            console.error('Iframe error:', e);
+            showError('Browser tidak dapat menampilkan PDF');
+        };
+        
+        // Retry button
+        btnRetry.onclick = loadPdf;
+        
+        // Fullscreen
+        btnFullscreen.onclick = function() {
+            var wrapper = document.getElementById('pdfWrapper');
             
             if (!document.fullscreenElement) {
-                wrapper.requestFullscreen();
+                if (wrapper.requestFullscreen) {
+                    wrapper.requestFullscreen();
+                } else if (wrapper.webkitRequestFullscreen) {
+                    wrapper.webkitRequestFullscreen();
+                } else if (wrapper.msRequestFullscreen) {
+                    wrapper.msRequestFullscreen();
+                }
+                wrapper.classList.add('fullscreen');
             } else {
-                document.exitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                wrapper.classList.remove('fullscreen');
             }
-        }
+        };
         
-        // Track reading progress for PDF
-        document.getElementById('pdfFrame').addEventListener('load', function() {
-            document.getElementById('pdfLoading').classList.remove('show');
-            
-            // Save progress when viewing PDF
-            saveProgress();
+        // Fullscreen change listener
+        document.addEventListener('fullscreenchange', function() {
+            var wrapper = document.getElementById('pdfWrapper');
+            if (!document.fullscreenElement && wrapper) {
+                wrapper.classList.remove('fullscreen');
+            }
         });
         
-        function saveProgress() {
-            fetch('/api/learn/progress', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    lessonId: lessonId, 
-                    completed: false,
-                    lastPage: pdfCurrentPage
-                })
-            }).catch(err => console.error(err));
-        }
-        
-        // Show loading on initial load
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('pdfLoading').classList.add('show');
-        });
+        // Start loading
+        loadPdf();
+    })();
     </script>
 </div>
 

@@ -199,6 +199,7 @@ public class LecturerCourseController {
             BindingResult bindingResult,
             HttpSession session,
             @RequestParam(value = "sectionsJson", required = false) String sectionsJson,
+            @RequestParam(value = "action", defaultValue = "draft") String action,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
@@ -220,8 +221,16 @@ public class LecturerCourseController {
         }
 
         try {
-            // Thumbnail URL sudah di-set dari AJAX upload ke existingThumbnailUrl
-            // Tidak perlu proses file di sini
+            // SET STATUS BERDASARKAN ACTION BUTTON YANG DIKLIK
+            // Ini adalah perbaikan utama - status ditentukan oleh tombol yang diklik
+            String status = "publish".equals(action) ? "published" : "draft";
+            courseDTO.setStatus(status);
+            
+            // Debug log
+            System.out.println("=== SAVE COURSE ===");
+            System.out.println("Action clicked: " + action);
+            System.out.println("Status to save: " + status);
+            System.out.println("Course title: " + courseDTO.getTitle());
 
             // Parse sections dari JSON jika ada
             if (sectionsJson != null && !sectionsJson.isEmpty()) {
@@ -239,24 +248,25 @@ public class LecturerCourseController {
                     return "redirect:/lecturer/courses";
                 }
                 savedCourse = courseService.updateCourse(courseDTO, lecturer.getUserId());
-                redirectAttributes.addFlashAttribute("success", "Kursus berhasil diperbarui");
+                
+                String successMsg = "publish".equals(action) ? "Kursus berhasil dipublish" : "Draft berhasil disimpan";
+                redirectAttributes.addFlashAttribute("success", successMsg);
             } else {
                 // Create new course
                 savedCourse = courseService.createCourse(courseDTO, lecturer.getUserId());
-                redirectAttributes.addFlashAttribute("success", "Kursus berhasil dibuat");
+                
+                String successMsg = "publish".equals(action) ? "Kursus berhasil dibuat dan dipublish" : "Draft kursus berhasil disimpan";
+                redirectAttributes.addFlashAttribute("success", successMsg);
             }
 
             // Cleanup temp folder lecturer setelah berhasil simpan
             courseService.cleanupLecturerTempFolder(lecturer.getUserId());
 
-            // Redirect berdasarkan status
-            if ("published".equals(courseDTO.getStatus())) {
-                return "redirect:/lecturer/courses";
-            } else {
-                return "redirect:/lecturer/courses/" + savedCourse.getCourseId() + "/edit";
-            }
+            // Redirect ke list courses
+            return "redirect:/lecturer/courses";
 
         } catch (Exception e) {
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Gagal menyimpan kursus: " + e.getMessage());
             return "redirect:/lecturer/courses/create";
         }

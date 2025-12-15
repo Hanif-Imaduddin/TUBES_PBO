@@ -16,6 +16,9 @@ public interface SectionRepository extends JpaRepository<Section, Integer> {
     // Find by course ordered by sort order
     List<Section> findByCourseCourseIdOrderBySortOrder(Integer courseId);
 
+    // Find by course entity ordered by sort order
+    List<Section> findByCourseOrderBySortOrder(Course course);
+
     // Count by course
     int countByCourseCourseId(Integer courseId);
 

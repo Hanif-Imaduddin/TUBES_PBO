@@ -62,7 +62,9 @@ public class TempFileService {
         if (tempPath == null || tempPath.isEmpty()) {
             return null;
         }
-
+//        if (!(tempPath.contains("temp"))){
+//            return tempPath;
+//        }
         // Parse temp path
         Path sourcePath = Paths.get(tempPath.startsWith("/") ? tempPath.substring(1) : tempPath);
         

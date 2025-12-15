@@ -1001,17 +1001,19 @@
         <!-- Main Content -->
         <main class="learn-main">
             <!-- Content Area - Changes based on lesson type -->
-            <div class="content-area">
+            <div class="content-area" th:if="${lesson.contentType.name() == 'video'}">
                 <!-- Video Content -->
-                <div th:if="${lesson.contentType == 'video'}" th:replace="~{fragments/learn-video :: video-content}"></div>
-                
-                <!-- Text Content -->
-                <div th:if="${lesson.contentType == 'text'}" th:replace="~{fragments/learn-text :: text-content}"></div>
-                
-                <!-- PDF Content -->
-                <div th:if="${lesson.contentType == 'pdf'}" th:replace="~{fragments/learn-pdf :: pdf-content}"></div>
+                <div th:replace="~{student/fragments/learn-video :: video-content}"></div>
             </div>
-
+            <div class="content-area" th:if="${lesson.contentType.name() == 'text'}">                
+                <!-- Text Content -->
+                <div th:replace="~{student/fragments/learn-text :: text-content}"></div>
+            </div>
+            <div class="content-area" th:if="${lesson.contentType.name() == 'pdf'}">                
+                <!-- PDF Content -->
+                <div th:replace="~{student/fragments/learn-pdf :: pdf-content}"></div>
+            </div>
+            
             <!-- Info Panel -->
             <div class="info-panel">
                 <!-- Header -->
@@ -1019,7 +1021,7 @@
                     <div>
                         <h1 class="lesson-title-main" th:text="${lesson.title}">Judul Materi</h1>
                         <div class="lesson-meta-main">
-                            <span th:text="${lesson.contentType == 'video'} ? 'Video' : (${lesson.contentType == 'text'} ? 'Artikel' : 'PDF')">Tipe</span>
+                            <span th:text="${lesson.contentType.name() == 'video'} ? 'Video' : (${lesson.contentType.name() == 'text'} ? 'Artikel' : 'PDF')">Tipe</span>
                             <span th:if="${lesson.duration > 0}">
                                 <span th:text="${lesson.duration}">10</span> menit
                             </span>
@@ -1043,45 +1045,13 @@
                 <!-- Tabs -->
                 <div class="info-tabs">
                     <button class="tab-btn active" onclick="showTab('description')">Deskripsi</button>
-                    <button class="tab-btn" onclick="showTab('discussion')">Diskusi</button>
-                    <button class="tab-btn" onclick="showTab('notes')">Catatan</button>
                 </div>
 
                 <!-- Tab Contents -->
                 <div class="tab-content active" id="tab-description">
                     <div class="description-content">
-                        <p th:if="${lesson.description}" th:text="${lesson.description}">Deskripsi materi akan tampil di sini.</p>
+                        <p th:if="${lesson.description}" th:utext="${lesson.description}">Deskripsi materi akan tampil di sini.</p>
                         <p th:unless="${lesson.description}" class="text-muted">Tidak ada deskripsi untuk materi ini.</p>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-discussion">
-                    <!-- Form Diskusi -->
-                    <div class="discussion-form">
-                        <textarea class="discussion-input" placeholder="Tulis pertanyaan atau komentar Anda..." id="discussionInput"></textarea>
-                        <div class="discussion-actions">
-                            <button class="btn-post" onclick="postDiscussion()">Kirim</button>
-                        </div>
-                    </div>
-
-                    <!-- Daftar Diskusi -->
-                    <div class="discussion-list" id="discussionList">
-                        <!-- Discussion items will be loaded here -->
-                        <div class="empty-state" id="emptyDiscussion">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            </svg>
-                            <p>Belum ada diskusi. Jadilah yang pertama bertanya!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-notes">
-                    <div class="notes-container">
-                        <textarea class="notes-input" placeholder="Tulis catatan Anda di sini..." id="notesInput" th:text="${notes}"></textarea>
-                        <div class="notes-footer">
-                            <span class="notes-status" id="notesStatus">Catatan tersimpan otomatis</span>
-                        </div>
                     </div>
                 </div>
 
@@ -1188,10 +1158,10 @@
             const lessonId = btn.dataset.lessonId;
             const isCompleted = btn.classList.contains('completed');
             
-            fetch('/api/learn/progress', {
+            fetch('/learn/api/progress', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lessonId: lessonId, completed: !isCompleted })
+                body: JSON.stringify({ lessonId: parseInt(lessonId), completed: !isCompleted })
             })
             .then(response => response.json())
             .then(data => {
@@ -1216,118 +1186,9 @@
             .catch(err => console.error(err));
         }
 
-        // Post Discussion
-        function postDiscussion() {
-            const input = document.getElementById('discussionInput');
-            const content = input.value.trim();
-            
-            if (!content) {
-                alert('Silakan tulis pertanyaan atau komentar Anda');
-                return;
-            }
-            
-            fetch('/api/learn/discussion', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lessonId: lessonId, content: content })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    input.value = '';
-                    loadDiscussions();
-                }
-            })
-            .catch(err => console.error(err));
-        }
-
-        // Load Discussions
-        function loadDiscussions() {
-            fetch('/api/learn/discussion/' + lessonId)
-            .then(response => response.json())
-            .then(data => {
-                const list = document.getElementById('discussionList');
-                const empty = document.getElementById('emptyDiscussion');
-                
-                if (data.discussions && data.discussions.length > 0) {
-                    empty.style.display = 'none';
-                    // Render discussions
-                    let html = '';
-                    data.discussions.forEach(d => {
-                        html += `
-                            <div class="discussion-item">
-                                <div class="discussion-avatar">${d.authorInitials}</div>
-                                <div class="discussion-content">
-                                    <div class="discussion-header">
-                                        <span class="discussion-author">${d.authorName}</span>
-                                        ${d.isLecturer ? '<span class="discussion-badge">Pengajar</span>' : ''}
-                                        <span class="discussion-time">${d.timeAgo}</span>
-                                    </div>
-                                    <div class="discussion-text">${d.content}</div>
-                                    <div class="discussion-footer">
-                                        <button class="btn-discussion-action" onclick="likeDiscussion(${d.id})">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
-                                            </svg>
-                                            <span>${d.likes}</span>
-                                        </button>
-                                        <button class="btn-discussion-action" onclick="replyDiscussion(${d.id})">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                                            </svg>
-                                            <span>Balas</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    list.innerHTML = html + empty.outerHTML;
-                } else {
-                    empty.style.display = 'block';
-                }
-            })
-            .catch(err => console.error(err));
-        }
-
-        // Auto-save Notes
-        let notesTimeout;
-        document.getElementById('notesInput').addEventListener('input', function() {
-            const status = document.getElementById('notesStatus');
-            status.textContent = 'Menyimpan...';
-            status.className = 'notes-status saving';
-            
-            clearTimeout(notesTimeout);
-            notesTimeout = setTimeout(() => {
-                saveNotes(this.value);
-            }, 1000);
-        });
-
-        function saveNotes(content) {
-            fetch('/api/learn/notes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lessonId: lessonId, content: content })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const status = document.getElementById('notesStatus');
-                if (data.success) {
-                    status.textContent = 'Tersimpan';
-                    status.className = 'notes-status saved';
-                } else {
-                    status.textContent = 'Gagal menyimpan';
-                    status.className = 'notes-status';
-                }
-            })
-            .catch(err => {
-                document.getElementById('notesStatus').textContent = 'Gagal menyimpan';
-            });
-        }
-
-        // Load discussions on page load
+        // Page loaded
         document.addEventListener('DOMContentLoaded', function() {
-            loadDiscussions();
+            console.log('Learn page loaded for lesson: ' + lessonId);
         });
     </script>
 </body>
