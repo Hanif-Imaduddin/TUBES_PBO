@@ -33,7 +33,10 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    
+    @Autowired
+    private CartItemRepository cartItemRepository;
+    
     @Transactional
     public User register(RegisterRequest request) {
         // Validasi email dan username unik
@@ -114,5 +117,9 @@ public class UserService {
             return "Student";
         }
         return "Unknown";
+    }
+    
+    public int getCartCount(User user){
+        return cartItemRepository.countByStudentUserId(user.getUserId());
     }
 }

@@ -3,6 +3,7 @@ package koding_muda_nusantara.koding_muda_belajar.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import koding_muda_nusantara.koding_muda_belajar.enums.EnrollmentStatus;
 
 @Entity
 @Table(name = "enrollments", uniqueConstraints = {
@@ -38,13 +39,6 @@ public class Enrollment {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private EnrollmentStatus status = EnrollmentStatus.active;
-
-    public enum EnrollmentStatus {
-        active,
-        completed,
-        expired
-    }
-
     // Constructors
     public Enrollment() {
         this.enrolledAt = LocalDateTime.now();

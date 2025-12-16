@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseLevel;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseStatus;
 import koding_muda_nusantara.koding_muda_belajar.enums.LessonContentType;
+import org.springframework.data.domain.Page;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -38,6 +39,12 @@ public class CourseService {
 
     @Autowired
     private SectionRepository sectionRepository;
+    
+    @Autowired
+    private ReviewRepository reviewRepository;
+    
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Autowired
     private LessonRepository lessonRepository;
@@ -668,5 +675,31 @@ public class CourseService {
         for (int i = 0; i < lessonIds.size(); i++) {
             lessonRepository.updateSortOrder(lessonIds.get(i), i);
         }
+    }
+    
+//    ====================================
+    
+    public double getAverageRating(int courseId){
+        Double average = reviewRepository.getAverageRatingByCourseId(courseId);
+        if (average==null){
+            return 0;
+        }else{
+            return average;
+        }
+    }
+    
+    public int getTotalReviews(int courseId){
+        return reviewRepository.countByCourseCourseId(courseId);
+    }
+    public long getTotalEnrollments(int courseId){
+        return enrollmentRepository.countByCourseCourseId(courseId);
+    }
+    
+    public List<Review> getAllReviews(int courseId){
+        return reviewRepository.findByCourseCourseId(courseId);
+    }
+    
+    public List<Section> getAllSections(int courseId){
+        return sectionRepository.findByCourseCourseIdOrderBySortOrder(courseId);
     }
 }

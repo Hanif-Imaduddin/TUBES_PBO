@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import koding_muda_nusantara.koding_muda_belajar.enums.EnrollmentStatus;
 
 @Service
 public class EnrollmentService {
@@ -49,8 +50,8 @@ public class EnrollmentService {
         }
         
         Enrollment e = enrollment.get();
-        return e.getStatus() == Enrollment.EnrollmentStatus.active || 
-               e.getStatus() == Enrollment.EnrollmentStatus.completed;
+        return e.getStatus() == EnrollmentStatus.active || 
+               e.getStatus() == EnrollmentStatus.completed;
     }
 
     // ==================== GET ENROLLMENT ====================
@@ -117,10 +118,12 @@ public class EnrollmentService {
                 .orElseThrow(() -> new RuntimeException("Kursus tidak ditemukan"));
 
         // Buat enrollment baru
-        Enrollment enrollment = new Enrollment(student, course);
+        Enrollment enrollment = new Enrollment();
+        enrollment.setCourse(course);
+        enrollment.setStudent(student);
         enrollment.setEnrolledAt(LocalDateTime.now());
         enrollment.setProgressPercentage(BigDecimal.ZERO);
-        enrollment.setStatus(Enrollment.EnrollmentStatus.active);
+        enrollment.setStatus(EnrollmentStatus.active);
 
         return enrollmentRepository.save(enrollment);
     }
@@ -157,7 +160,7 @@ public class EnrollmentService {
 
         // Jika progress 100%, tandai sebagai selesai
         if (progress.compareTo(new BigDecimal("100.00")) >= 0) {
-            enrollment.setStatus(Enrollment.EnrollmentStatus.completed);
+            enrollment.setStatus(EnrollmentStatus.completed);
             enrollment.setCompletedAt(LocalDateTime.now());
         }
 
@@ -211,6 +214,6 @@ public class EnrollmentService {
      * Hitung jumlah course yang sudah selesai
      */
     public long countCompletedCourses(Integer studentId) {
-        return enrollmentRepository.countByStudentUserIdAndStatus(studentId, Enrollment.EnrollmentStatus.completed);
+        return enrollmentRepository.countByStudentUserIdAndStatus(studentId, EnrollmentStatus.completed);
     }
 }

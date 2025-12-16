@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import koding_muda_nusantara.koding_muda_belajar.enums.EnrollmentStatus;
 
 @Service
 public class ProgressService {
@@ -182,8 +183,8 @@ public class ProgressService {
             enrollment.setLastAccessedAt(LocalDateTime.now());
 
             // Jika 100%, tandai sebagai selesai
-            if (progressPercentage >= 100 && enrollment.getStatus() != Enrollment.EnrollmentStatus.completed) {
-                enrollment.setStatus(Enrollment.EnrollmentStatus.completed);
+            if (progressPercentage >= 100 && enrollment.getStatus() != EnrollmentStatus.completed) {
+                enrollment.setStatus(EnrollmentStatus.completed);
                 enrollment.setCompletedAt(LocalDateTime.now());
             }
 
@@ -263,7 +264,7 @@ public class ProgressService {
         if (enrollmentOpt.isPresent()) {
             Enrollment enrollment = enrollmentOpt.get();
             enrollment.setProgressPercentage(BigDecimal.ZERO);
-            enrollment.setStatus(Enrollment.EnrollmentStatus.active);
+            enrollment.setStatus(EnrollmentStatus.active);
             enrollment.setCompletedAt(null);
             enrollmentRepository.save(enrollment);
         }

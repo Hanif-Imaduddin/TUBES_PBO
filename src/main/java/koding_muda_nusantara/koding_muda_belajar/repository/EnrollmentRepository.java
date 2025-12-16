@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import koding_muda_nusantara.koding_muda_belajar.enums.EnrollmentStatus;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
@@ -22,7 +23,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     List<Enrollment> findByStudentUserIdOrderByEnrolledAtDesc(Integer studentId);
 
     // Daftar enrollment student berdasarkan status
-    List<Enrollment> findByStudentUserIdAndStatusOrderByEnrolledAtDesc(Integer studentId, Enrollment.EnrollmentStatus status);
+    List<Enrollment> findByStudentUserIdAndStatusOrderByEnrolledAtDesc(Integer studentId, EnrollmentStatus status);
 
     // Daftar enrollment untuk course tertentu
     List<Enrollment> findByCourseCourseIdOrderByEnrolledAtDesc(Integer courseId);
@@ -34,7 +35,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     long countByStudentUserId(Integer studentId);
 
     // Hitung jumlah course yang sudah selesai oleh student
-    long countByStudentUserIdAndStatus(Integer studentId, Enrollment.EnrollmentStatus status);
+    long countByStudentUserIdAndStatus(Integer studentId, EnrollmentStatus status);
 
     // Cari enrollment aktif student
     @Query("SELECT e FROM Enrollment e WHERE e.student.userId = :studentId AND e.status = 'active' ORDER BY e.lastAccessedAt DESC")
