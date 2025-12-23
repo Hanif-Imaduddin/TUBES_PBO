@@ -5,6 +5,7 @@
 package koding_muda_nusantara.koding_muda_belajar.repository;
 
 import java.util.List;
+import java.util.Optional;
 import koding_muda_nusantara.koding_muda_belajar.model.CartItem;
 import koding_muda_nusantara.koding_muda_belajar.model.Category;
 import koding_muda_nusantara.koding_muda_belajar.model.Transaction;
@@ -17,5 +18,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    
+    Optional<Transaction> findByTransactionCode(String transactionCode);
 }

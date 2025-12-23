@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
  * @author hanif
  */
 @Repository
-public interface TransactionItemRepository extends JpaRepository<TransactionItem, Long> {
+public interface TransactionItemRepository extends JpaRepository<TransactionItem, Integer> {
+    List<TransactionItem> findByTransactionId(Integer transactionId);
     
 }

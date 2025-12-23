@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Berhasil - Dikoding Muda Nusantara</title>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --color-primary: #0d9488;
+            --color-primary-dark: #0f766e;
+            --color-bg: #ffffff;
+            --color-bg-subtle: #f9fafb;
+            --color-text: #111827;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-border: #e5e7eb;
+            --color-success: #10b981;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 0;
+        }
+        
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+        
+        .success-card {
+            background: var(--color-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            padding: 3rem;
+            text-align: center;
+            max-width: 560px;
+            width: 100%;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #ecfdf5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .success-icon svg {
+            color: var(--color-success);
+        }
+        
+        .success-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: .5rem;
+        }
+        
+        .success-subtitle {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .order-info {
+            background: var(--color-bg-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        
+        .order-info-title {
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 1rem;
+        }
+        
+        .order-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: .5rem 0;
+            font-size: .9375rem;
+        }
+        
+        .order-info-label { color: var(--color-text-secondary); }
+        .order-info-value { font-weight: 600; }
+        
+        .order-courses {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .order-course-item {
+            display: flex;
+            gap: 1rem;
+            padding: .75rem 0;
+            text-align: left;
+        }
+        
+        .order-course-thumb {
+            width: 80px;
+            height: 45px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .order-course-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .order-course-title {
+            font-size: .9375rem;
+            font-weight: 500;
+        }
+        
+        .success-actions {
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            padding: .875rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--color-primary);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: var(--color-primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--color-bg);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--color-bg-subtle);
+            border-color: var(--color-primary);
+        }
+        
+        @media (max-width: 480px) {
+            .success-card { padding: 2rem 1.5rem; }
+            .success-title { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo">Dikoding Muda</a>
+        </div>
+    </header>
+    
+    <main class="main-container">
+        <div class="success-card">
+            <div class="success-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            
+            <h1 class="success-title">Pembayaran Berhasil!</h1>
+            <p class="success-subtitle">Terima kasih! Kamu sekarang bisa mulai belajar.</p>
+            
+            <div class="order-info">
+                <div class="order-info-title">Detail Transaksi</div>
+                <div class="order-info-row">
+                    <span class="order-info-label">Kode Transaksi</span>
+                    <span class="order-info-value" th:text="${transactionCode}">TRX-20241215-001</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="order-info-label">Tanggal</span>
+                    <span class="order-info-value" th:text="${#temporals.format(transactionDate, 'dd MMM yyyy, HH:mm')}">15 Des 2024, 14:30</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="order-info-label">Metode Pembayaran</span>
+                    <span class="order-info-value" th:text="${paymentMethod}">Transfer Bank BCA</span>
+                </div>
+                <div class="order-info-row">
+                    <span class="order-info-label">Total Pembayaran</span>
+                    <span class="order-info-value" th:text="'Rp ' + ${#numbers.formatInteger(totalAmount, 3, 'POINT')}">Rp 698.000</span>
+                </div>
+                
+                <div class="order-courses">
+                    <div class="order-info-title">Kursus yang Dibeli</div>
+                    <div th:each="course : ${purchasedCourses}" class="order-course-item">
+                        <div class="order-course-thumb">
+                            <img th:src="${course.thumbnailUrl != null} ? @{/files/view(path=${course.thumbnailUrl})} : '/images/default-course.png'" alt="">
+                        </div>
+                        <span class="order-course-title" th:text="${course.title}">Judul Kursus</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-actions">
+                <a href="/my-learning" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Mulai Belajar
+                </a>
+                <a href="/courses" class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Jelajahi Kursus Lainnya
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

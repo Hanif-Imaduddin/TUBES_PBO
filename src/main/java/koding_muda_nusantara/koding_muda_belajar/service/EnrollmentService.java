@@ -16,6 +16,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import koding_muda_nusantara.koding_muda_belajar.enums.EnrollmentStatus;
+import koding_muda_nusantara.koding_muda_belajar.enums.PaymentStatus;
+import koding_muda_nusantara.koding_muda_belajar.model.CartItem;
+import koding_muda_nusantara.koding_muda_belajar.model.Transaction;
+import koding_muda_nusantara.koding_muda_belajar.model.TransactionItem;
+import koding_muda_nusantara.koding_muda_belajar.repository.CartItemRepository;
+import koding_muda_nusantara.koding_muda_belajar.repository.TransactionItemRepository;
+import koding_muda_nusantara.koding_muda_belajar.repository.TransactionRepository;
 
 @Service
 public class EnrollmentService {
@@ -28,6 +35,15 @@ public class EnrollmentService {
 
     @Autowired
     private StudentRepository studentRepository;
+    
+    @Autowired
+    private TransactionRepository transactionRepository;
+    
+    @Autowired
+    private TransactionItemRepository transactionItemRepository;
+    
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
     // ==================== CHECK ENROLLMENT ====================
 
@@ -215,5 +231,20 @@ public class EnrollmentService {
      */
     public long countCompletedCourses(Integer studentId) {
         return enrollmentRepository.countByStudentUserIdAndStatus(studentId, EnrollmentStatus.completed);
+    }
+    
+    @Transactional
+    public void enrollAllItems(Transaction transaction){
+        if (transaction.getPaymentStatus() == PaymentStatus.paid){
+            List<TransactionItem> items = transactionItemRepository.findByTransactionId(transaction.getId());
+            for (TransactionItem item : items){
+                Enrollment enrollment = enrollStudent(transaction.getStudent().getUserId(), item.getCourse().getCourseId());
+                
+                CartItem cartItem = cartItemRepository.findByStudentUserIdAndCourseCourseId(transaction.getStudent().getUserId(), item.getCourse().getCourseId())
+                        .orElseThrow(() -> new RuntimeException("Cart Item tidak ditemukan"));
+                cartItemRepository.delete(cartItem);
+                System.out.println(enrollment);
+            }
+        }
     }
 }

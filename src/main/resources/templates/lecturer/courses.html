@@ -235,6 +235,33 @@
             padding: 2rem;
         }
 
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
         /* Filter Bar */
         .filter-bar {
             display: flex;
@@ -367,6 +394,10 @@
             font-weight: 600;
             color: var(--color-text);
             margin-bottom: 0.25rem;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .course-details p {
@@ -522,7 +553,7 @@
             justify-content: center;
         }
 
-        .pagination-btn:hover {
+        .pagination-btn:hover:not(:disabled) {
             background: var(--color-bg-subtle);
             color: var(--color-text);
         }
@@ -709,6 +740,12 @@
             justify-content: center;
             cursor: pointer;
         }
+
+        .no-thumbnail {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: var(--color-primary);
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -750,31 +787,6 @@
                 </div>
 
                 <div class="nav-section">
-                    <div class="nav-section-title">Analitik</div>
-                    <a href="/lecturer/statistics" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 20V10"></path>
-                            <path d="M12 20V4"></path>
-                            <path d="M6 20v-6"></path>
-                        </svg>
-                        Statistik
-                    </a>
-                    <a href="/lecturer/earnings" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                        Pendapatan
-                    </a>
-                    <a href="/lecturer/reviews" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                        Ulasan
-                    </a>
-                </div>
-
-                <div class="nav-section">
                     <div class="nav-section-title">Lainnya</div>
                     <a href="/lecturer/settings" class="nav-item">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -796,10 +808,10 @@
 
             <div class="sidebar-footer">
                 <div class="user-profile">
-                    <div class="user-avatar" th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}"></div>
+                    <div class="user-avatar" th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}">BS</div>
                     <div class="user-info">
-                        <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}"></div>
-                        <div class="user-role" th:text="${role}"></div>
+                        <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}">Nama User</div>
+                        <div class="user-role" th:text="${role}">Lecturer</div>
                     </div>
                 </div>
             </div>
@@ -832,259 +844,215 @@
 
             <!-- Content Area -->
             <div class="content-area">
-                <!-- Filter Bar -->
-                <div class="filter-bar">
-                    <div class="search-box">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.3-4.3"></path>
-                        </svg>
-                        <input type="text" placeholder="Cari kursus..." id="searchInput">
+                <!-- Stats Row -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Kursus</div>
+                        <div class="stat-value" th:text="${totalCourses}">0</div>
                     </div>
-                    <select class="filter-select" id="statusFilter">
-                        <option value="">Semua Status</option>
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-                    <select class="filter-select" id="categoryFilter">
-                        <option value="">Semua Kategori</option>
-                        <option value="web">Web Development</option>
-                        <option value="mobile">Mobile Apps</option>
-                        <option value="data">Data Science</option>
-                        <option value="ml">Machine Learning</option>
-                    </select>
+                    <div class="stat-card">
+                        <div class="stat-label">Published</div>
+                        <div class="stat-value" th:text="${publishedCourses}">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Draft</div>
+                        <div class="stat-value" th:text="${draftCourses}">0</div>
+                    </div>
                 </div>
+
+                <!-- Filter Bar -->
+                <form id="filterForm" th:action="@{/lecturer/courses}" method="get">
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input type="text" name="search" placeholder="Cari kursus..." 
+                                   th:value="${searchQuery}" id="searchInput">
+                        </div>
+                        <select class="filter-select" name="status" id="statusFilter" onchange="this.form.submit()">
+                            <option value="">Semua Status</option>
+                            <option value="published" th:selected="${selectedStatus == 'published'}">Published</option>
+                            <option value="draft" th:selected="${selectedStatus == 'draft'}">Draft</option>
+                            <option value="suspended" th:selected="${selectedStatus == 'suspended'}">Suspended</option>
+                        </select>
+                        <select class="filter-select" name="category" id="categoryFilter" onchange="this.form.submit()">
+                            <option value="">Semua Kategori</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.slug}"
+                                    th:text="${cat.name}"
+                                    th:selected="${selectedCategory == cat.slug}">
+                            </option>
+                        </select>
+                        <!-- Hidden field untuk maintain page size -->
+                        <input type="hidden" name="size" th:value="${size}">
+                    </div>
+                </form>
 
                 <!-- Course Table -->
                 <div class="course-table-card">
-                    <table class="course-table">
-                        <thead>
-                            <tr>
-                                <th>Kursus</th>
-                                <th>Status</th>
-                                <th>Pelajar</th>
-                                <th>Rating</th>
-                                <th>Pendapatan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="course : ${courses}">
-                                <td>
-                                    <div class="course-cell">
-                                        <div class="course-thumb">
-                                            <img th:src="${course.thumbnail}" alt="Thumbnail">
+                    <!-- Jika ada kursus -->
+                    <div th:if="${#lists.size(courses) > 0}">
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>Kursus</th>
+                                    <th>Status</th>
+                                    <th>Pelajar</th>
+                                    <th>Rating</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="course : ${courses}">
+                                    <td>
+                                        <div class="course-cell">
+                                            <div class="course-thumb" th:classappend="${course.thumbnailUrl == null ? 'no-thumbnail' : ''}">
+                                                <img th:src="${course.thumbnailUrl != null} ? @{/files/view(path=${course.thumbnailUrl})} : '/images/default-course.png'" alt="Course Thumbnail">
+                                                <span th:if="${course.thumbnailUrl == null}">No Image</span>
+                                            </div>
+                                            <div class="course-details">
+                                                <h3 th:text="${course.title}">Judul Kursus</h3>
+                                                <p th:text="${course.categoryName}">Kategori</p>
+                                            </div>
                                         </div>
-                                        <div class="course-details">
-                                            <h3 th:text="${course.title}">Judul Kursus</h3>
-                                            <p th:text="${course.category}">Kategori</p>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge" 
+                                              th:classappend="${course.statusClass}"
+                                              th:text="${course.statusDisplay}">Status</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${course.formattedStudents}">0</span>
+                                    </td>
+                                    <td>
+                                        <div class="rating-cell">
+                                            <span class="rating-star">&#9733;</span>
+                                            <span class="rating-value" th:text="${course.formattedRating}">-</span>
+                                            <span class="rating-count" th:text="'(' + ${course.totalReviews} + ')'"></span>
                                         </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge" th:classappend="${'status-' + course.status}" th:text="${course.status}">Status</span></td>
-                                <td th:text="${course.students}">0</td>
-                                <td>
-                                    <div class="rating-cell">
-                                        <span class="rating-star">*</span>
-                                        <span class="rating-value" th:text="${course.rating}">0</span>
-                                        <span class="rating-count" th:text="'(' + ${course.reviewCount} + ')'">0</span>
-                                    </div>
-                                </td>
-                                <td th:text="'Rp ' + ${course.earnings}">Rp 0</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a th:href="@{/lecturer/courses/{id}/edit(id=${course.id})}" class="btn-action edit" title="Edit">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                        </a>
-                                        <button class="btn-action delete" title="Hapus" onclick="showDeleteModal(1)">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a th:href="@{/lecturer/courses/{id}/edit(id=${course.courseId})}" 
+                                               class="btn-action edit" title="Edit">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                </svg>
+                                            </a>
+                                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" 
+                                               class="btn-action" title="Lihat" target="_blank">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </a>
+                                            <button class="btn-action delete" title="Hapus" 
+                                                    th:data-course-id="${course.courseId}"
+                                                    th:data-course-title="${course.title}"
+                                                    onclick="showDeleteModal(this)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                            <!-- Dummy Data -->
-                            <tr>
-                                <td>
-                                    <div class="course-cell">
-                                        <div class="course-thumb">Thumb</div>
-                                        <div class="course-details">
-                                            <h3>Belajar Dasar Pemrograman JavaScript</h3>
-                                            <p>Web Development</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-published">Published</span></td>
-                                <td>1,234</td>
-                                <td>
-                                    <div class="rating-cell">
-                                        <span class="rating-star">*</span>
-                                        <span class="rating-value">4.8</span>
-                                        <span class="rating-count">(456)</span>
-                                    </div>
-                                </td>
-                                <td>Rp 8.250.000</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="/lecturer/courses/1/edit" class="btn-action edit" title="Edit">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                        </a>
-                                        <button class="btn-action delete" title="Hapus" onclick="showDeleteModal(1)">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                        <!-- Pagination -->
+                        <div class="pagination-wrapper" th:if="${totalPages > 0}">
+                            <div class="pagination-info">
+                                Menampilkan <span th:text="${startItem}">1</span>-<span th:text="${endItem}">10</span> 
+                                dari <span th:text="${totalItems}">0</span> kursus
+                            </div>
+                            <div class="pagination">
+                                <!-- Previous Button -->
+                                <a th:href="@{/lecturer/courses(page=${currentPage - 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                                   class="pagination-btn"
+                                   th:classappend="${currentPage == 0 ? 'disabled' : ''}"
+                                   th:if="${currentPage > 0}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="m15 18-6-6 6-6"></path>
+                                    </svg>
+                                </a>
+                                <button class="pagination-btn" disabled th:if="${currentPage == 0}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="m15 18-6-6 6-6"></path>
+                                    </svg>
+                                </button>
 
-                            <tr>
-                                <td>
-                                    <div class="course-cell">
-                                        <div class="course-thumb">Thumb</div>
-                                        <div class="course-details">
-                                            <h3>React.js untuk Pemula</h3>
-                                            <p>Web Development</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-published">Published</span></td>
-                                <td>856</td>
-                                <td>
-                                    <div class="rating-cell">
-                                        <span class="rating-star">*</span>
-                                        <span class="rating-value">4.9</span>
-                                        <span class="rating-count">(321)</span>
-                                    </div>
-                                </td>
-                                <td>Rp 5.120.000</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="/lecturer/courses/2/edit" class="btn-action edit" title="Edit">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                        </a>
-                                        <button class="btn-action delete" title="Hapus" onclick="showDeleteModal(2)">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                <!-- Page Numbers -->
+                                <!-- First page -->
+                                <a th:if="${currentPage > 2}" 
+                                   th:href="@{/lecturer/courses(page=0, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                                   class="pagination-btn">1</a>
+                                <span th:if="${currentPage > 3}" class="pagination-btn" style="border: none; cursor: default;">...</span>
 
-                            <tr>
-                                <td>
-                                    <div class="course-cell">
-                                        <div class="course-thumb">Thumb</div>
-                                        <div class="course-details">
-                                            <h3>Node.js Backend Development</h3>
-                                            <p>Web Development</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-draft">Draft</span></td>
-                                <td>0</td>
-                                <td>
-                                    <div class="rating-cell">
-                                        <span class="rating-star">*</span>
-                                        <span class="rating-value">-</span>
-                                        <span class="rating-count">(0)</span>
-                                    </div>
-                                </td>
-                                <td>Rp 0</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="/lecturer/courses/3/edit" class="btn-action edit" title="Edit">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                        </a>
-                                        <button class="btn-action delete" title="Hapus" onclick="showDeleteModal(3)">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                <!-- Page numbers using #numbers.sequence -->
+                                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                                    <a th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+                                       th:href="@{/lecturer/courses(page=${i}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                                       class="pagination-btn"
+                                       th:classappend="${i == currentPage ? 'active' : ''}"
+                                       th:text="${i + 1}">1</a>
+                                </th:block>
 
-                            <tr>
-                                <td>
-                                    <div class="course-cell">
-                                        <div class="course-thumb">Thumb</div>
-                                        <div class="course-details">
-                                            <h3>Python Data Analysis</h3>
-                                            <p>Data Science</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-published">Published</span></td>
-                                <td>567</td>
-                                <td>
-                                    <div class="rating-cell">
-                                        <span class="rating-star">*</span>
-                                        <span class="rating-value">4.7</span>
-                                        <span class="rating-count">(198)</span>
-                                    </div>
-                                </td>
-                                <td>Rp 2.080.000</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="/lecturer/courses/4/edit" class="btn-action edit" title="Edit">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg>
-                                        </a>
-                                        <button class="btn-action delete" title="Hapus" onclick="showDeleteModal(4)">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                <!-- Last page -->
+                                <span th:if="${currentPage < totalPages - 4}" class="pagination-btn" style="border: none; cursor: default;">...</span>
+                                <a th:if="${currentPage < totalPages - 3}" 
+                                   th:href="@{/lecturer/courses(page=${totalPages - 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                                   class="pagination-btn"
+                                   th:text="${totalPages}">Last</a>
 
-                    <!-- Pagination -->
-                    <div class="pagination-wrapper">
-                        <div class="pagination-info">
-                            Menampilkan 1-4 dari 12 kursus
+                                <!-- Next Button -->
+                                <a th:href="@{/lecturer/courses(page=${currentPage + 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                                   class="pagination-btn"
+                                   th:if="${currentPage < totalPages - 1}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="m9 18 6-6-6-6"></path>
+                                    </svg>
+                                </a>
+                                <button class="pagination-btn" disabled th:if="${currentPage >= totalPages - 1}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="m9 18 6-6-6-6"></path>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                        <div class="pagination">
-                            <button class="pagination-btn" disabled>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="m15 18-6-6 6-6"></path>
-                                </svg>
-                            </button>
-                            <button class="pagination-btn active">1</button>
-                            <button class="pagination-btn">2</button>
-                            <button class="pagination-btn">3</button>
-                            <button class="pagination-btn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="m9 18 6-6-6-6"></path>
-                                </svg>
-                            </button>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state" th:if="${#lists.size(courses) == 0}">
+                        <div class="empty-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
                         </div>
+                        <h3 class="empty-title">Belum Ada Kursus</h3>
+                        <p class="empty-desc" th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                            Tidak ditemukan kursus dengan kata kunci "<span th:text="${searchQuery}"></span>"
+                        </p>
+                        <p class="empty-desc" th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                            Mulai buat kursus pertamamu dan bagikan ilmu ke ribuan pelajar Indonesia
+                        </p>
+                        <a href="/lecturer/courses/create" class="btn-primary-custom" 
+                           th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14"></path>
+                                <path d="M5 12h14"></path>
+                            </svg>
+                            Buat Kursus Pertama
+                        </a>
+                        <a href="/lecturer/courses" class="btn-secondary" 
+                           th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                            Reset Filter
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1106,12 +1074,11 @@
                 <h3 class="modal-title">Hapus Kursus</h3>
             </div>
             <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus kursus ini? Tindakan ini tidak dapat dibatalkan dan semua data terkait akan dihapus permanen.</p>
+                <p>Apakah Anda yakin ingin menghapus kursus "<span id="deleteCourseTitle"></span>"? Tindakan ini tidak dapat dibatalkan dan semua data terkait akan dihapus permanen.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="hideDeleteModal()">Batal</button>
                 <form id="deleteForm" method="POST" style="display: inline;">
-                    <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="btn-danger">Hapus Kursus</button>
                 </form>
             </div>
@@ -1124,9 +1091,12 @@
             document.getElementById('sidebar').classList.toggle('open');
         }
 
-        function showDeleteModal(courseId) {
+        function showDeleteModal(button) {
+            var courseId = button.getAttribute('data-course-id');
+            var courseTitle = button.getAttribute('data-course-title');
             document.getElementById('deleteModal').classList.add('show');
             document.getElementById('deleteForm').action = '/lecturer/courses/' + courseId + '/delete';
+            document.getElementById('deleteCourseTitle').textContent = courseTitle;
         }
 
         function hideDeleteModal() {
@@ -1140,21 +1110,21 @@
             }
         });
 
-        // Search functionality
+        // Search with debounce
+        let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function(e) {
-            // Implement search logic or send to server
-            console.log('Searching:', e.target.value);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                document.getElementById('filterForm').submit();
+            }, 500);
         });
 
-        // Filter functionality
-        document.getElementById('statusFilter').addEventListener('change', function(e) {
-            // Implement filter logic or send to server
-            console.log('Status filter:', e.target.value);
-        });
-
-        document.getElementById('categoryFilter').addEventListener('change', function(e) {
-            // Implement filter logic or send to server
-            console.log('Category filter:', e.target.value);
+        // Submit form on Enter key in search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                document.getElementById('filterForm').submit();
+            }
         });
     </script>
 </body>

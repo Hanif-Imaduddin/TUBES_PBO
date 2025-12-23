@@ -10,6 +10,7 @@ package koding_muda_nusantara.koding_muda_belajar.repository;
  */
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import koding_muda_nusantara.koding_muda_belajar.model.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +32,5 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
     
     boolean existsByStudentUserIdAndCourseCourseId(Integer studentId, Integer courseId);
     
+    Optional<CartItem> findByStudentUserIdAndCourseCourseId(Integer studentId, Integer courseId);
 }

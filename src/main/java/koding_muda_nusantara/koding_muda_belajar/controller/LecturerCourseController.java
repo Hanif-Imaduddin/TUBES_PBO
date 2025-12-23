@@ -25,6 +25,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO;
+import koding_muda_nusantara.koding_muda_belajar.repository.CategoryRepository;
+import koding_muda_nusantara.koding_muda_belajar.service.LecturerCourseService;
+import org.springframework.data.domain.Page;
 
 @Controller
 @RequestMapping("/lecturer/courses")
@@ -38,6 +42,12 @@ public class LecturerCourseController {
 
     @Autowired
     private FileStorageService fileStorageService;
+    
+    @Autowired
+    private LecturerCourseService lecturerCourseService;
+    
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     // ==================== HELPER METHODS ====================
 
@@ -65,49 +75,85 @@ public class LecturerCourseController {
 
     /**
      * Menampilkan daftar kursus milik lecturer
+     * @param page
+     * @param size
+     * @param status
+     * @param category
+     * @param search
+     * @param model
+     * @param session
+     * @return 
      */
     @GetMapping
-    public String listCourses(
-            HttpSession session,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) String search,
+    public String courses(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
-        // Cek authentication
-        Lecturer lecturer = getLecturerFromSession(session);
-        if (lecturer == null) {
-            redirectAttributes.addFlashAttribute("error", "Silakan login sebagai lecturer terlebih dahulu");
+            HttpSession session) {
+        
+        // Cek session
+        Object userObj = session.getAttribute("user");
+        if (userObj == null || !(userObj instanceof Lecturer)) {
             return "redirect:/login";
         }
-
-        // Ambil daftar kursus dengan filter
-        List<Course> courses = courseService.getCoursesByLecturer(
-            lecturer.getUserId(), status, categoryId, search, page
-        );
-
-        // Ambil statistik
-        long totalCourses = courseService.countByLecturer(lecturer.getUserId());
-        long publishedCourses = courseService.countByLecturerAndStatus(lecturer.getUserId(), "published");
-        long draftCourses = courseService.countByLecturerAndStatus(lecturer.getUserId(), "draft");
-
-        // Ambil kategori untuk filter
-        List<Category> categories = categoryService.getAllActiveCategories();
-
+        
+        Lecturer lecturer = (Lecturer) userObj;
+        
+        // Ambil data courses dengan pagination
+        Page<CourseWithStatsDTO> coursePage = lecturerCourseService.getLecturerCourses(
+                lecturer.getUserId(), status, category, search, page, size);
+        
+        // Ambil semua kategori untuk filter
+        List<Category> categories = categoryRepository.findByIsActiveTrue();
+        
+        // Statistik
+        long totalCourses = lecturerCourseService.getTotalCourses(lecturer.getUserId());
+        long publishedCourses = lecturerCourseService.getPublishedCourses(lecturer.getUserId());
+        long draftCourses = lecturerCourseService.getDraftCourses(lecturer.getUserId());
+        
+        // Add to model
         model.addAttribute("user", lecturer);
-        model.addAttribute("courses", courses);
+        model.addAttribute("role", "Lecturer");
+        model.addAttribute("courses", coursePage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", coursePage.getTotalPages());
+        model.addAttribute("totalItems", coursePage.getTotalElements());
+        model.addAttribute("size", size);
         model.addAttribute("categories", categories);
+        
+        // Filter values untuk maintain state
+        model.addAttribute("selectedStatus", status != null ? status : "");
+        model.addAttribute("selectedCategory", category != null ? category : "");
+        model.addAttribute("searchQuery", search != null ? search : "");
+        
+        // Statistik
         model.addAttribute("totalCourses", totalCourses);
         model.addAttribute("publishedCourses", publishedCourses);
         model.addAttribute("draftCourses", draftCourses);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("selectedStatus", status);
-        model.addAttribute("selectedCategory", categoryId);
-        model.addAttribute("searchQuery", search);
-
+        
+        // Pagination info
+        int startItem = page * size + 1;
+        int endItem = Math.min((page + 1) * size, (int) coursePage.getTotalElements());
+        model.addAttribute("startItem", coursePage.getTotalElements() > 0 ? startItem : 0);
+        model.addAttribute("endItem", endItem);
+        
         return "lecturer/courses";
+    }
+    
+    @PostMapping("/{id}/delete")
+    public String deleteCourse(@PathVariable Integer id, HttpSession session) {
+        Object userObj = session.getAttribute("user");
+        if (userObj == null || !(userObj instanceof Lecturer)) {
+            return "redirect:/login";
+        }
+        
+        // Implement delete logic dengan validasi ownership
+        // courseService.deleteCourse(id, ((Lecturer) userObj).getUserId());
+        
+        return "redirect:/lecturer/courses";
     }
 
     // ==================== CREATE COURSE ====================

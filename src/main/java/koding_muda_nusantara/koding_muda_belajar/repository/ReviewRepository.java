@@ -23,4 +23,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     Double getAverageRatingByCourseId(@Param("courseId") int courseId);
     int countByCourseCourseId(int courseId);
     List<Review> findByCourseCourseId(int courseId);
+    
+    boolean existsByStudentUserIdAndCourseCourseId(Integer studentId, Integer courseId);
 }

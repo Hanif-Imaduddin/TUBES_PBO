@@ -16,6 +16,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import koding_muda_nusantara.koding_muda_belajar.enums.PaymentMethod;
 import koding_muda_nusantara.koding_muda_belajar.enums.PaymentStatus;
@@ -74,5 +75,16 @@ public class Transaction {
 
     // Relasi ke Item Transaksi (One Transaction -> Many Items)
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TransactionItem> items;
+    private List<TransactionItem> items = new ArrayList<>();
+    
+    public void addItem(TransactionItem item) {
+        items.add(item);
+        item.setTransaction(this);
+    }
+
+    public void removeItem(TransactionItem item) {
+        items.remove(item);
+        item.setTransaction(null);
+    }
+
 }

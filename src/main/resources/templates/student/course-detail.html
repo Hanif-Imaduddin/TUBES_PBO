@@ -807,6 +807,101 @@
             line-height: 1.7;
         }
         
+        .review-form-section {
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .review-form-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--color-text);
+        }
+
+        .review-form { display: flex; flex-direction: column; gap: 1.25rem; }
+        .form-group { display: flex; flex-direction: column; gap: .5rem; }
+        .form-label { font-size: .875rem; font-weight: 600; color: var(--color-text); }
+        .star-rating-input { display: flex; align-items: center; gap: .25rem; }
+
+        .star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: .25rem;
+            color: var(--color-border);
+            transition: var(--transition);
+        }
+
+        .star-btn:hover, .star-btn.active { color: var(--color-star); }
+        .rating-text { margin-left: .75rem; font-size: .875rem; color: var(--color-text-muted); }
+
+        .form-textarea {
+            width: 100%;
+            padding: .875rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: .9375rem;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 120px;
+            transition: var(--transition);
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+
+        .form-textarea::placeholder { color: var(--color-text-muted); }
+        .form-hint { font-size: .8125rem; color: var(--color-text-muted); }
+        .btn-submit-review { align-self: flex-start; padding: .75rem 1.5rem; }
+        .btn-submit-review:disabled { background: var(--color-text-muted); cursor: not-allowed; }
+
+        .review-info-message {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: .9375rem;
+            margin-bottom: 2rem;
+        }
+
+        .review-info-message.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .review-info-message.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .review-list-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--color-text);
+        }
+
+        .review-empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--color-text-muted);
+        }
+
+        .review-empty-state svg { margin-bottom: 1rem; opacity: 0.5; }
+        .review-empty-state p { font-size: 1rem; margin-bottom: .5rem; }
+        .review-empty-state span { font-size: .875rem; }
+        
         /* Responsive */
         @media (max-width: 1024px) {
             .hero-container {
@@ -1176,40 +1271,16 @@
                 <div class="reviews-header">
                     <h2 class="section-title">Ulasan Siswa</h2>
                 </div>
-                
-                <!-- Rating Overview -->
-                <div class="rating-overview">
-                    <div class="rating-big">
-                        <div class="rating-big-value" th:text="${courseAverageRating != null} ? ${#numbers.formatDecimal(courseAverageRating, 1, 1)} : '0.0'">4.8</div>
-                        <div class="rating-big-stars">
-                            <svg th:each="i : ${#numbers.sequence(1, 5)}" width="18" height="18" viewBox="0 0 24 24" 
-                                 th:classappend="${i <= (courseAverageRating != null ? courseAverageRating : 0)} ? 'star-filled' : 'star-empty'"
-                                 fill="currentColor">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                        </div>
-                        <div class="rating-big-count" th:text="${courseTotalReviews != null} ? ${courseTotalReviews} + ' ulasan' : '0 ulasan'">128 ulasan</div>
-                    </div>
-                    
-                    <div class="rating-bars">
-                        <div class="rating-bar-row" th:each="i : ${#numbers.sequence(5, 1, -1)}">
-                            <span class="rating-bar-label" th:text="${i} + ' bintang'">5 bintang</span>
-                            <div class="rating-bar-track">
-                                <div class="rating-bar-fill" style="width: 70%"></div>
-                            </div>
-                            <span class="rating-bar-count">70%</span>
-                        </div>
-                    </div>
-                </div>
+ 
+                <!-- Review Form -->
+                <th:block th:replace="~{student/fragments/review-form :: review-form}"></th:block>
                 
                 <!-- Review List -->
                 <div class="review-list">
                     <div th:each="review : ${reviews}" class="review-item">
                         <div class="review-header">
-                            <img th:src="${review.student.profilePictureUrl != null} ? ${review.student.profilePictureUrl} : '/images/default-avatar.png'" 
-                                 alt="Reviewer" class="review-avatar">
                             <div>
-                                <div class="review-author" th:text="${review.student.fullName}">Nama Reviewer</div>
+                                <div class="review-author" th:text="${review.student.firstName+' '+review.student.lastName}">Nama Reviewer</div>
                                 <div class="review-date" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">12 Des 2024</div>
                             </div>
                         </div>
@@ -1220,7 +1291,7 @@
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                             </svg>
                         </div>
-                        <div class="review-content" th:text="${review.comment}">
+                        <div class="review-content" th:text="${review.reviewText}">
                             Kursus yang sangat bagus dan mudah dipahami...
                         </div>
                     </div>
@@ -1258,6 +1329,72 @@
             var accordion = header.parentElement;
             accordion.classList.toggle('open');
         }
+        (function() {
+            var starBtns = document.querySelectorAll('.star-btn');
+            var ratingValue = document.getElementById('ratingValue');
+            var ratingText = document.getElementById('ratingText');
+            var reviewComment = document.getElementById('reviewComment');
+            var charCount = document.getElementById('charCount');
+            var btnSubmit = document.getElementById('btnSubmitReview');
+
+            if (!starBtns.length) return;
+
+            var currentRating = 0;
+            var ratingLabels = ['Pilih rating', 'Sangat Buruk', 'Buruk', 'Cukup', 'Bagus', 'Sangat Bagus'];
+
+            // Star hover and click
+            starBtns.forEach(function(btn) {
+                var value = parseInt(btn.getAttribute('data-value'));
+
+                btn.addEventListener('mouseenter', function() {
+                    highlightStars(value);
+                    ratingText.textContent = ratingLabels[value];
+                });
+
+                btn.addEventListener('mouseleave', function() {
+                    highlightStars(currentRating);
+                    ratingText.textContent = currentRating > 0 ? ratingLabels[currentRating] : 'Pilih rating';
+                });
+
+                btn.addEventListener('click', function() {
+                    currentRating = value;
+                    ratingValue.value = value;
+                    highlightStars(value);
+                    ratingText.textContent = ratingLabels[value];
+                    validateForm();
+                });
+            });
+
+            function highlightStars(count) {
+                starBtns.forEach(function(btn) {
+                    var val = parseInt(btn.getAttribute('data-value'));
+                    if (val <= count) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            if (reviewComment) {
+                reviewComment.addEventListener('input', function() {
+                    var len = this.value.length;
+                    charCount.textContent = len;
+                    validateForm();
+                });
+            }
+
+            function validateForm() {
+                var rating = parseInt(ratingValue.value);
+                var commentLen = reviewComment ? reviewComment.value.length : 0;
+
+                if (rating > 0 && commentLen >= 20) {
+                    btnSubmit.disabled = false;
+                } else {
+                    btnSubmit.disabled = true;
+                }
+            }
+        })();
     </script>
 </body>
 </html>
