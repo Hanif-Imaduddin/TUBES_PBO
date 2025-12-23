@@ -839,6 +839,53 @@
         .dropdown:hover .dropdown-toggle {
             pointer-events: auto;
         }
+        /* Rating Stars */
+        .rating-stars {
+            color: #fbbf24;
+            font-size: 0.875rem;
+            letter-spacing: -1px;
+        }
+
+        .star-filled {
+            color: #fbbf24;
+        }
+
+        .star-empty {
+            color: #d1d5db;
+        }
+
+        /* Course Card Link */
+        a.text-decoration-none .course-card {
+            cursor: pointer;
+        }
+
+        a.text-decoration-none:hover .course-card {
+            box-shadow: var(--shadow-md);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* Course Students */
+        .course-students {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 2rem;
+        }
+
+        .empty-state svg {
+            opacity: 0.5;
+        }
+
+        /* Price styling */
+        .course-price.text-success {
+            color: var(--color-success) !important;
+        }
     </style>
 </head>
 <body>
@@ -914,24 +961,23 @@
                     </div>
                     <div class="hero-stats">
                         <div class="stat-item">
-                            <div class="stat-number">50K+</div>
+                            <div class="stat-number" th:text="${totalStudents}">50K+</div>
                             <div class="stat-label">Pelajar Aktif</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number">200+</div>
+                            <div class="stat-number" th:text="${totalCourses}">200+</div>
                             <div class="stat-label">Kursus</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number">50+</div>
+                            <div class="stat-number" th:text="${totalLecturers}">50+</div>
                             <div class="stat-label">Pengajar Ahli</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="hero-image">
-                        <div class="hero-image-placeholder">
-                            Ilustrasi Hero
-                        </div>
+                        <img th:src="@{/images/hero.jpg}" 
+                         alt="Hero Image">
                     </div>
                 </div>
             </div>
@@ -962,7 +1008,7 @@
                 </p>
             </div>
             
-            <div class="row g-3">
+            <div class="row g-3 justify-content-center">
                 <div class="col-6 col-md-4 col-lg-2">
                     <div class="category-card">
                         <div class="category-icon">
@@ -972,19 +1018,7 @@
                             </svg>
                         </div>
                         <div class="category-name">Web Development</div>
-                        <div class="category-count">42 Kursus</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                                <path d="M12 18h.01"></path>
-                            </svg>
-                        </div>
-                        <div class="category-name">Mobile Apps</div>
-                        <div class="category-count">28 Kursus</div>
+                        <div class="category-count" th:text="${webCat.courseCount+' '+'Kursus'}">42 Kursus</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
@@ -997,7 +1031,7 @@
                             </svg>
                         </div>
                         <div class="category-name">Database</div>
-                        <div class="category-count">18 Kursus</div>
+                        <div class="category-count" th:text="${dataBaseCat.courseCount+' '+'Kursus'}">42 Kursus</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
@@ -1010,18 +1044,7 @@
                             </svg>
                         </div>
                         <div class="category-name">Data Science</div>
-                        <div class="category-count">24 Kursus</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                            </svg>
-                        </div>
-                        <div class="category-name">Machine Learning</div>
-                        <div class="category-count">15 Kursus</div>
+                        <div class="category-count" th:text="${dataCat.courseCount+' '+'Kursus'}">42 Kursus</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
@@ -1032,7 +1055,7 @@
                             </svg>
                         </div>
                         <div class="category-name">Cyber Security</div>
-                        <div class="category-count">12 Kursus</div>
+                        <div class="category-count" th:text="${securityCat.courseCount+' '+'Kursus'}">42 Kursus</div>
                     </div>
                 </div>
             </div>
@@ -1056,159 +1079,88 @@
                 </a>
             </div>
 
-            <div class="category-list">
-                <span class="category-pill active">Semua</span>
-                <span class="category-pill">Web Development</span>
-                <span class="category-pill">Mobile Apps</span>
-                <span class="category-pill">Data Science</span>
-                <span class="category-pill">Machine Learning</span>
-            </div>
-
+            <!-- Course Cards dengan Thymeleaf -->
             <div class="row g-4">
-                <!-- Course Card 1 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge bestseller">Bestseller</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Web Development</div>
-                            <h3 class="course-title">Belajar Dasar Pemrograman JavaScript</h3>
-                            <div class="course-instructor">Budi Santoso</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.8</span>
-                                <span class="rating-count">(1,234)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">12 Jam</span>
-                                <span class="course-meta-item">Pemula</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 199.000</span>
-                                    <span class="course-price-original">Rp 499.000</span>
+                <div class="col-md-6 col-lg-3" th:each="course : ${popularCourse}">
+                    <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="text-decoration-none">
+                        <div class="course-card">
+                            <div class="course-thumbnail">
+                                <img th:if="${course.thumbnailUrl != null}" 
+                                     th:src="@{/files/view(path=${course.thumbnailUrl})}" 
+                                     alt="Course Thumbnail">
+                                <div th:if="${course.thumbnailUrl == null}" class="course-thumbnail-placeholder">
+                                    <span th:text="${#strings.abbreviate(course.title, 20)}">Thumbnail</span>
                                 </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
+                            </div>
+                            <div class="course-content">
+                                <!-- Kategori -->
+                                <div class="course-category" th:text="${course.categoryName}">Web Development</div>
+
+                                <!-- Judul -->
+                                <h3 class="course-title" th:text="${course.title}">Belajar Dasar Pemrograman JavaScript</h3>
+
+                                <!-- Instructor - jika ada di DTO -->
+                                <div class="course-instructor" th:if="${course.lecturerName != null}" th:text="${course.lecturerName}">Instructor</div>
+
+                                <!-- Rating -->
+                                <div class="course-rating">
+                                    <span class="rating-value" th:text="${course.averageRating != null && course.averageRating > 0} ? ${#numbers.formatDecimal(course.averageRating, 1, 1)+'/5'} : '-'">4.8</span>
+                                    <span class="rating-count" th:text="|(${course.totalReviews})|">(1,234)</span>
+                                </div>
+
+                                <!-- Meta Info -->
+                                <div class="course-meta">
+                                    <!-- Durasi -->
+                                    <span class="course-meta-item" th:with="hours=${course.totalDuration / 60}, mins=${course.totalDuration % 60}">
+                                        <span th:if="${hours > 0}" th:text="${hours} + ' Jam'">12 Jam</span>
+                                        <span th:if="${hours == 0 && mins > 0}" th:text="${mins} + ' Menit'">30 Menit</span>
+                                        <span th:if="${hours == 0 && mins == 0}">-</span>
+                                    </span>
+
+                                    <!-- Level -->
+                                    <span class="course-meta-item" th:switch="${course.level}">
+                                        <span th:case="'beginner'">Pemula</span>
+                                        <span th:case="'intermediate'">Menengah</span>
+                                        <span th:case="'advanced'">Mahir</span>
+                                        <span th:case="*">-</span>
+                                    </span>
+
+                                    <!-- Total Lessons -->
+                                    <span class="course-meta-item" th:text="${course.totalLessons} + ' Materi'">10 Materi</span>
+                                </div>
+
+                                <!-- Footer dengan Harga -->
+                                <div class="course-footer">
+                                    <div>
+                                        <span th:if="${course.price == 0 || course.price == null}" class="course-price text-success">Gratis</span>
+                                        <span th:if="${course.price != null && course.price > 0}" class="course-price" th:text="'Rp ' + ${#numbers.formatInteger(course.price, 1, 'POINT')}">Rp 199.000</span>
+                                    </div>
+
+                                    <!-- Total Students -->
+                                    <span class="course-students text-muted" th:title="${course.totalStudents} + ' siswa terdaftar'">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        <span th:text="${course.totalStudents >= 1000} ? ${#numbers.formatDecimal(course.totalStudents / 1000.0, 1, 1)} + 'K' : ${course.totalStudents}">1.2K</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- Course Card 2 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge new">Baru</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Mobile Apps</div>
-                            <h3 class="course-title">Flutter: Membangun Aplikasi Android & iOS</h3>
-                            <div class="course-instructor">Dewi Anggraini</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.9</span>
-                                <span class="rating-count">(856)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">18 Jam</span>
-                                <span class="course-meta-item">Menengah</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 299.000</span>
-                                    <span class="course-price-original">Rp 599.000</span>
-                                </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Course Card 3 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Data Science</div>
-                            <h3 class="course-title">Python untuk Data Science dan Machine Learning</h3>
-                            <div class="course-instructor">Ahmad Fauzi</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.7</span>
-                                <span class="rating-count">(2,103)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">24 Jam</span>
-                                <span class="course-meta-item">Menengah</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 349.000</span>
-                                    <span class="course-price-original">Rp 799.000</span>
-                                </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Course Card 4 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge bestseller">Bestseller</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Web Development</div>
-                            <h3 class="course-title">Full Stack Web Developer dengan React & Node.js</h3>
-                            <div class="course-instructor">Rina Wijaya</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.9</span>
-                                <span class="rating-count">(1,567)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">32 Jam</span>
-                                <span class="course-meta-item">Mahir</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 449.000</span>
-                                    <span class="course-price-original">Rp 999.000</span>
-                                </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                <!-- Empty State jika tidak ada kursus -->
+                <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(popularCourse)}">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted mb-3">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        <h5 class="text-muted">Belum ada kursus tersedia</h5>
+                        <p class="text-muted small">Kursus akan segera hadir, nantikan ya!</p>
                     </div>
                 </div>
             </div>
@@ -1237,151 +1189,86 @@
             </div>
 
             <div class="row g-4">
-                <!-- New Course Card 1 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge new">Baru</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Database</div>
-                            <h3 class="course-title">MySQL: Dari Dasar hingga Mahir</h3>
-                            <div class="course-instructor">Hendra Kusuma</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.6</span>
-                                <span class="rating-count">(128)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">10 Jam</span>
-                                <span class="course-meta-item">Pemula</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 149.000</span>
-                                    <span class="course-price-original">Rp 349.000</span>
+                <div class="col-md-6 col-lg-3" th:each="course : ${recentCourse}">
+                    <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="text-decoration-none">
+                        <div class="course-card">
+                            <div class="course-thumbnail">
+                                <img th:if="${course.thumbnailUrl != null}" 
+                                     th:src="@{/files/view(path=${course.thumbnailUrl})}" 
+                                     alt="Course Thumbnail">
+                                <div th:if="${course.thumbnailUrl == null}" class="course-thumbnail-placeholder">
+                                    <span th:text="${#strings.abbreviate(course.title, 20)}">Thumbnail</span>
                                 </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
+                            </div>
+                            <div class="course-content">
+                                <!-- Kategori -->
+                                <div class="course-category" th:text="${course.categoryName}">Web Development</div>
+
+                                <!-- Judul -->
+                                <h3 class="course-title" th:text="${course.title}">Belajar Dasar Pemrograman JavaScript</h3>
+
+                                <!-- Instructor - jika ada di DTO -->
+                                <div class="course-instructor" th:if="${course.lecturerName != null}" th:text="${course.lecturerName}">Instructor</div>
+
+                                <!-- Rating -->
+                                <div class="course-rating">
+                                    <span class="rating-value" th:text="${course.averageRating != null && course.averageRating > 0} ? ${#numbers.formatDecimal(course.averageRating, 1, 1)+'/5'} : '-'">4.8</span>
+                                    <span class="rating-count" th:text="|(${course.totalReviews})|">(1,234)</span>
+                                </div>
+
+                                <!-- Meta Info -->
+                                <div class="course-meta">
+                                    <!-- Durasi -->
+                                    <span class="course-meta-item" th:with="hours=${course.totalDuration / 60}, mins=${course.totalDuration % 60}">
+                                        <span th:if="${hours > 0}" th:text="${hours} + ' Jam'">12 Jam</span>
+                                        <span th:if="${hours == 0 && mins > 0}" th:text="${mins} + ' Menit'">30 Menit</span>
+                                        <span th:if="${hours == 0 && mins == 0}">-</span>
+                                    </span>
+
+                                    <!-- Level -->
+                                    <span class="course-meta-item" th:switch="${course.level}">
+                                        <span th:case="'beginner'">Pemula</span>
+                                        <span th:case="'intermediate'">Menengah</span>
+                                        <span th:case="'advanced'">Mahir</span>
+                                        <span th:case="*">-</span>
+                                    </span>
+
+                                    <!-- Total Lessons -->
+                                    <span class="course-meta-item" th:text="${course.totalLessons} + ' Materi'">10 Materi</span>
+                                </div>
+
+                                <!-- Footer dengan Harga -->
+                                <div class="course-footer">
+                                    <div>
+                                        <span th:if="${course.price == 0 || course.price == null}" class="course-price text-success">Gratis</span>
+                                        <span th:if="${course.price != null && course.price > 0}" class="course-price" th:text="'Rp ' + ${#numbers.formatInteger(course.price, 1, 'POINT')}">Rp 199.000</span>
+                                    </div>
+
+                                    <!-- Total Students -->
+                                    <span class="course-students text-muted" th:title="${course.totalStudents} + ' siswa terdaftar'">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        <span th:text="${course.totalStudents >= 1000} ? ${#numbers.formatDecimal(course.totalStudents / 1000.0, 1, 1)} + 'K' : ${course.totalStudents}">1.2K</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- New Course Card 2 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge new">Baru</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Cyber Security</div>
-                            <h3 class="course-title">Ethical Hacking: Penetration Testing</h3>
-                            <div class="course-instructor">Rizky Pratama</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.8</span>
-                                <span class="rating-count">(76)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">15 Jam</span>
-                                <span class="course-meta-item">Mahir</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 399.000</span>
-                                    <span class="course-price-original">Rp 799.000</span>
-                                </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- New Course Card 3 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge new">Baru</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Web Development</div>
-                            <h3 class="course-title">Spring Boot: REST API Development</h3>
-                            <div class="course-instructor">Agus Setiawan</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.7</span>
-                                <span class="rating-count">(92)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">14 Jam</span>
-                                <span class="course-meta-item">Menengah</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 279.000</span>
-                                    <span class="course-price-original">Rp 549.000</span>
-                                </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- New Course Card 4 -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            <div class="course-thumbnail-placeholder">Thumbnail</div>
-                            <span class="course-badge new">Baru</span>
-                        </div>
-                        <div class="course-content">
-                            <div class="course-category">Machine Learning</div>
-                            <h3 class="course-title">Deep Learning dengan TensorFlow</h3>
-                            <div class="course-instructor">Siti Nurhaliza</div>
-                            <div class="course-rating">
-                                <span class="rating-stars">*****</span>
-                                <span class="rating-value">4.9</span>
-                                <span class="rating-count">(54)</span>
-                            </div>
-                            <div class="course-meta">
-                                <span class="course-meta-item">20 Jam</span>
-                                <span class="course-meta-item">Mahir</span>
-                            </div>
-                            <div class="course-footer">
-                                <div>
-                                    <span class="course-price">Rp 499.000</span>
-                                    <span class="course-price-original">Rp 999.000</span>
-                                </div>
-                                <button class="course-action">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                                        <path d="M3 6h18"></path>
-                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                <!-- Empty State jika tidak ada kursus -->
+                <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(recentCourse)}">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted mb-3">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        <h5 class="text-muted">Belum ada kursus tersedia</h5>
+                        <p class="text-muted small">Kursus akan segera hadir, nantikan ya!</p>
                     </div>
                 </div>
             </div>

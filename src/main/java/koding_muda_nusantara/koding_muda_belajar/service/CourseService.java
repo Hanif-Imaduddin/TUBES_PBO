@@ -18,10 +18,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseLevel;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseStatus;
 import koding_muda_nusantara.koding_muda_belajar.enums.LessonContentType;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -702,4 +707,143 @@ public class CourseService {
     public List<Section> getAllSections(int courseId){
         return sectionRepository.findByCourseCourseIdOrderBySortOrder(courseId);
     }
+    
+    public long getTotalCourses(){
+        return courseRepository.count();
+    }
+    
+    public List<CourseWithStatsDTO> getPopularCourse(){
+        return courseRepository.findPopularCoursesWithStatsAndLecturer(PageRequest.of(0,4));
+    }
+    
+    public List<CourseWithStatsDTO> getRecentCourse(){
+        return courseRepository.findRecentCoursesWithStatsAndLecturer(PageRequest.of(0,4));
+    }
+    
+    /**
+     * Mendapatkan kursus populer (berdasarkan jumlah student)
+     */
+    public List<CourseWithStatsDTO> getPopularCourses(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return courseRepository.findPopularCoursesWithStats(pageable);
+    }
+
+    /**
+     * Mendapatkan kursus terbaru
+     */
+    public List<CourseWithStatsDTO> getNewestCourses(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return courseRepository.findNewestCoursesWithStats(pageable);
+    }
+
+    /**
+     * Search kursus dengan filter dan pagination
+     */
+    public Page<CourseWithStatsDTO> searchCourses(
+            String keyword,
+            List<Integer> categoryIds,
+            List<String> levels,
+            Double minRating,
+            String sort,
+            int page,
+            int size
+    ) {
+        // Convert level strings ke enum
+        List<CourseLevel> courseLevels = null;
+        if (levels != null && !levels.isEmpty()) {
+            courseLevels = levels.stream()
+                    .map(level -> {
+                        try {
+                            return CourseLevel.valueOf(level.toLowerCase());
+                        } catch (IllegalArgumentException e) {
+                            return null;
+                        }
+                    })
+                    .filter(level -> level != null)
+                    .collect(Collectors.toList());
+            
+            if (courseLevels.isEmpty()) {
+                courseLevels = null;
+            }
+        }
+
+        switch (sort) {
+            case "popular" -> {
+                Pageable pageable = PageRequest.of(page, size);
+                
+                // Handle empty lists
+                List<Integer> catIds = (categoryIds != null && !categoryIds.isEmpty()) ? categoryIds : null;
+                String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+                
+                return courseRepository.searchPopularCoursesWithStats(
+                        searchKeyword,
+                        catIds,
+                        courseLevels,
+                        minRating,
+                        pageable
+                );
+            }
+            case "rating" -> {
+                Pageable pageable = PageRequest.of(page, size);
+                
+                // Handle empty lists
+                List<Integer> catIds = (categoryIds != null && !categoryIds.isEmpty()) ? categoryIds : null;
+                String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+                
+                return courseRepository.searchAvgRatingCoursesWithStats(
+                        searchKeyword,
+                        catIds,
+                        courseLevels,
+                        minRating,
+                        pageable
+                );
+            }
+            default -> {
+                // Buat Sort berdasarkan parameter
+                Sort sortOrder = createSort(sort);
+                Pageable pageable = PageRequest.of(page, size, sortOrder);
+                
+                // Handle empty lists
+                List<Integer> catIds = (categoryIds != null && !categoryIds.isEmpty()) ? categoryIds : null;
+                String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+                
+                return courseRepository.searchCoursesWithStats(
+                        searchKeyword,
+                        catIds,
+                        courseLevels,
+                        minRating,
+                        pageable
+                );
+            }
+        }
+    }
+
+    /**
+     * Membuat Sort object berdasarkan parameter sort
+     */
+    private Sort createSort(String sort) {
+        if (sort == null) {
+            return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+
+        switch (sort) {
+            case "price-low":
+                return Sort.by(Sort.Direction.ASC, "price");
+            case "price-high":
+                return Sort.by(Sort.Direction.DESC, "price");
+            case "newest":
+            default:
+                return Sort.by(Sort.Direction.DESC, "createdAt");
+        }
+    }
+
+    /**
+     * Mendapatkan kursus berdasarkan kategori
+     */
+    public Page<CourseWithStatsDTO> getCoursesByCategory(Integer categoryId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<Integer> categoryIds = List.of(categoryId);
+        return courseRepository.searchCoursesWithStats(null, categoryIds, null, null, pageable);
+    }
+
 }

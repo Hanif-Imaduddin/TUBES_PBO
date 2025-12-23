@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO;
+import koding_muda_nusantara.koding_muda_belajar.enums.CourseLevel;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -158,5 +159,222 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             @Param("search") String search,
             Pageable pageable);
     
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+       "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+       "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+       "cat.name, cat.slug, " +
+       "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+       "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+       "FROM Course c " +
+       "LEFT JOIN c.category cat " +
+       "LEFT JOIN c.lecturer l " +
+       "LEFT JOIN User u ON l.userId = u.userId " +
+       "LEFT JOIN Enrollment e ON e.course = c " +
+       "LEFT JOIN Review r ON r.course = c " +
+       "WHERE c.status = 'published' " +
+       "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+       "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+       "cat.name, cat.slug, u.firstName, u.lastName " +
+       "ORDER BY COUNT(DISTINCT e.student) DESC")
+    List<CourseWithStatsDTO> findPopularCoursesWithStatsAndLecturer(Pageable pageable);
+    
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+       "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+       "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+       "cat.name, cat.slug, " +
+       "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+       "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+       "FROM Course c " +
+       "LEFT JOIN c.category cat " +
+       "LEFT JOIN c.lecturer l " +
+       "LEFT JOIN User u ON l.userId = u.userId " +
+       "LEFT JOIN Enrollment e ON e.course = c " +
+       "LEFT JOIN Review r ON r.course = c " +
+       "WHERE c.status = 'published' " +
+       "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+       "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+       "cat.name, cat.slug, u.firstName, u.lastName " +
+       "ORDER BY c.createdAt DESC")
+    List<CourseWithStatsDTO> findRecentCoursesWithStatsAndLecturer(Pageable pageable);
+    
     Long countByLecturerUserIdAndStatus(Integer lecturerId, CourseStatus status);
+    
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.status = 'published' " +
+           "AND (:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "     OR LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:categoryIds IS NULL OR cat.categoryId IN :categoryIds) " +
+           "AND (:levels IS NULL OR c.level IN :levels) " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName " +
+           "HAVING (:minRating IS NULL OR COALESCE(AVG(CAST(r.rating AS double)), 0.0) >= :minRating)")
+    Page<CourseWithStatsDTO> searchCoursesWithStats(
+            @Param("keyword") String keyword,
+            @Param("categoryIds") List<Integer> categoryIds,
+            @Param("levels") List<CourseLevel> levels,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+    
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.status = 'published' " +
+           "AND (:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "     OR LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:categoryIds IS NULL OR cat.categoryId IN :categoryIds) " +
+           "AND (:levels IS NULL OR c.level IN :levels) " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName " +
+           "HAVING (:minRating IS NULL OR COALESCE(AVG(CAST(r.rating AS double)), 0.0) >= :minRating)"+
+           "ORDER BY COUNT(DISTINCT e.student) DESC")
+    Page<CourseWithStatsDTO> searchPopularCoursesWithStats(
+            @Param("keyword") String keyword,
+            @Param("categoryIds") List<Integer> categoryIds,
+            @Param("levels") List<CourseLevel> levels,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+    
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.status = 'published' " +
+           "AND (:keyword IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "     OR LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:categoryIds IS NULL OR cat.categoryId IN :categoryIds) " +
+           "AND (:levels IS NULL OR c.level IN :levels) " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName " +
+           "HAVING (:minRating IS NULL OR COALESCE(AVG(CAST(r.rating AS double)), 0.0) >= :minRating)"+
+           "ORDER BY COALESCE(AVG(CAST(r.rating AS double)), 0.0) DESC")
+    Page<CourseWithStatsDTO> searchAvgRatingCoursesWithStats(
+            @Param("keyword") String keyword,
+            @Param("categoryIds") List<Integer> categoryIds,
+            @Param("levels") List<CourseLevel> levels,
+            @Param("minRating") Double minRating,
+            Pageable pageable
+    );
+
+    /**
+     * Mendapatkan kursus populer (berdasarkan jumlah student)
+     */
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.status = 'published' " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName " +
+           "ORDER BY COUNT(DISTINCT e.student) DESC")
+    List<CourseWithStatsDTO> findPopularCoursesWithStats(Pageable pageable);
+
+    /**
+     * Mendapatkan kursus terbaru
+     */
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.status = 'published' " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName " +
+           "ORDER BY c.createdAt DESC")
+    List<CourseWithStatsDTO> findNewestCoursesWithStats(Pageable pageable);
+
+    /**
+     * Mendapatkan detail kursus berdasarkan slug
+     * @param slug
+     * @return 
+     */
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.slug = :slug " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName")
+    Optional<CourseWithStatsDTO> findCourseWithStatsBySlug(@Param("slug") String slug);
+
+    /**
+     * Mendapatkan detail kursus berdasarkan ID
+     * @param courseId
+     * @return 
+     */
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO(" +
+           "c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, " +
+           "CONCAT(u.firstName, ' ', COALESCE(u.lastName, '')), " +
+           "COUNT(DISTINCT e.student), COALESCE(AVG(CAST(r.rating AS double)), 0.0), COUNT(DISTINCT r.id)) " +
+           "FROM Course c " +
+           "LEFT JOIN c.category cat " +
+           "LEFT JOIN c.lecturer l " +
+           "LEFT JOIN User u ON l.userId = u.userId " +
+           "LEFT JOIN Enrollment e ON e.course = c " +
+           "LEFT JOIN Review r ON r.course = c " +
+           "WHERE c.courseId = :courseId " +
+           "GROUP BY c.courseId, c.title, c.slug, c.shortDescription, c.thumbnailUrl, " +
+           "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
+           "cat.name, cat.slug, u.firstName, u.lastName")
+    Optional<CourseWithStatsDTO> findCourseWithStatsById(@Param("courseId") Integer courseId);
 }
