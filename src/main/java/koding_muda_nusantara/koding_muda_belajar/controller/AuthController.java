@@ -13,6 +13,12 @@ import koding_muda_nusantara.koding_muda_belajar.dto.RegisterRequest;
 import koding_muda_nusantara.koding_muda_belajar.model.User;
 import koding_muda_nusantara.koding_muda_belajar.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
+import koding_muda_nusantara.koding_muda_belajar.dto.CategoryDTO;
+import koding_muda_nusantara.koding_muda_belajar.dto.CourseWithStatsDTO;
+import koding_muda_nusantara.koding_muda_belajar.model.Category;
+import koding_muda_nusantara.koding_muda_belajar.service.CategoryService;
+import koding_muda_nusantara.koding_muda_belajar.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +30,12 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private CourseService courseService;
+    
+    @Autowired
+    private CategoryService categoryService;
 
     // ==================== HOME ====================
     
@@ -31,8 +43,29 @@ public class AuthController {
     public String home(Model model,HttpSession session) {
         User user = (User) session.getAttribute("user");
         
+        long totalStudents = userService.getTotalStudents();
+        long totalLecturers = userService.getTotalLecturers();
+        long totalCourses = courseService.getTotalCourses();
+        
+        CategoryDTO webCat = categoryService.getCategoryWithPublishedCourseCount("web-development");
+        CategoryDTO dataCat = categoryService.getCategoryWithPublishedCourseCount("data-science");
+        CategoryDTO securityCat = categoryService.getCategoryWithPublishedCourseCount("cyber-security");
+        CategoryDTO dataBaseCat = categoryService.getCategoryWithPublishedCourseCount("database");
+
+        List<CourseWithStatsDTO> popularCourse = courseService.getPopularCourse();
+        List<CourseWithStatsDTO> recentCourse = courseService.getRecentCourse();
+        
         model.addAttribute("user", user);
         model.addAttribute("role", session.getAttribute("userRole"));
+        model.addAttribute("totalStudents",totalStudents);
+        model.addAttribute("totalCourses", totalCourses);
+        model.addAttribute("totalLecturers", totalLecturers);
+        model.addAttribute("webCat", webCat);
+        model.addAttribute("dataCat",dataCat );
+        model.addAttribute("securityCat", securityCat);
+        model.addAttribute("dataBaseCat", dataBaseCat);
+        model.addAttribute("popularCourse", popularCourse);
+        model.addAttribute("recentCourse", recentCourse);
         
         return "index";
     }

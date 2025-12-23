@@ -23,6 +23,7 @@ public class CourseWithStatsDTO {
     private Integer totalDuration;
     private String categoryName;
     private String categorySlug;
+    private String lecturerName;
     
     // Statistik
     private Long totalStudents;
@@ -57,11 +58,42 @@ public class CourseWithStatsDTO {
         this.totalReviews = totalReviews != null ? totalReviews : 0L;
     }
     
+    public CourseWithStatsDTO(Integer courseId, String title, String slug, 
+                               String shortDescription, String thumbnailUrl,
+                               BigDecimal price, BigDecimal discountPrice,
+                               CourseLevel level, CourseStatus status,
+                               Integer totalLessons, Integer totalDuration,
+                               String categoryName, String categorySlug,
+                               String lecturerName,
+                               Long totalStudents, Double averageRating, 
+                               Long totalReviews) {
+        this.courseId = courseId;
+        this.title = title;
+        this.slug = slug;
+        this.shortDescription = shortDescription;
+        this.thumbnailUrl = thumbnailUrl;
+        this.price = price;
+        this.discountPrice = discountPrice;
+        this.level = level;
+        this.status = status;
+        this.totalLessons = totalLessons;
+        this.totalDuration = totalDuration;
+        this.categoryName = categoryName;
+        this.categorySlug = categorySlug;
+        this.lecturerName = lecturerName;
+        this.totalStudents = totalStudents != null ? totalStudents : 0L;
+        this.averageRating = averageRating != null ? averageRating : 0.0;
+        this.totalReviews = totalReviews != null ? totalReviews : 0L;
+    }
+    
     public CourseWithStatsDTO() {}
     
     // Getters and Setters
     public Integer getCourseId() { return courseId; }
     public void setCourseId(Integer courseId) { this.courseId = courseId; }
+    
+    public String getLecturerName() { return lecturerName; }
+    public void setLecturerName(String lecturerName) { this.lecturerName = lecturerName; }
     
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

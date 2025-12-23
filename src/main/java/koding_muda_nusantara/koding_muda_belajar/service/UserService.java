@@ -131,4 +131,12 @@ public class UserService {
     public int getCartCount(User user){
         return cartItemRepository.countByStudentUserId(user.getUserId());
     }
+    
+    public long getTotalStudents(){
+        return studentRepository.count();
+    }
+    
+    public long getTotalLecturers(){
+        return lecturerRepository.count();
+    }
 }
