@@ -84,4 +84,33 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
            "GROUP BY c.categoryId, c.name, c.slug, c.icon")
     Optional<CategoryDTO> findCategoryWithStatsById(@Param("categoryId") Integer categoryId);
 
+    
+    // Find by name
+    Optional<Category> findByName(String name);
+    
+    // Check if name exists
+    boolean existsByName(String name);
+    
+    /**
+     * Get all categories with course count
+     * @return 
+     */
+    @Query("SELECT c, COUNT(course.courseId) as courseCount " +
+           "FROM Category c " +
+           "LEFT JOIN Course course ON course.category.categoryId = c.categoryId " +
+           "GROUP BY c.categoryId " +
+           "ORDER BY c.name ASC")
+    List<Object[]> findAllWithCourseCount();
+    
+    /**
+     * Get active categories with course count
+     * @return 
+     */
+    @Query("SELECT c, COUNT(course.courseId) as courseCount " +
+           "FROM Category c " +
+           "LEFT JOIN Course course ON course.category.categoryId = c.categoryId " +
+           "WHERE c.isActive = true " +
+           "GROUP BY c.categoryId " +
+           "ORDER BY c.name ASC")
+    List<Object[]> findActiveWithCourseCount();
 }

@@ -106,6 +106,9 @@ public class AuthController {
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("loginRequest", loginRequest);
+            System.out.println("=============DEBUG LOGIN=================");
+            System.out.println(e.getMessage());
+            System.out.println("=============DEBUG LOGIN=================");
             return "login";
         }
     }

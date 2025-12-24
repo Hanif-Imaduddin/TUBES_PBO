@@ -12,7 +12,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "students")
-@PrimaryKeyJoinColumn(name = "admin_id")
+@PrimaryKeyJoinColumn(name = "student_id")
 public class Student extends User {
 
     public Student() {}

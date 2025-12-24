@@ -31,6 +31,9 @@ public class UserService {
 
     @Autowired
     private StudentRepository studentRepository;
+    
+    @Autowired
+    private AdminRepository adminRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -92,7 +95,9 @@ public class UserService {
         if (optionalUser.isEmpty()) {
             throw new RuntimeException("Email tidak ditemukan");
         }
-
+        System.out.println("============DEBUG============");
+        System.out.println("Dapet akun");
+        System.out.println("============DEBUG============");
         User user = optionalUser.get();
 
         // Verifikasi password
@@ -111,23 +116,46 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    /**
+     * PERBAIKAN: Gunakan repository.existsById() bukan instanceof
+     * Ini menghindari error "persister is null" pada JOINED inheritance
+     */
+    @Transactional(readOnly = true)
     public String getUserRole(User user) {
-        if (user instanceof Lecturer) {
-            return "Lecturer";
-        } else if (user instanceof Student) {
-            return "Student";
-        } else if (user instanceof Admin){
+        if (user == null) {
+            return "Unknown";
+        }
+        
+        Integer userId = user.getUserId();
+        
+        // Cek urutan: Admin dulu, karena Admin adalah role khusus
+        if (adminRepository.existsById(userId)) {
             return "Admin";
         }
+        
+        if (lecturerRepository.existsById(userId)) {
+            return "Lecturer";
+        }
+        
+        if (studentRepository.existsById(userId)) {
+            return "Student";
+        }
+        
         return "Unknown";
     }
     
+    /**
+     * PERBAIKAN: Gunakan repository untuk cek, bukan instanceof
+     */
+    @Transactional(readOnly = true)
     public Student getStudentFromSession(HttpSession session) {
         User user = (User) session.getAttribute("user");
-        if (user instanceof Student student) {
-            return student;
+        if (user == null) {
+            return null;
         }
-        return null;
+        
+        // Gunakan repository untuk fetch Student yang benar
+        return studentRepository.findById(user.getUserId()).orElse(null);
     }
     
     public int getCartCount(User user){
@@ -142,7 +170,36 @@ public class UserService {
         return lecturerRepository.count();
     }
     
+    /**
+     * PERBAIKAN: Gunakan repository.existsById() bukan instanceof
+     */
+    @Transactional(readOnly = true)
     public boolean isAdmin(User user){
-        return user instanceof Admin;
+        if (user == null) {
+            return false;
+        }
+        return adminRepository.existsById(user.getUserId());
+    }
+    
+    /**
+     * Helper method untuk cek apakah user adalah Lecturer
+     */
+    @Transactional(readOnly = true)
+    public boolean isLecturer(User user){
+        if (user == null) {
+            return false;
+        }
+        return lecturerRepository.existsById(user.getUserId());
+    }
+    
+    /**
+     * Helper method untuk cek apakah user adalah Student
+     */
+    @Transactional(readOnly = true)
+    public boolean isStudent(User user){
+        if (user == null) {
+            return false;
+        }
+        return studentRepository.existsById(user.getUserId());
     }
 }
