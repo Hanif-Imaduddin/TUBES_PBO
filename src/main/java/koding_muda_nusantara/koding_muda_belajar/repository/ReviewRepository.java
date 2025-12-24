@@ -5,9 +5,11 @@
 package koding_muda_nusantara.koding_muda_belajar.repository;
 
 import java.util.List;
+import koding_muda_nusantara.koding_muda_belajar.dto.ReviewDTO;
 import koding_muda_nusantara.koding_muda_belajar.model.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,13 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<Review> findByCourseCourseId(int courseId);
     
     boolean existsByStudentUserIdAndCourseCourseId(Integer studentId, Integer courseId);
+    
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.ReviewDTO(" +
+       "r.id, u.firstName, u.lastName, c.title, c.slug, r.rating, r.reviewText, r.createdAt) " +
+       "FROM Review r " +
+       "JOIN r.student s " +
+       "JOIN User u ON u.userId = s.userId " +
+       "JOIN r.course c " +
+       "ORDER BY r.createdAt DESC")
+    List<ReviewDTO> findRecentReviewDTOs(Pageable pageable);
 }

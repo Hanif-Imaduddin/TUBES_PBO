@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Category Modal Fragment -->
+<div class="modal-overlay" id="categoryModal" th:fragment="categoryModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="categoryModalTitle">Tambah Kategori</h3>
+            <button class="modal-close" onclick="closeModal('categoryModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId" name="categoryId">
+                <div class="mb-3">
+                    <label class="form-label">Nama Kategori</label>
+                    <input type="text" class="form-control" id="categoryName" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Slug</label>
+                    <input type="text" class="form-control" id="categorySlug" name="slug" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Deskripsi</label>
+                    <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="categoryStatus" name="isActive">
+                        <option value="true">Aktif</option>
+                        <option value="false">Nonaktif</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-secondary" onclick="closeModal('categoryModal')">Batal</button>
+            <button class="btn btn-primary" onclick="saveCategory()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Course Status Modal Fragment -->
+<div class="modal-overlay" id="courseStatusModal" th:fragment="courseStatusModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Ubah Status Kursus</h3>
+            <button class="modal-close" onclick="closeModal('courseStatusModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="courseStatusForm">
+                <input type="hidden" id="courseStatusId" name="courseId">
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="courseStatusValue" name="status">
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-secondary" onclick="closeModal('courseStatusModal')">Batal</button>
+            <button class="btn btn-primary" onclick="saveCourseStatus()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- User Modal Fragment -->
+<div class="modal-overlay" id="userModal" th:fragment="userModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="userModalTitle">Tambah Pengguna</h3>
+            <button class="modal-close" onclick="closeModal('userModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="userForm">
+                <input type="hidden" id="userId" name="userId">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label class="form-label">Nama Depan</label>
+                            <input type="text" class="form-control" id="userFirstName" name="firstName" required>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label class="form-label">Nama Belakang</label>
+                            <input type="text" class="form-control" id="userLastName" name="lastName">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" id="userUsername" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="userEmail" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="userPassword" name="password" placeholder="Kosongkan jika tidak ingin mengubah">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" id="userRole" name="role">
+                        <option value="student">Student</option>
+                        <option value="lecturer">Lecturer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-secondary" onclick="closeModal('userModal')">Batal</button>
+            <button class="btn btn-primary" onclick="saveUser()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal Fragment -->
+<div class="modal-overlay" id="deleteModal" th:fragment="deleteModal">
+    <div class="modal" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Konfirmasi Hapus</h3>
+            <button class="modal-close" onclick="closeModal('deleteModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="deleteMessage">Apakah Anda yakin ingin menghapus item ini?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-secondary" onclick="closeModal('deleteModal')">Batal</button>
+            <button class="btn btn-danger" onclick="confirmDelete()">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container Fragment -->
+<div class="toast-container" id="toastContainer" th:fragment="toastContainer"></div>
+
+</html>

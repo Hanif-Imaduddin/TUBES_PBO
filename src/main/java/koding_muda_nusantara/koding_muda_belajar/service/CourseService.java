@@ -846,4 +846,11 @@ public class CourseService {
         return courseRepository.searchCoursesWithStats(null, categoryIds, null, null, pageable);
     }
 
+    public long countPublishedCourse(){
+        return courseRepository.countByStatus(CourseStatus.published);
+    }
+    
+    public long countDraftCourse(){
+        return courseRepository.countByStatus(CourseStatus.draft);
+    }
 }

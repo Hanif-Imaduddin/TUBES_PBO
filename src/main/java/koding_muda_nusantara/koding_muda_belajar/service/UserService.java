@@ -116,6 +116,8 @@ public class UserService {
             return "Lecturer";
         } else if (user instanceof Student) {
             return "Student";
+        } else if (user instanceof Admin){
+            return "Admin";
         }
         return "Unknown";
     }
@@ -138,5 +140,9 @@ public class UserService {
     
     public long getTotalLecturers(){
         return lecturerRepository.count();
+    }
+    
+    public boolean isAdmin(User user){
+        return user instanceof Admin;
     }
 }
