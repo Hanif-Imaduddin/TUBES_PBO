@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pengguna - Admin Dikoding Muda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}" />
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar Fragment -->
+        <th:block th:replace="~{admin/fragments/admin-sidebar :: sidebar('users')}"></th:block>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header Fragment -->
+            <th:block th:replace="~{admin/fragments/admin-header :: header('Manajemen Pengguna')}"></th:block>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" th:text="${totalStudents != null ? totalStudents : 0}">0</div>
+                                <div class="stat-label">Total Student</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" th:text="${totalLecturers != null ? totalLecturers : 0}">0</div>
+                                <div class="stat-label">Total Lecturer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon yellow">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" th:text="${totalAdmins != null ? totalAdmins : 0}">0</div>
+                                <div class="stat-label">Total Admin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Daftar Pengguna</h3>
+                        <button class="btn btn-primary" onclick="openAddUserModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Tambah Pengguna
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Toolbar -->
+                        <div class="toolbar">
+                            <div class="search-box">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.3-4.3"></path>
+                                </svg>
+                                <input type="text" id="userSearch" placeholder="Cari pengguna..." onkeyup="filterTable('usersTable', this.value)">
+                            </div>
+                            <div class="filter-group">
+                                <select class="form-select form-select-sm" id="userRoleFilter" onchange="filterByRole('usersTable', this.value)">
+                                    <option value="">Semua Role</option>
+                                    <option value="student">Student</option>
+                                    <option value="lecturer">Lecturer</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="usersTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Pengguna</th>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Bergabung</th>
+                                        <th style="width: 120px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="u : ${users}" th:data-role="${u.role}">
+                                        <td>
+                                            <div class="table-user">
+                                                <div class="table-avatar" th:text="${#strings.substring(u.firstName, 0, 1) + (#strings.isEmpty(u.lastName) ? '' : #strings.substring(u.lastName, 0, 1))}">U</div>
+                                                <div class="table-user-info">
+                                                    <div class="table-user-name" th:text="${u.firstName + ' ' + (u.lastName != null ? u.lastName : '')}">Nama User</div>
+                                                    <div class="table-user-email" th:text="${u.email}">email@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td th:text="${u.username}">username</td>
+                                        <td>
+                                            <span class="role-badge" th:classappend="${u.role}" th:text="${u.role}">role</span>
+                                        </td>
+                                        <td th:text="${u.joinDate != null ? #dates.format(u.joinDate, 'dd MMM yyyy') : '-'}">01 Jan 2025</td>
+                                        <td>
+                                            <div class="action-btns">
+                                                <button class="action-btn edit" th:onclick="'editUser(' + ${u.userId} + ')'" title="Edit">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button class="action-btn delete" th:onclick="'deleteItem(\'user\', ' + ${u.userId} + ')'" title="Hapus">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Empty state -->
+                                    <tr th:if="${users == null || users.isEmpty()}">
+                                        <td colspan="5" class="text-center py-4 text-muted">Belum ada pengguna</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <nav th:if="${totalPages != null && totalPages > 1}">
+                            <ul class="pagination justify-content-center mb-0">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1})}">Sebelumnya</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/users(page=${i})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1})}">Selanjutnya</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Panel Fragment -->
+    <th:block th:replace="~{admin/fragments/admin-header :: notifications}"></th:block>
+
+    <!-- User Modal -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: userModal}"></th:block>
+
+    <!-- Delete Modal -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: deleteModal}"></th:block>
+
+    <!-- Toast Container -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: toastContainer}"></th:block>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
+    <script>
+        // User-specific functions
+        function openAddUserModal() {
+            document.getElementById('userModalTitle').textContent = 'Tambah Pengguna';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userPassword').placeholder = 'Masukkan password';
+            document.getElementById('userPassword').required = true;
+            openModal('userModal');
+        }
+
+        function editUser(userId) {
+            document.getElementById('userModalTitle').textContent = 'Edit Pengguna';
+            document.getElementById('userId').value = userId;
+            document.getElementById('userPassword').placeholder = 'Kosongkan jika tidak ingin mengubah';
+            document.getElementById('userPassword').required = false;
+            
+            fetch('/api/admin/users/' + userId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('userFirstName').value = data.firstName;
+                    document.getElementById('userLastName').value = data.lastName || '';
+                    document.getElementById('userUsername').value = data.username;
+                    document.getElementById('userEmail').value = data.email;
+                    document.getElementById('userRole').value = data.role;
+                    openModal('userModal');
+                })
+                .catch(error => {
+                    showToast('Gagal memuat data pengguna', 'error');
+                });
+        }
+
+        function saveUser() {
+            const userId = document.getElementById('userId').value;
+            const data = {
+                firstName: document.getElementById('userFirstName').value,
+                lastName: document.getElementById('userLastName').value,
+                username: document.getElementById('userUsername').value,
+                email: document.getElementById('userEmail').value,
+                role: document.getElementById('userRole').value
+            };
+
+            const password = document.getElementById('userPassword').value;
+            if (password) {
+                data.password = password;
+            }
+
+            if (userId) {
+                data.userId = userId;
+            }
+
+            const method = userId ? 'PUT' : 'POST';
+            const url = userId ? '/api/admin/users/' + userId : '/api/admin/users';
+            
+            fetch(url, { 
+                method: method, 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(data) 
+            })
+            .then(response => { 
+                if (response.ok) { 
+                    showToast('Pengguna berhasil disimpan', 'success'); 
+                    closeModal('userModal'); 
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Gagal menyimpan pengguna');
+                    });
+                }
+            })
+            .catch(error => {
+                showToast(error.message || 'Terjadi kesalahan', 'error');
+            });
+        }
+
+        function filterByRole(tableId, role) {
+            const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+            rows.forEach(row => {
+                const rowRole = row.getAttribute('data-role');
+                row.style.display = !role || rowRole === role ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

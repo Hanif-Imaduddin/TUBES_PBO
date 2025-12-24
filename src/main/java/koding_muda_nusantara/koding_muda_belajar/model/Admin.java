@@ -11,13 +11,13 @@ package koding_muda_nusantara.koding_muda_belajar.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "students")
+@Table(name = "admins")
 @PrimaryKeyJoinColumn(name = "admin_id")
-public class Student extends User {
+public class Admin extends User {
 
-    public Student() {}
+    public Admin() {}
 
-    public Student(String firstName, String lastName, String username, String email, String passwordHash) {
+    public Admin(String firstName, String lastName, String username, String email, String passwordHash) {
         super(firstName, lastName, username, email, passwordHash);
     }
 }

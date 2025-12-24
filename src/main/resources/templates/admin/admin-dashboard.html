@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Dikoding Muda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}" />
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar Fragment -->
+        <th:block th:replace="~{admin/fragments/admin-sidebar :: sidebar('dashboard')}"></th:block>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header Fragment -->
+            <th:block th:replace="~{admin/fragments/admin-header :: header('Dashboard')}"></th:block>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" th:text="${totalUsers != null ? totalUsers : 0}">0</div>
+                            <div class="stat-label">Total Pengguna</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" th:text="${totalCourses != null ? totalCourses : 0}">0</div>
+                            <div class="stat-label">Total Kursus</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" th:text="${totalLecturers != null ? totalLecturers : 0}">0</div>
+                            <div class="stat-label">Total Pengajar</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Recent Reviews -->
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Review Terbaru</h3>
+                                <a th:href="@{/admin/reviews}" class="btn btn-outline-secondary btn-sm">Lihat Semua</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Review List -->
+                                <div class="review-list">
+                                    <a th:each="review : ${recentReviews}" 
+                                       th:href="@{/courses/{slug}(slug=${review.courseSlug})}" 
+                                       class="review-item">
+                                        <div class="review-header">
+                                            <div class="review-user">
+                                                <div class="review-avatar" th:text="${#strings.substring(review.studentFirstName, 0, 1) + (#strings.isEmpty(review.studentLastName) ? '' : #strings.substring(review.studentLastName, 0, 1))}">U</div>
+                                                <div class="review-user-info">
+                                                    <div class="review-user-name" th:text="${review.studentFirstName + ' ' + (review.studentLastName != null ? review.studentLastName : '')}">Nama User</div>
+                                                    <div class="review-course-title" th:text="${review.courseTitle}">Nama Kursus</div>
+                                                </div>
+                                            </div>
+                                            <div class="review-rating">
+                                                <span class="rating-stars">
+                                                    <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                                          th:class="${i <= review.rating} ? 'star filled' : 'star'">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+                                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                        </svg>
+                                                    </span>
+                                                </span>
+                                                <span class="rating-value" th:text="${review.rating + '.0'}">5.0</span>
+                                            </div>
+                                        </div>
+                                        <div class="review-content" th:if="${review.reviewText != null && !review.reviewText.isEmpty()}">
+                                            <p th:text="${#strings.abbreviate(review.reviewText, 150)}">Review text content...</p>
+                                        </div>
+                                        <div class="review-meta">
+                                            <span class="review-date" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy HH:mm')}">01 Jan 2025</span>
+                                            <span class="review-link-hint">Klik untuk melihat kursus</span>
+                                        </div>
+                                    </a>
+                                    
+                                    <!-- Empty state -->
+                                    <div class="review-empty" th:if="${recentReviews == null || recentReviews.isEmpty()}">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                        <p>Belum ada review</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Ringkasan</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Student</span>
+                                    <strong th:text="${totalStudents != null ? totalStudents : 0}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Lecturer</span>
+                                    <strong th:text="${totalLecturers != null ? totalLecturers : 0}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Kursus Published</span>
+                                    <strong th:text="${publishedCourses != null ? publishedCourses : 0}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Kursus Draft</span>
+                                    <strong th:text="${draftCourses != null ? draftCourses : 0}">0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span class="text-muted">Transaksi Pending</span>
+                                    <strong th:text="${pendingTransactions != null ? pendingTransactions : 0}">0</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Aksi Cepat</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a th:href="@{/admin/users}" class="btn btn-outline-primary">Kelola Pengguna</a>
+                                    <a th:href="@{/admin/courses}" class="btn btn-outline-primary">Kelola Kursus</a>
+                                    <a th:href="@{/admin/categories}" class="btn btn-outline-primary">Kelola Kategori</a>
+                                    <a th:href="@{/admin/transactions}" class="btn btn-outline-primary">Lihat Transaksi</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: toastContainer}"></th:block>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
+</body>
+</html>

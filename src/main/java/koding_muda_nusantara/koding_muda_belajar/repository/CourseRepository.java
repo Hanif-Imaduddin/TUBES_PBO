@@ -377,4 +377,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
            "c.price, c.discountPrice, c.level, c.status, c.totalLessons, c.totalDuration, " +
            "cat.name, cat.slug, u.firstName, u.lastName")
     Optional<CourseWithStatsDTO> findCourseWithStatsById(@Param("courseId") Integer courseId);
+    
+    long countByStatus(CourseStatus status);
 }

@@ -82,4 +82,8 @@ public class TransactionService {
     public List<TransactionItem> getAllItemsById(int transactionId){
         return transactionItemRepository.findByTransactionId(transactionId);
     }
+    
+    public long countPendingTransactions(){
+        return transactionRepository.countByPaymentStatus(PaymentStatus.pending);
+    }
 }

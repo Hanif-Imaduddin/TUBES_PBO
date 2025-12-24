@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Admin Header Fragment -->
+<header class="main-header" th:fragment="header(pageTitle)">
+    <div class="header-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <h1 class="page-title-header" th:text="${pageTitle}">Dashboard</h1>
+    </div>
+    <div class="header-right">
+        <div class="user-dropdown dropdown">
+            <div class="dropdown-toggle" data-bs-toggle="dropdown">
+                <div class="user-avatar" th:text="${user != null ? #strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1) : 'AD'}">AD</div>
+                <span class="user-name" th:text="${user != null ? user.firstName : 'Admin'}">Admin</span>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" th:href="@{/admin/profile}">Profil</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" th:href="@{/logout}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+</html>
