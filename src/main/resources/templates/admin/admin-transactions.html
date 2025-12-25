@@ -19,6 +19,7 @@
             <th:block th:replace="~{admin/fragments/admin-header :: header('Transaksi')}"></th:block>
 
             <div class="content-area">
+                <!-- Statistics Cards -->
                 <div class="row mb-4">
                     <div class="col-md-3">
                         <div class="stat-card">
@@ -77,37 +78,45 @@
                     </div>
                 </div>
 
+                <!-- Transaction Table Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Riwayat Transaksi</h3>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="exportTransactions()">Export</button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="exportTransactions()">Export CSV</button>
                     </div>
                     <div class="card-body">
+                        <!-- Toolbar -->
                         <div class="toolbar">
-                            <div class="search-box">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
-                                </svg>
-                                <input type="text" id="transactionSearch" placeholder="Cari kode transaksi..." onkeyup="filterTable('transactionsTable', this.value)">
-                            </div>
+                            <form action="/admin/transactions" method="get" class="d-flex gap-2 flex-grow-1">
+                                <div class="search-box">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.3-4.3"></path>
+                                    </svg>
+                                    <input type="text" name="search" th:value="${search}" placeholder="Cari kode transaksi atau nama...">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">Cari</button>
+                            </form>
                             <div class="filter-group">
-                                <select class="form-select form-select-sm" id="transactionStatusFilter" onchange="filterByPaymentStatus('transactionsTable', this.value)">
+                                <select class="form-select form-select-sm" id="statusFilter" onchange="applyStatusFilter(this.value)">
                                     <option value="">Semua Status</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="paid">Paid</option>
-                                    <option value="failed">Failed</option>
-                                    <option value="refunded">Refunded</option>
+                                    <option value="pending" th:selected="${statusFilter == 'pending'}">Pending</option>
+                                    <option value="paid" th:selected="${statusFilter == 'paid'}">Paid</option>
+                                    <option value="failed" th:selected="${statusFilter == 'failed'}">Failed</option>
+                                    <option value="refunded" th:selected="${statusFilter == 'refunded'}">Refunded</option>
+                                    <option value="expired" th:selected="${statusFilter == 'expired'}">Expired</option>
                                 </select>
-                                <select class="form-select form-select-sm" id="transactionTypeFilter" onchange="filterByType('transactionsTable', this.value)">
+                                <select class="form-select form-select-sm" id="typeFilter" onchange="applyTypeFilter(this.value)">
                                     <option value="">Semua Tipe</option>
-                                    <option value="purchase">Purchase</option>
-                                    <option value="topup">Top Up</option>
-                                    <option value="refund">Refund</option>
+                                    <option value="purchase" th:selected="${typeFilter == 'purchase'}">Purchase</option>
+                                    <option value="subscription" th:selected="${typeFilter == 'subscription'}">Subscription</option>
+                                    <option value="topup" th:selected="${typeFilter == 'topup'}">Top Up</option>
+                                    <option value="refund" th:selected="${typeFilter == 'refund'}">Refund</option>
                                 </select>
                             </div>
                         </div>
 
+                        <!-- Table -->
                         <div class="table-responsive">
                             <table class="table table-hover" id="transactionsTable">
                                 <thead class="table-light">
@@ -123,22 +132,43 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="trx : ${transactions}" th:data-status="${trx.paymentStatus}" th:data-type="${trx.transactionType}">
+                                    <tr th:each="trx : ${transactions}">
                                         <td><strong th:text="${trx.transactionCode}">#TRX001</strong></td>
                                         <td>
                                             <div class="table-user">
-                                                <div class="table-avatar" th:text="${#strings.substring(trx.student.firstName, 0, 1)}">U</div>
+                                                <div class="table-avatar" th:text="${trx.studentInitials}">U</div>
                                                 <div class="table-user-info">
-                                                    <div class="table-user-name" th:text="${trx.student.firstName + ' ' + (trx.student.lastName != null ? trx.student.lastName : '')}">Nama</div>
-                                                    <div class="table-user-email" th:text="${trx.student.email}">email</div>
+                                                    <div class="table-user-name" th:text="${trx.studentName}">Nama</div>
+                                                    <div class="table-user-email" th:text="${trx.studentEmail}">email</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span class="badge bg-secondary" th:text="${trx.transactionType}">purchase</span></td>
-                                        <td th:text="${trx.paymentMethod}">balance</td>
-                                        <td th:text="'Rp ' + ${#numbers.formatInteger(trx.amount, 3, 'POINT')}">Rp 0</td>
-                                        <td><span class="status-badge" th:classappend="${trx.paymentStatus == 'paid' ? 'published' : 'draft'}" th:text="${trx.paymentStatus}">status</span></td>
-                                        <td th:text="${#temporals.format(trx.createdAt, 'dd MMM yyyy')}">01 Jan 2025</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${trx.transactionType.name() == 'purchase' ? 'bg-primary' : 
+                                                                    trx.transactionType.name() == 'topup' ? 'bg-info' : 
+                                                                    trx.transactionType.name() == 'refund' ? 'bg-warning' : 'bg-secondary'}"
+                                                  th:text="${trx.transactionType}">purchase</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${trx.paymentMethod.name() == 'balance' ? 'Saldo' : 
+                                                            trx.paymentMethod.name() == 'bank_transfer' ? 'Transfer Bank' : 
+                                                            trx.paymentMethod.name() == 'ewallet' ? 'E-Wallet' : 
+                                                            trx.paymentMethod.name() == 'credit_card' ? 'Kartu Kredit' : trx.paymentMethod}">balance</span>
+                                        </td>
+                                        <td class="fw-semibold" th:text="'Rp ' + ${#numbers.formatInteger(trx.amount, 3, 'POINT')}">Rp 0</td>
+                                        <td>
+                                            <span class="status-badge" 
+                                                  th:classappend="${trx.paymentStatus.name() == 'paid' ? 'published' : 
+                                                                    trx.paymentStatus.name() == 'pending' ? 'draft' : 
+                                                                    trx.paymentStatus.name() == 'failed' ? 'suspended' : 
+                                                                    trx.paymentStatus.name() == 'refunded' ? 'draft' : 'suspended'}" 
+                                                  th:text="${trx.paymentStatus.name() == 'paid' ? 'Berhasil' : 
+                                                            trx.paymentStatus.name() == 'pending' ? 'Pending' : 
+                                                            trx.paymentStatus.name() == 'failed' ? 'Gagal' : 
+                                                            trx.paymentStatus.name() == 'refunded' ? 'Refund' : 'Expired'}">status</span>
+                                        </td>
+                                        <td th:text="${#temporals.format(trx.createdAt, 'dd MMM yyyy HH:mm')}">01 Jan 2025</td>
                                         <td>
                                             <div class="action-btns">
                                                 <button class="action-btn" th:onclick="'viewTransaction(' + ${trx.id} + ')'" title="Detail">
@@ -147,7 +177,10 @@
                                                         <circle cx="12" cy="12" r="3"></circle>
                                                     </svg>
                                                 </button>
-                                                <button class="action-btn edit" th:if="${trx.paymentStatus == 'pending'}" th:onclick="'updateTransactionStatus(' + ${trx.id} + ')'" title="Update">
+                                                <button class="action-btn edit" 
+                                                        th:if="${trx.paymentStatus.name() == 'pending'}" 
+                                                        th:onclick="'updateTransactionStatus(' + ${trx.id} + ')'" 
+                                                        title="Update Status">
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -163,27 +196,45 @@
                             </table>
                         </div>
 
-                        <nav th:if="${totalPages != null && totalPages > 1}">
+                        <!-- Pagination -->
+                        <nav th:if="${totalPages != null && totalPages > 1}" class="mt-4">
                             <ul class="pagination justify-content-center mb-0">
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/transactions(page=${currentPage - 1})}">Sebelumnya</a>
+                                    <a class="page-link" 
+                                       th:href="@{/admin/transactions(page=${currentPage - 1}, status=${statusFilter}, type=${typeFilter}, search=${search})}">
+                                        Sebelumnya
+                                    </a>
                                 </li>
-                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-                                    <a class="page-link" th:href="@{/admin/transactions(page=${i})}" th:text="${i + 1}">1</a>
-                                </li>
+                                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                                    <li class="page-item" th:classappend="${i == currentPage} ? 'active'" 
+                                        th:if="${i == 0 || i == totalPages - 1 || (i >= currentPage - 2 && i <= currentPage + 2)}">
+                                        <a class="page-link" 
+                                           th:href="@{/admin/transactions(page=${i}, status=${statusFilter}, type=${typeFilter}, search=${search})}" 
+                                           th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item disabled" 
+                                        th:if="${(i == currentPage - 3 && i > 0) || (i == currentPage + 3 && i < totalPages - 1)}">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                </th:block>
                                 <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/transactions(page=${currentPage + 1})}">Selanjutnya</a>
+                                    <a class="page-link" 
+                                       th:href="@{/admin/transactions(page=${currentPage + 1}, status=${statusFilter}, type=${typeFilter}, search=${search})}">
+                                        Selanjutnya
+                                    </a>
                                 </li>
                             </ul>
                         </nav>
+
+                        <!-- Result info -->
+                        <div class="text-center text-muted small mt-2" th:if="${totalElements != null}">
+                            Menampilkan <span th:text="${transactions.size()}">0</span> dari <span th:text="${totalElements}">0</span> transaksi
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <th:block th:replace="~{admin/fragments/admin-header :: notifications}"></th:block>
-
     <!-- Transaction Status Modal -->
     <div class="modal-overlay" id="transactionStatusModal">
         <div class="modal">
@@ -198,20 +249,21 @@
                         <label class="form-label">Status Pembayaran</label>
                         <select class="form-select" id="transactionStatusValue">
                             <option value="pending">Pending</option>
-                            <option value="paid">Paid</option>
-                            <option value="failed">Failed</option>
+                            <option value="paid">Paid (Berhasil)</option>
+                            <option value="failed">Failed (Gagal)</option>
                             <option value="refunded">Refunded</option>
+                            <option value="expired">Expired</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Catatan</label>
-                        <textarea class="form-control" id="transactionNotes" rows="3"></textarea>
+                        <label class="form-label">Catatan Admin</label>
+                        <textarea class="form-control" id="transactionNotes" rows="3" placeholder="Tambahkan catatan..."></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" onclick="closeModal('transactionStatusModal')">Batal</button>
-                <button class="btn btn-primary" onclick="saveTransactionStatus()">Simpan</button>
+                <button class="btn btn-primary" onclick="saveTransactionStatus()">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -223,7 +275,9 @@
                 <h3 class="modal-title">Detail Transaksi</h3>
                 <button class="modal-close" onclick="closeModal('transactionDetailModal')">X</button>
             </div>
-            <div class="modal-body" id="transactionDetailContent"></div>
+            <div class="modal-body" id="transactionDetailContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary" onclick="closeModal('transactionDetailModal')">Tutup</button>
             </div>
@@ -235,60 +289,216 @@
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/admin-common.js}"></script>
     <script>
+        // View transaction detail
         function viewTransaction(transactionId) {
             fetch('/api/admin/transactions/' + transactionId)
-                .then(r => r.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Transaction not found');
+                    return response.json();
+                })
                 .then(data => {
-                    let itemsHtml = '';
+                    let content = '';
+                    
+                    // Transaction code
+                    content += '<div class="mb-3">';
+                    content += '<label class="text-muted small d-block">Kode Transaksi</label>';
+                    content += '<div class="fw-bold fs-5">' + data.transactionCode + '</div>';
+                    content += '</div>';
+                    
+                    // User info row
+                    content += '<div class="row mb-3">';
+                    content += '<div class="col-6">';
+                    content += '<label class="text-muted small d-block">Pengguna</label>';
+                    content += '<div class="fw-semibold">' + data.studentName + '</div>';
+                    content += '<div class="small text-muted">' + data.studentEmail + '</div>';
+                    content += '</div>';
+                    content += '<div class="col-6">';
+                    content += '<label class="text-muted small d-block">Status</label>';
+                    let statusClass = data.paymentStatus === 'paid' ? 'published' : 
+                                     data.paymentStatus === 'pending' ? 'draft' : 'suspended';
+                    let statusText = data.paymentStatus === 'paid' ? 'Berhasil' : 
+                                    data.paymentStatus === 'pending' ? 'Pending' : 
+                                    data.paymentStatus === 'failed' ? 'Gagal' : 
+                                    data.paymentStatus === 'refunded' ? 'Refund' : 'Expired';
+                    content += '<span class="status-badge ' + statusClass + '">' + statusText + '</span>';
+                    content += '</div>';
+                    content += '</div>';
+                    
+                    // Type and method row
+                    content += '<div class="row mb-3">';
+                    content += '<div class="col-6">';
+                    content += '<label class="text-muted small d-block">Tipe Transaksi</label>';
+                    content += '<div>' + data.transactionType + '</div>';
+                    content += '</div>';
+                    content += '<div class="col-6">';
+                    content += '<label class="text-muted small d-block">Metode Pembayaran</label>';
+                    let methodText = data.paymentMethod === 'balance' ? 'Saldo' : 
+                                    data.paymentMethod === 'bank_transfer' ? 'Transfer Bank' : 
+                                    data.paymentMethod === 'ewallet' ? 'E-Wallet' : 
+                                    data.paymentMethod === 'credit_card' ? 'Kartu Kredit' : data.paymentMethod;
+                    content += '<div>' + methodText + '</div>';
+                    content += '</div>';
+                    content += '</div>';
+                    
+                    // Amount
+                    content += '<div class="mb-3">';
+                    content += '<label class="text-muted small d-block">Total Pembayaran</label>';
+                    content += '<div class="fs-4 fw-bold text-primary">Rp ' + new Intl.NumberFormat('id-ID').format(data.amount) + '</div>';
+                    content += '</div>';
+                    
+                    // Items
                     if (data.items && data.items.length > 0) {
-                        itemsHtml = '<div class="mb-3"><label class="text-muted small">Item</label><ul class="list-group">';
+                        content += '<div class="mb-3">';
+                        content += '<label class="text-muted small d-block mb-2">Item Transaksi</label>';
+                        content += '<ul class="list-group">';
                         data.items.forEach(item => {
-                            itemsHtml += '<li class="list-group-item d-flex justify-content-between"><span>' + item.course.title + '</span><span>Rp ' + new Intl.NumberFormat('id-ID').format(item.price) + '</span></li>';
+                            content += '<li class="list-group-item d-flex justify-content-between align-items-center">';
+                            content += '<span>' + item.courseTitle + '</span>';
+                            content += '<span class="fw-semibold">Rp ' + new Intl.NumberFormat('id-ID').format(item.price) + '</span>';
+                            content += '</li>';
                         });
-                        itemsHtml += '</ul></div>';
+                        content += '</ul>';
+                        content += '</div>';
                     }
-                    document.getElementById('transactionDetailContent').innerHTML = 
-                        '<div class="mb-3"><label class="text-muted small">Kode</label><div class="fw-bold">' + data.transactionCode + '</div></div>' +
-                        '<div class="row mb-3"><div class="col-6"><label class="text-muted small">Pengguna</label><div>' + data.student.firstName + ' ' + (data.student.lastName || '') + '</div></div>' +
-                        '<div class="col-6"><label class="text-muted small">Status</label><div><span class="status-badge ' + (data.paymentStatus === 'paid' ? 'published' : 'draft') + '">' + data.paymentStatus + '</span></div></div></div>' +
-                        '<div class="mb-3"><label class="text-muted small">Jumlah</label><div class="fs-4 fw-bold text-primary">Rp ' + new Intl.NumberFormat('id-ID').format(data.amount) + '</div></div>' +
-                        itemsHtml;
+                    
+                    // Dates row
+                    content += '<div class="row mb-3">';
+                    content += '<div class="col-6">';
+                    content += '<label class="text-muted small d-block">Tanggal Dibuat</label>';
+                    content += '<div class="small">' + formatDateTime(data.createdAt) + '</div>';
+                    content += '</div>';
+                    if (data.paidAt) {
+                        content += '<div class="col-6">';
+                        content += '<label class="text-muted small d-block">Tanggal Bayar</label>';
+                        content += '<div class="small">' + formatDateTime(data.paidAt) + '</div>';
+                        content += '</div>';
+                    }
+                    content += '</div>';
+                    
+                    // Notes
+                    if (data.notes) {
+                        content += '<div class="mb-3">';
+                        content += '<label class="text-muted small d-block">Catatan</label>';
+                        content += '<div class="small bg-light p-2 rounded" style="white-space: pre-wrap;">' + data.notes + '</div>';
+                        content += '</div>';
+                    }
+                    
+                    document.getElementById('transactionDetailContent').innerHTML = content;
                     openModal('transactionDetailModal');
                 })
-                .catch(() => showToast('Gagal memuat detail', 'error'));
+                .catch(error => {
+                    showToast('Gagal memuat detail transaksi', 'error');
+                    console.error(error);
+                });
         }
 
+        // Update transaction status
         function updateTransactionStatus(transactionId) {
             document.getElementById('transactionStatusId').value = transactionId;
+            document.getElementById('transactionStatusValue').value = 'pending';
+            document.getElementById('transactionNotes').value = '';
             openModal('transactionStatusModal');
         }
 
+        // Save transaction status
         function saveTransactionStatus() {
             const id = document.getElementById('transactionStatusId').value;
-            fetch('/api/admin/transactions/' + id + '/status', { 
-                method: 'PUT', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ status: document.getElementById('transactionStatusValue').value, notes: document.getElementById('transactionNotes').value }) 
-            }).then(r => { 
-                if (r.ok) { showToast('Status berhasil diubah', 'success'); closeModal('transactionStatusModal'); setTimeout(() => location.reload(), 1000); } 
-                else showToast('Gagal mengubah status', 'error'); 
+            const status = document.getElementById('transactionStatusValue').value;
+            const notes = document.getElementById('transactionNotes').value;
+
+            fetch('/api/admin/transactions/' + id + '/status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: status,
+                    notes: notes
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update status');
+                return response.json();
+            })
+            .then(data => {
+                showToast('Status transaksi berhasil diubah', 'success');
+                closeModal('transactionStatusModal');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(error => {
+                showToast('Gagal mengubah status transaksi', 'error');
+                console.error(error);
             });
         }
 
-        function filterByPaymentStatus(tableId, status) {
-            document.querySelectorAll('#' + tableId + ' tbody tr').forEach(row => {
-                row.style.display = !status || row.getAttribute('data-status') === status ? '' : 'none';
-            });
+        // Apply status filter
+        function applyStatusFilter(status) {
+            const url = new URL(window.location.href);
+            if (status) {
+                url.searchParams.set('status', status);
+                url.searchParams.delete('type');
+            } else {
+                url.searchParams.delete('status');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
         }
 
-        function filterByType(tableId, type) {
-            document.querySelectorAll('#' + tableId + ' tbody tr').forEach(row => {
-                row.style.display = !type || row.getAttribute('data-type') === type ? '' : 'none';
-            });
+        // Apply type filter
+        function applyTypeFilter(type) {
+            const url = new URL(window.location.href);
+            if (type) {
+                url.searchParams.set('type', type);
+                url.searchParams.delete('status');
+            } else {
+                url.searchParams.delete('type');
+            }
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
         }
 
+        // Export transactions
         function exportTransactions() {
             window.location.href = '/api/admin/transactions/export';
+        }
+
+        // Format date time
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            const options = { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        // Open modal
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Show toast notification
+        function showToast(message, type) {
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast show align-items-center text-white border-0 ' + 
+                             (type === 'success' ? 'bg-success' : 'bg-danger');
+            toast.innerHTML = '<div class="d-flex"><div class="toast-body">' + message + '</div>' +
+                             '<button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button></div>';
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 5000);
         }
     </script>
 </body>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Kategori - Admin Dikoding Muda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}" />
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar Fragment -->
+        <th:block th:replace="~{admin/fragments/admin-sidebar :: sidebar('categories')}"></th:block>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header Fragment -->
+            <th:block th:replace="~{admin/fragments/admin-header :: header('Manajemen Kategori')}"></th:block>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Daftar Kategori</h3>
+                        <button class="btn btn-primary" onclick="openAddCategoryModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Tambah Kategori
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Toolbar -->
+                        <div class="toolbar">
+                            <div class="search-box">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.3-4.3"></path>
+                                </svg>
+                                <input type="text" id="categorySearch" placeholder="Cari kategori..." onkeyup="filterTable('categoriesTable', this.value)">
+                            </div>
+                            <div class="filter-group">
+                                <select class="form-select form-select-sm" id="categoryStatusFilter" onchange="filterByActiveStatus('categoriesTable', this.value)">
+                                    <option value="">Semua Status</option>
+                                    <option value="active">Aktif</option>
+                                    <option value="inactive">Nonaktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="categoriesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 60px;">ID</th>
+                                        <th>Nama</th>
+                                        <th>Slug</th>
+                                        <th>Deskripsi</th>
+                                        <th>Jumlah Kursus</th>
+                                        <th>Status</th>
+                                        <th style="width: 120px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="category : ${categories}" th:data-status="${category.isActive ? 'active' : 'inactive'}">
+                                        <td th:text="${category.categoryId}">#1</td>
+                                        <td>
+                                            <strong th:text="${category.name}">Nama Kategori</strong>
+                                        </td>
+                                        <td>
+                                            <code th:text="${category.slug}">slug-kategori</code>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted" th:text="${category.description != null ? #strings.abbreviate(category.description, 50) : '-'}">Deskripsi</span>
+                                        </td>
+                                        <td th:text="${category.courseCount != null ? category.courseCount : 0}">0</td>
+                                        <td>
+                                            <span class="status-badge" th:classappend="${category.isActive ? 'active' : 'inactive'}" th:text="${category.isActive ? 'Aktif' : 'Nonaktif'}">Aktif</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-btns">
+                                                <button class="action-btn edit" th:onclick="'editCategory(' + ${category.categoryId} + ')'" title="Edit">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button class="action-btn delete" th:onclick="'deleteItem(\'category\', ' + ${category.categoryId} + ')'" title="Hapus">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Empty state -->
+                                    <tr th:if="${categories == null || categories.isEmpty()}">
+                                        <td colspan="7" class="text-center py-4 text-muted">Belum ada kategori</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Category Modal -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: categoryModal}"></th:block>
+
+    <!-- Delete Modal -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: deleteModal}"></th:block>
+
+    <!-- Toast Container -->
+    <th:block th:replace="~{admin/fragments/admin-modals :: toastContainer}"></th:block>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/admin-common.js}"></script>
+    <script>
+        // Category-specific functions
+        function openAddCategoryModal() {
+            document.getElementById('categoryModalTitle').textContent = 'Tambah Kategori';
+            document.getElementById('categoryForm').reset();
+            document.getElementById('categoryId').value = '';
+            openModal('categoryModal');
+        }
+
+        function editCategory(categoryId) {
+            document.getElementById('categoryModalTitle').textContent = 'Edit Kategori';
+            document.getElementById('categoryId').value = categoryId;
+            
+            fetch('/api/admin/categories/' + categoryId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('categoryName').value = data.name;
+                    document.getElementById('categorySlug').value = data.slug;
+                    document.getElementById('categoryDescription').value = data.description || '';
+                    document.getElementById('categoryStatus').value = data.isActive.toString();
+                    openModal('categoryModal');
+                })
+                .catch(error => {
+                    showToast('Gagal memuat data kategori', 'error');
+                });
+        }
+
+        function saveCategory() {
+            const categoryId = document.getElementById('categoryId').value;
+            const data = {
+                name: document.getElementById('categoryName').value,
+                slug: document.getElementById('categorySlug').value,
+                description: document.getElementById('categoryDescription').value,
+                isActive: document.getElementById('categoryStatus').value === 'true'
+            };
+
+            if (categoryId) {
+                data.categoryId = categoryId;
+            }
+
+            const method = categoryId ? 'PUT' : 'POST';
+            const url = categoryId ? '/api/admin/categories/' + categoryId : '/api/admin/categories';
+            
+            fetch(url, { 
+                method: method, 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(data) 
+            })
+            .then(response => { 
+                if (response.ok) { 
+                    showToast('Kategori berhasil disimpan', 'success'); 
+                    closeModal('categoryModal'); 
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Gagal menyimpan kategori', 'error'); 
+                }
+            })
+            .catch(error => {
+                showToast('Terjadi kesalahan', 'error');
+            });
+        }
+
+        // Auto-generate slug from name
+        document.getElementById('categoryName').addEventListener('input', function() {
+            const slug = this.value
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
+            document.getElementById('categorySlug').value = slug;
+        });
+
+        function filterByActiveStatus(tableId, status) {
+            const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+            rows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                row.style.display = !status || rowStatus === status ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

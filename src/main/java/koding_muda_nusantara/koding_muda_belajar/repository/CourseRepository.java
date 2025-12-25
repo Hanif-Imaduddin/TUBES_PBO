@@ -13,6 +13,7 @@ import koding_muda_nusantara.koding_muda_belajar.enums.CourseLevel;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
@@ -379,4 +380,133 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     Optional<CourseWithStatsDTO> findCourseWithStatsById(@Param("courseId") Integer courseId);
     
     long countByStatus(CourseStatus status);
+    
+    
+    // Find by status
+    List<Course> findByStatus(CourseStatus status);
+    
+    // Find by status with pagination
+    Page<Course> findByStatus(CourseStatus status, Pageable pageable);
+    
+    
+    Page<Course> findByLecturerUserId(Integer lecturerId, Pageable pageable);
+    
+    Page<Course> findByCategoryCategoryId(Integer categoryId, Pageable pageable);
+    
+    // Search by title
+    Page<Course> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    
+    // Find featured courses
+    List<Course> findByIsFeaturedTrueAndStatus(CourseStatus status);
+    
+    // Count by category
+    long countByCategoryCategoryId(Integer categoryId);
+    
+    /**
+     * Query untuk mendapatkan semua course dengan enrollment count
+     * Menggunakan LEFT JOIN untuk menghitung jumlah enrollment
+     */
+    @Query("SELECT c, COUNT(e.enrollmentId) as enrollmentCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC")
+    List<Object[]> findAllWithEnrollmentCount();
+    
+    /**
+     * Query dengan pagination untuk admin
+     */
+    @Query(value = "SELECT c, COUNT(e.enrollmentId) as enrollmentCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC",
+           countQuery = "SELECT COUNT(c) FROM Course c")
+    Page<Object[]> findAllWithEnrollmentCountPaged(Pageable pageable);
+    
+    /**
+     * Filter by status dengan enrollment count
+     */
+    @Query("SELECT c, COUNT(e.enrollmentId) as enrollmentCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "WHERE c.status = :status " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC")
+    List<Object[]> findByStatusWithEnrollmentCount(@Param("status") CourseStatus status);
+    
+    /**
+     * Filter by category dengan enrollment count
+     */
+    @Query("SELECT c, COUNT(e.enrollmentId) as enrollmentCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "WHERE c.category.categoryId = :categoryId " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC")
+    List<Object[]> findByCategoryWithEnrollmentCount(@Param("categoryId") Integer categoryId);
+    
+    /**
+     * Search dengan enrollment count
+     */
+    @Query("SELECT c, COUNT(e.enrollmentId) as enrollmentCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "   OR LOWER(c.shortDescription) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC")
+    List<Object[]> searchWithEnrollmentCount(@Param("keyword") String keyword);
+    
+    /**
+     * Update status kursus
+     */
+    @Modifying
+    @Query("UPDATE Course c SET c.status = :status, c.updatedAt = CURRENT_TIMESTAMP WHERE c.courseId = :courseId")
+    int updateStatus(@Param("courseId") Integer courseId, @Param("status") CourseStatus status);
+    
+    /**
+     * Update featured status
+     */
+    @Modifying
+    @Query("UPDATE Course c SET c.isFeatured = :featured, c.updatedAt = CURRENT_TIMESTAMP WHERE c.courseId = :courseId")
+    int updateFeaturedStatus(@Param("courseId") Integer courseId, @Param("featured") boolean featured);
+    
+    /**
+     * Count total courses
+     */
+    @Query("SELECT COUNT(c) FROM Course c")
+    long countAllCourses();
+    
+    /**
+     * Count published courses
+     */
+    @Query("SELECT COUNT(c) FROM Course c WHERE c.status = 'published'")
+    long countPublishedCourses();
+    
+    /**
+     * Get courses dengan statistik lengkap (enrollment, rating, reviews)
+     */
+    @Query("SELECT c, " +
+           "COUNT(DISTINCT e.enrollmentId) as enrollmentCount, " +
+           "COALESCE(AVG(r.rating), 0.0) as avgRating, " +
+           "COUNT(DISTINCT r.id) as reviewCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "LEFT JOIN Review r ON r.course.courseId = c.courseId " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC")
+    List<Object[]> findAllWithFullStats();
+    
+    @Query(value = "SELECT c, " +
+           "COUNT(DISTINCT e.enrollmentId) as enrollmentCount, " +
+           "COALESCE(AVG(r.rating), 0.0) as avgRating, " +
+           "COUNT(DISTINCT r.id) as reviewCount " +
+           "FROM Course c " +
+           "LEFT JOIN Enrollment e ON e.course.courseId = c.courseId " +
+           "LEFT JOIN Review r ON r.course.courseId = c.courseId " +
+           "GROUP BY c.courseId " +
+           "ORDER BY c.createdAt DESC",
+           countQuery = "SELECT COUNT(c) FROM Course c")
+    Page<Object[]> findAllWithFullStatsPaged(Pageable pageable);
 }
