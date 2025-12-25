@@ -570,16 +570,18 @@ a {
 }
 
 .modal-overlay.show {
-    display: flex;
+    display: flex !important;
 }
 
-.modal {
-    background: var(--color-bg);
-    border-radius: var(--radius-md);
+.modal-overlay .modal {
+    display: block !important;
+    background: var(--color-bg, #ffffff);
+    border-radius: var(--radius-md, 8px);
     width: 100%;
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
+    position: relative;
 }
 
 .modal-header {

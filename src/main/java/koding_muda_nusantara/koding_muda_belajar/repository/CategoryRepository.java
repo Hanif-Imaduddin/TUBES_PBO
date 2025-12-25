@@ -113,4 +113,34 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
            "GROUP BY c.categoryId " +
            "ORDER BY c.name ASC")
     List<Object[]> findActiveWithCourseCount();
+    
+    // Cari berdasarkan nama (case insensitive)
+    Optional<Category> findByNameIgnoreCase(String name);
+    
+    // Cari semua kategori diurutkan berdasarkan nama
+    List<Category> findAllByOrderByNameAsc();
+    
+    // Cek apakah slug sudah ada selain ID tertentu (untuk update)
+    boolean existsBySlugAndCategoryIdNot(String slug, Integer categoryId);
+    
+    // Cek apakah nama sudah ada
+    boolean existsByNameIgnoreCase(String name);
+    
+    // Cek apakah nama sudah ada selain ID tertentu (untuk update)
+    boolean existsByNameIgnoreCaseAndCategoryIdNot(String name, Integer categoryId);
+    
+    // Query untuk mendapatkan jumlah kursus per kategori
+    @Query("SELECT c.categoryId, COUNT(co) FROM Category c LEFT JOIN c.courses co GROUP BY c.categoryId")
+    List<Object[]> findCategoriesWithCourseCount();
+    
+    // Query untuk mendapatkan satu kategori dengan jumlah kursus
+    @Query("SELECT COUNT(co) FROM Course co WHERE co.category.categoryId = :categoryId")
+    Long countCoursesByCategoryId(@Param("categoryId") Integer categoryId);
+    
+    // Cari kategori berdasarkan nama (partial match)
+    List<Category> findByNameContainingIgnoreCase(String name);
+    
+    // Query untuk mendapatkan kategori dengan jumlah kursus published
+    @Query("SELECT c, COUNT(co) FROM Category c LEFT JOIN c.courses co ON co.status = 'published' GROUP BY c ORDER BY c.name ASC")
+    List<Object[]> findAllWithPublishedCourseCount();
 }

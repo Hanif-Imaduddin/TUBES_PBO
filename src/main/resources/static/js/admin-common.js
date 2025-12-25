@@ -6,6 +6,7 @@
 // ============================================
 // Sidebar Functions
 // ============================================
+console.log("Masuk ke admin-commons.js");
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('show');
     document.getElementById('sidebarOverlay').classList.toggle('show');
@@ -24,6 +25,7 @@ function toggleNotifications() {
 function openModal(modalId) {
     document.getElementById(modalId).classList.add('show');
     document.body.style.overflow = 'hidden';
+    console.log("Membuka modal "+modalId);
 }
 
 function closeModal(modalId) {
