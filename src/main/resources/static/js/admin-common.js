@@ -126,7 +126,8 @@ function deleteItem(type, id) {
 }
 
 function confirmDelete() {
-    fetch('/api/admin/' + deleteType + 's/' + deleteId, { 
+    const endpoint = (deleteType === 'category') ? '/api/admin/categories/' + deleteId : '/api/admin/' + deleteType + 's/' + deleteId;
+    fetch(endpoint, { 
         method: 'DELETE' 
     })
     .then(response => { 

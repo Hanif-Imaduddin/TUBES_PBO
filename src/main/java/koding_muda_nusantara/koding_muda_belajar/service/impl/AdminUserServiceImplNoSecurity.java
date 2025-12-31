@@ -27,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Service implementation untuk manajemen user di admin panel
@@ -40,16 +41,19 @@ public class AdminUserServiceImplNoSecurity implements AdminUserService {
     private final StudentRepository studentRepository;
     private final LecturerRepository lecturerRepository;
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public AdminUserServiceImplNoSecurity(UserRepository userRepository,
                                           StudentRepository studentRepository,
                                           LecturerRepository lecturerRepository,
-                                          AdminRepository adminRepository) {
+                                          AdminRepository adminRepository,
+                                          PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.lecturerRepository = lecturerRepository;
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -78,6 +82,7 @@ public class AdminUserServiceImplNoSecurity implements AdminUserService {
         adminRepository.findAll().forEach(admin -> 
             allUsers.add(mapToResponseDTO(admin, "admin"))
         );
+        
 
         // Sort by join date descending
         allUsers.sort(Comparator.comparing(
@@ -339,29 +344,11 @@ public class AdminUserServiceImplNoSecurity implements AdminUserService {
         return "unknown";
     }
 
-    /**
-     * Hash password menggunakan SHA-256
-     * Catatan: Untuk production, sebaiknya gunakan BCrypt atau Argon2
-     */
     private String hashPassword(String password) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-            return bytesToHex(encodedHash);
-        } catch (NoSuchAlgorithmException e) {
+            return passwordEncoder.encode(password);
+        } catch (Exception e) {
             throw new RuntimeException("Error hashing password", e);
         }
-    }
-
-    private String bytesToHex(byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-        return hexString.toString();
     }
 }

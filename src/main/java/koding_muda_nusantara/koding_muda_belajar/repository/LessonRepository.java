@@ -37,4 +37,9 @@ public interface LessonRepository extends JpaRepository<Lesson, Integer> {
 
     // Delete by section entity
     void deleteBySection(Section section);
+    
+    /**
+     * Ambil semua lesson untuk section tertentu, diurutkan berdasarkan sortOrder
+     */
+    List<Lesson> findBySection_SectionIdOrderBySortOrderAsc(Integer sectionId);
 }

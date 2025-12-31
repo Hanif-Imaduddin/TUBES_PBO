@@ -83,4 +83,72 @@ public interface LessonProgressRepository extends JpaRepository<LessonProgress, 
             @Param("studentId") Integer studentId, 
             @Param("courseId") Integer courseId
     );
+    
+    /**
+     * Mendapatkan progress lesson untuk student dan lesson tertentu
+     */
+    Optional<LessonProgress> findByStudent_UserIdAndLesson_LessonId(Integer studentId, Integer lessonId);
+
+    /**
+     * Cek apakah lesson sudah completed
+     */
+    boolean existsByStudent_UserIdAndLesson_LessonIdAndIsCompletedTrue(Integer studentId, Integer lessonId);
+
+    /**
+     * Mendapatkan semua progress untuk student
+     */
+    List<LessonProgress> findByStudent_UserId(Integer studentId);
+
+    /**
+     * Menghitung jumlah lesson yang sudah diselesaikan oleh student
+     */
+    @Query("SELECT COUNT(lp) FROM LessonProgress lp " +
+           "WHERE lp.student.userId = :studentId " +
+           "AND lp.isCompleted = true")
+    Long countCompletedLessonsByStudent(@Param("studentId") Integer studentId);
+
+    /**
+     * Menghitung jumlah lesson yang sudah diselesaikan untuk course tertentu
+     */
+    @Query("SELECT COUNT(lp) FROM LessonProgress lp " +
+           "JOIN lp.lesson l " +
+           "JOIN l.section s " +
+           "WHERE lp.student.userId = :studentId " +
+           "AND s.course.courseId = :courseId " +
+           "AND lp.isCompleted = true")
+    Long countCompletedLessonsByCourse(
+            @Param("studentId") Integer studentId, 
+            @Param("courseId") Integer courseId);
+
+    /**
+     * Mendapatkan total watch time student (dalam detik)
+     */
+    @Query("SELECT COALESCE(SUM(lp.watchTime), 0) FROM LessonProgress lp " +
+           "WHERE lp.student.userId = :studentId")
+    Long getTotalWatchTimeByStudent(@Param("studentId") Integer studentId);
+
+    /**
+     * Mendapatkan total watch time untuk course tertentu (dalam detik)
+     */
+    @Query("SELECT COALESCE(SUM(lp.watchTime), 0) FROM LessonProgress lp " +
+           "JOIN lp.lesson l " +
+           "JOIN l.section s " +
+           "WHERE lp.student.userId = :studentId " +
+           "AND s.course.courseId = :courseId")
+    Long getTotalWatchTimeByCourse(
+            @Param("studentId") Integer studentId, 
+            @Param("courseId") Integer courseId);
+
+    /**
+     * Mendapatkan lesson terakhir yang diakses untuk course tertentu
+     */
+    @Query("SELECT lp FROM LessonProgress lp " +
+           "JOIN lp.lesson l " +
+           "JOIN l.section s " +
+           "WHERE lp.student.userId = :studentId " +
+           "AND s.course.courseId = :courseId " +
+           "ORDER BY lp.updatedAt DESC")
+    List<LessonProgress> findLastAccessedLessonByCourse(
+            @Param("studentId") Integer studentId, 
+            @Param("courseId") Integer courseId);
 }

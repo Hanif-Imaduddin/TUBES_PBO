@@ -161,29 +161,73 @@
                 isActive: document.getElementById('categoryStatus').value === 'true'
             };
 
+            // Debug: tampilkan data yang akan dikirim
+            console.log('============ Request Data ============');
+            console.log('Category ID:', categoryId);
+            console.log('Data:', JSON.stringify(data, null, 2));
+            console.log('======================================');
+
             if (categoryId) {
-                data.categoryId = categoryId;
+                data.categoryId = parseInt(categoryId);
             }
 
             const method = categoryId ? 'PUT' : 'POST';
             const url = categoryId ? '/api/admin/categories/' + categoryId : '/api/admin/categories';
-            
+
+            console.log('Method:', method);
+            console.log('URL:', url);
+
             fetch(url, { 
                 method: method, 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify(data) 
             })
-            .then(response => { 
-                if (response.ok) { 
+            .then(response => {
+                console.log('Response Status:', response.status);
+                console.log('Response OK:', response.ok);
+
+                // Selalu parse response sebagai JSON untuk melihat error detail
+                return response.json().then(jsonData => {
+                    return { ok: response.ok, status: response.status, data: jsonData };
+                });
+            })
+            .then(result => {
+                console.log('============ Response Data ============');
+                console.log('Status:', result.status);
+                console.log('Data:', JSON.stringify(result.data, null, 2));
+                console.log('=======================================');
+
+                if (result.ok) { 
                     showToast('Kategori berhasil disimpan', 'success'); 
                     closeModal('categoryModal'); 
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToast('Gagal menyimpan kategori', 'error'); 
+                    // Tampilkan error message dari server
+                    let errorMessage = 'Gagal menyimpan kategori';
+
+                    if (result.data) {
+                        if (result.data.message) {
+                            errorMessage = result.data.message;
+                        }
+
+                        // Jika ada field errors, tampilkan detail
+                        if (result.data.errors) {
+                            console.log('Field Errors:', result.data.errors);
+                            const errorDetails = Object.entries(result.data.errors)
+                                .map(([field, msg]) => `${field}: ${msg}`)
+                                .join(', ');
+                            errorMessage += ' (' + errorDetails + ')';
+                        }
+                    }
+
+                    showToast(errorMessage, 'error'); 
                 }
             })
             .catch(error => {
-                showToast('Terjadi kesalahan', 'error');
+                console.error('============ Fetch Error ============');
+                console.error('Error:', error);
+                console.error('=====================================');
+                showToast('Terjadi kesalahan jaringan', 'error');
             });
         }
 

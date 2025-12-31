@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpSession;
 import koding_muda_nusantara.koding_muda_belajar.enums.CourseStatus;
+import koding_muda_nusantara.koding_muda_belajar.model.Admin;
 import koding_muda_nusantara.koding_muda_belajar.model.User;
 import koding_muda_nusantara.koding_muda_belajar.service.AdminCourseService;
 
@@ -141,8 +142,7 @@ public class AdminCourseApiController {
      */
     private boolean isAdmin(HttpSession session) {
         User user = (User) session.getAttribute("user");
-        String role = (String) session.getAttribute("role");
-        return user != null && "Admin".equals(role);
+        return user != null && user instanceof Admin;
     }
     
     /**

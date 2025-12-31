@@ -45,7 +45,7 @@ public class AdminCourseController {
         
         // Cek session admin
         User user = (User) session.getAttribute("user");
-        String role = (String) session.getAttribute("role");
+        String role = (String) session.getAttribute("userRole");
         
         if (user == null || !(user instanceof Admin)) {
             return "redirect:/login";
@@ -122,7 +122,7 @@ public class AdminCourseController {
         
         // Cek session admin
         User user = (User) session.getAttribute("user");
-        String role = (String) session.getAttribute("role");
+        String role = (String) session.getAttribute("userRole");
         
         if (user == null || !(user instanceof Admin)) {
             return "redirect:/login";

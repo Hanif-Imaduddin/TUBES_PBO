@@ -143,6 +143,9 @@ public class AuthController {
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("registerRequest", registerRequest);
+            System.out.println("=============DEBUG Register=================");
+            System.out.println(e.getMessage());
+            System.out.println("=============DEBUG Register=================");
             return "register";
         }
     }
