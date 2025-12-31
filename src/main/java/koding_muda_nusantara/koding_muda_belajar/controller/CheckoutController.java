@@ -15,6 +15,7 @@ import koding_muda_nusantara.koding_muda_belajar.model.Course;
 import koding_muda_nusantara.koding_muda_belajar.model.Student;
 import koding_muda_nusantara.koding_muda_belajar.model.Transaction;
 import koding_muda_nusantara.koding_muda_belajar.model.TransactionItem;
+import koding_muda_nusantara.koding_muda_belajar.model.User;
 import koding_muda_nusantara.koding_muda_belajar.service.CartService;
 import koding_muda_nusantara.koding_muda_belajar.service.CourseService;
 import koding_muda_nusantara.koding_muda_belajar.service.EnrollmentService;
@@ -71,6 +72,8 @@ public class CheckoutController {
         model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("checkoutItems", cartItems);
         model.addAttribute("total", total);
+        model.addAttribute("user", (User)session.getAttribute("user"));
+        model.addAttribute("role", session.getAttribute("userRole"));
         return "student/checkout";
     }
     
@@ -105,6 +108,8 @@ public class CheckoutController {
         Transaction transaction = transactionService.getByTransactionId(transactionCode);
         model.addAttribute("transactionCode", transaction.getTransactionCode());
         model.addAttribute("transactionDate", transaction.getCreatedAt());
+        model.addAttribute("user", (User)session.getAttribute("user"));
+        model.addAttribute("role", session.getAttribute("userRole"));
         String strPaymentMethod = "";
         if (transaction.getPaymentMethod()==PaymentMethod.bank_transfer){
             strPaymentMethod = "Transfer Bank";

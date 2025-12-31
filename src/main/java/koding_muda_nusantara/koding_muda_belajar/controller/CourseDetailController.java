@@ -76,6 +76,7 @@ public class CourseDetailController {
         model.addAttribute("course", course);
         model.addAttribute("sections", sections);
         model.addAttribute("user", student);
+        model.addAttribute("role", session.getAttribute("userRole"));
         model.addAttribute("isEnrolled",isEnrolled);
         model.addAttribute("cartCount", cartCount);
         model.addAttribute("courseAverageRating", courseAverageRating);
