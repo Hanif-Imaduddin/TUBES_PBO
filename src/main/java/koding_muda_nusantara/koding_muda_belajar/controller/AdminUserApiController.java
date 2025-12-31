@@ -1,47 +1,52 @@
 package koding_muda_nusantara.koding_muda_belajar.controller;
 
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import koding_muda_nusantara.koding_muda_belajar.dto.ApiErrorResponse;
 import koding_muda_nusantara.koding_muda_belajar.dto.UserRequestDTO;
 import koding_muda_nusantara.koding_muda_belajar.dto.UserResponseDTO;
 import koding_muda_nusantara.koding_muda_belajar.dto.UserStatsDTO;
 import koding_muda_nusantara.koding_muda_belajar.exception.DuplicateResourceException;
 import koding_muda_nusantara.koding_muda_belajar.exception.ResourceNotFoundException;
+import koding_muda_nusantara.koding_muda_belajar.model.Admin;
 import koding_muda_nusantara.koding_muda_belajar.model.User;
 import koding_muda_nusantara.koding_muda_belajar.service.AdminUserService;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import koding_muda_nusantara.koding_muda_belajar.model.Admin;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
- * REST API Controller untuk manajemen pengguna di admin panel
+ * REST API Controller untuk manajemen user oleh Admin
  */
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminUserApiController {
 
-    private final AdminUserService adminUserService;
-
     @Autowired
-    public AdminUserApiController(AdminUserService adminUserService) {
-        this.adminUserService = adminUserService;
+    private AdminUserService adminUserService;
+
+    /**
+     * Helper method untuk mengecek apakah user adalah admin
+     */
+    private boolean isAdmin(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        return user != null && user instanceof Admin;
     }
 
     /**
-     * GET /api/admin/users - Mendapatkan semua user dengan pagination
+     * GET /api/admin/users - Mengambil semua user dengan pagination dan filter
      */
     @GetMapping
     public ResponseEntity<?> getAllUsers(
@@ -77,24 +82,32 @@ public class AdminUserApiController {
     }
 
     /**
-     * GET /api/admin/users/all - Mendapatkan semua user tanpa pagination
+     * GET /api/admin/users/stats - Mengambil statistik user
      */
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllUsersNoPagination(HttpSession session) {
+    @GetMapping("/stats")
+    public ResponseEntity<?> getUserStats(HttpSession session) {
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
         }
 
-        List<UserResponseDTO> users = adminUserService.getAllUsers();
-        return ResponseEntity.ok(users);
+        try {
+            UserStatsDTO stats = adminUserService.getUserStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiErrorResponse(500, "Internal Server Error", e.getMessage()));
+        }
     }
 
     /**
-     * GET /api/admin/users/{id} - Mendapatkan user berdasarkan ID
+     * GET /api/admin/users/{id} - Mengambil user berdasarkan ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable("id") Integer userId, HttpSession session) {
+    public ResponseEntity<?> getUserById(
+            @PathVariable("id") Integer userId,
+            HttpSession session) {
+
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
@@ -125,10 +138,11 @@ public class AdminUserApiController {
 
         // Validation errors
         if (bindingResult.hasErrors()) {
-            Map<String, String> errors = bindingResult.getFieldErrors().stream()
+            Map<String, String> errors = bindingResult.getFieldErrors()
+                    .stream()
                     .collect(Collectors.toMap(
-                            e -> e.getField(),
-                            e -> e.getDefaultMessage(),
+                            FieldError::getField,
+                            e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid value",
                             (e1, e2) -> e1
                     ));
 
@@ -153,6 +167,8 @@ public class AdminUserApiController {
 
     /**
      * PUT /api/admin/users/{id} - Mengupdate user
+     * 
+     * PERBAIKAN: Tidak menggunakan removeIf() pada unmodifiable list
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(
@@ -166,25 +182,28 @@ public class AdminUserApiController {
                     .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
         }
 
-        // Skip password validation for update if not provided
-        if (request.getPassword() == null || request.getPassword().isEmpty()) {
-            bindingResult.getAllErrors().removeIf(error -> 
-                "password".equals(((org.springframework.validation.FieldError) error).getField())
-            );
-        }
+        // PERBAIKAN: Filter validation errors tanpa memodifikasi list asli
+        // Skip password validation untuk update jika tidak diisi
+        boolean skipPasswordValidation = request.getPassword() == null || request.getPassword().isEmpty();
 
-        // Validation errors (excluding password if empty)
-        List<org.springframework.validation.FieldError> errors = bindingResult.getFieldErrors()
+        // Ambil field errors dan filter menggunakan stream (tidak memodifikasi list asli)
+        List<FieldError> filteredErrors = bindingResult.getFieldErrors()
                 .stream()
-                .filter(e -> !("password".equals(e.getField()) && 
-                             (request.getPassword() == null || request.getPassword().isEmpty())))
+                .filter(error -> {
+                    // Jika password kosong, skip error validasi password
+                    if (skipPasswordValidation && "password".equals(error.getField())) {
+                        return false;
+                    }
+                    return true;
+                })
                 .collect(Collectors.toList());
 
-        if (!errors.isEmpty()) {
-            Map<String, String> errorMap = errors.stream()
+        // Cek apakah ada error setelah filtering
+        if (!filteredErrors.isEmpty()) {
+            Map<String, String> errorMap = filteredErrors.stream()
                     .collect(Collectors.toMap(
-                            e -> e.getField(),
-                            e -> e.getDefaultMessage(),
+                            FieldError::getField,
+                            e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid value",
                             (e1, e2) -> e1
                     ));
 
@@ -240,120 +259,5 @@ public class AdminUserApiController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiErrorResponse(404, "Not Found", e.getMessage()));
         }
-    }
-
-    /**
-     * GET /api/admin/users/stats - Mendapatkan statistik user
-     */
-    @GetMapping("/stats")
-    public ResponseEntity<?> getUserStats(HttpSession session) {
-        if (!isAdmin(session)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
-        }
-
-        UserStatsDTO stats = adminUserService.getUserStats();
-        return ResponseEntity.ok(stats);
-    }
-
-    /**
-     * PUT /api/admin/users/{id}/role - Mengubah role user
-     */
-    @PutMapping("/{id}/role")
-    public ResponseEntity<?> changeUserRole(
-            @PathVariable("id") Integer userId,
-            @RequestBody Map<String, String> request,
-            HttpSession session) {
-
-        if (!isAdmin(session)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
-        }
-
-        String newRole = request.get("role");
-        if (newRole == null || newRole.trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiErrorResponse(400, "Bad Request", "Role wajib diisi"));
-        }
-
-        // Prevent self role change
-        User currentUser = (User) session.getAttribute("user");
-        if (currentUser != null && currentUser.getUserId().equals(userId)) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiErrorResponse(400, "Bad Request", "Tidak dapat mengubah role akun sendiri"));
-        }
-
-        try {
-            UserResponseDTO updatedUser = adminUserService.changeUserRole(userId, newRole);
-            return ResponseEntity.ok(updatedUser);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiErrorResponse(404, "Not Found", e.getMessage()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiErrorResponse(400, "Bad Request", e.getMessage()));
-        }
-    }
-
-    /**
-     * GET /api/admin/users/check-username - Cek ketersediaan username
-     */
-    @GetMapping("/check-username")
-    public ResponseEntity<?> checkUsername(
-            @RequestParam String username,
-            @RequestParam(required = false) Integer excludeId,
-            HttpSession session) {
-
-        if (!isAdmin(session)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
-        }
-
-        boolean exists;
-        if (excludeId != null) {
-            exists = adminUserService.isUsernameExists(username, excludeId);
-        } else {
-            exists = adminUserService.isUsernameExists(username);
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("available", !exists);
-        response.put("username", username);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * GET /api/admin/users/check-email - Cek ketersediaan email
-     */
-    @GetMapping("/check-email")
-    public ResponseEntity<?> checkEmail(
-            @RequestParam String email,
-            @RequestParam(required = false) Integer excludeId,
-            HttpSession session) {
-
-        if (!isAdmin(session)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiErrorResponse(403, "Forbidden", "Akses ditolak"));
-        }
-
-        boolean exists;
-        if (excludeId != null) {
-            exists = adminUserService.isEmailExists(email, excludeId);
-        } else {
-            exists = adminUserService.isEmailExists(email);
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("available", !exists);
-        response.put("email", email);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Helper method untuk cek apakah user adalah admin
-     */
-    private boolean isAdmin(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        return user instanceof Admin;
     }
 }

@@ -77,7 +77,7 @@ public class UserService {
             );
             user = studentRepository.save(student);
         } else {
-            throw new RuntimeException("Role tidak valid");
+            throw new RuntimeException("Role tidak valid | Role: "+request.getRole());
         }
 
         // Buat balance untuk user baru

@@ -11,6 +11,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 /**
  * Global exception handler untuk REST API
@@ -97,5 +98,27 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    /**
+     * Menangani error saat parsing JSON (misalnya format salah)
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        // Log untuk debugging
+        System.out.println("============ JSON Parse Error ============");
+        System.out.println("Message: " + ex.getMessage());
+        if (ex.getCause() != null) {
+            System.out.println("Cause: " + ex.getCause().getMessage());
+        }
+        System.out.println("==========================================");
+        
+        response.put("success", false);
+        response.put("message", "Format JSON tidak valid: " + ex.getMostSpecificCause().getMessage());
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

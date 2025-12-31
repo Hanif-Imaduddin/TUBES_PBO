@@ -141,6 +141,9 @@ public class AdminCategoryApiController {
             return successResponse("Kategori berhasil ditambahkan", savedCategory);
             
         } catch (IllegalArgumentException e) {
+            System.out.println("============ Debug Create Category ============");
+            System.out.println(e.getMessage());
+            System.out.println("============ Debug Create Category ============");
             return errorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return errorResponse("Terjadi kesalahan saat menyimpan kategori", HttpStatus.INTERNAL_SERVER_ERROR);
