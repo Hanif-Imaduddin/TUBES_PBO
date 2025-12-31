@@ -62,7 +62,7 @@ public class CourseController {
     ) {
         // Get user dari session
         User user = (User) session.getAttribute("user");
-        String role = (String) session.getAttribute("role");
+        String role = (String) session.getAttribute("userRole");
 
         // Search courses dengan filter
         Page<CourseWithStatsDTO> coursePage = courseService.searchCourses(
@@ -125,7 +125,7 @@ public class CourseController {
     ) {
         // Get user dari session
         User user = (User) session.getAttribute("user");
-        String role = (String) session.getAttribute("role");
+        String role = (String) session.getAttribute("userRole");
 
         // Get category by slug
         CategoryDTO category = categoryService.getCategoryBySlug(slug);

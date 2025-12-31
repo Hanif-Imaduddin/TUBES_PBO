@@ -32,4 +32,9 @@ public interface SectionRepository extends JpaRepository<Section, Integer> {
 
     // Delete by course id
     void deleteByCourseCourseId(Integer courseId);
+    
+    /**
+     * Ambil semua section untuk course tertentu, diurutkan berdasarkan sortOrder
+     */
+    List<Section> findByCourse_CourseIdOrderBySortOrderAsc(Integer courseId);
 }

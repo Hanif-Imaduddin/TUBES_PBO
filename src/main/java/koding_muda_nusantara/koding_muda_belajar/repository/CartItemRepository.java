@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import koding_muda_nusantara.koding_muda_belajar.model.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -33,4 +34,15 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
     boolean existsByStudentUserIdAndCourseCourseId(Integer studentId, Integer courseId);
     
     Optional<CartItem> findByStudentUserIdAndCourseCourseId(Integer studentId, Integer courseId);
+     /**
+     * Hapus semua cart item yang berisi course tertentu
+     */
+    @Modifying
+    @Query("DELETE FROM CartItem c WHERE c.course.courseId = :courseId")
+    void deleteByCourse_CourseId(@Param("courseId") Integer courseId);
+    
+    /**
+     * Hitung jumlah cart item untuk course tertentu
+     */
+    long countByCourse_CourseId(Integer courseId);
 }

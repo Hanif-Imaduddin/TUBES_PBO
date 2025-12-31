@@ -5,16 +5,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 public class FileStorageService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -47,10 +52,14 @@ public class FileStorageService {
             Files.createDirectories(videosLocation);
             Files.createDirectories(documentsLocation);
 
+            logger.info("Storage directories initialized at: {}", rootLocation.toAbsolutePath());
+
         } catch (IOException e) {
             throw new RuntimeException("Tidak dapat membuat direktori upload", e);
         }
     }
+
+    // ========== UPLOAD METHODS (yang sudah ada) ==========
 
     /**
      * Simpan thumbnail kursus
@@ -165,12 +174,122 @@ public class FileStorageService {
             }
 
             // Return relative path untuk disimpan di database
-            return "/" + uploadDir + "/" + relativePath + "/" + newFilename;
+            String storedPath = "/" + uploadDir + "/" + relativePath + "/" + newFilename;
+            logger.info("File stored: {} -> {}", originalFilename, storedPath);
+            
+            return storedPath;
 
         } catch (IOException e) {
             throw new RuntimeException("Gagal menyimpan file: " + e.getMessage(), e);
         }
     }
+
+    // ========== DELETE METHODS (baru ditambahkan) ==========
+
+    /**
+     * Hapus file berdasarkan path yang tersimpan di database
+     * 
+     * @param relativePath path file seperti "/uploads/videos/course-1/uuid.mp4"
+     * @return true jika berhasil, false jika file tidak ditemukan
+     */
+    public boolean deleteFile(String relativePath) {
+        if (relativePath == null || relativePath.isEmpty()) {
+            logger.warn("File path kosong, tidak ada yang dihapus");
+            return false;
+        }
+
+        try {
+            Path filePath = getFilePath(relativePath);
+            
+            // Security check: pastikan file berada di dalam direktori upload
+            Path absoluteFilePath = filePath.toAbsolutePath().normalize();
+            Path absoluteRootPath = rootLocation.toAbsolutePath().normalize();
+            
+            if (!absoluteFilePath.startsWith(absoluteRootPath)) {
+                logger.error("Percobaan menghapus file di luar direktori upload: {}", relativePath);
+                throw new SecurityException("Tidak diizinkan menghapus file di luar direktori upload");
+            }
+
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                logger.info("File berhasil dihapus: {}", relativePath);
+                return true;
+            } else {
+                logger.warn("File tidak ditemukan: {}", relativePath);
+                return false;
+            }
+
+        } catch (IOException e) {
+            logger.error("Gagal menghapus file {}: {}", relativePath, e.getMessage());
+            throw new RuntimeException("Gagal menghapus file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Hapus folder course beserta semua isinya (video dan dokumen)
+     * 
+     * @param courseId ID course
+     */
+    public void deleteCourseFolder(Integer courseId) {
+        String courseFolderName = "course-" + courseId;
+        
+        // Hapus folder video course
+        Path videoFolder = videosLocation.resolve(courseFolderName);
+        deleteDirectoryRecursively(videoFolder);
+        
+        // Hapus folder dokumen course
+        Path docFolder = documentsLocation.resolve(courseFolderName);
+        deleteDirectoryRecursively(docFolder);
+        
+        logger.info("Folder course {} berhasil dihapus", courseId);
+    }
+
+    /**
+     * Hapus direktori beserta semua isinya secara rekursif
+     */
+    private void deleteDirectoryRecursively(Path directory) {
+        if (!Files.exists(directory)) {
+            logger.debug("Direktori tidak ada, skip: {}", directory);
+            return;
+        }
+
+        try (Stream<Path> walk = Files.walk(directory)) {
+            walk.sorted(Comparator.reverseOrder())
+                .forEach(path -> {
+                    try {
+                        Files.delete(path);
+                        logger.debug("Deleted: {}", path);
+                    } catch (IOException e) {
+                        logger.warn("Gagal menghapus: {} - {}", path, e.getMessage());
+                    }
+                });
+        } catch (IOException e) {
+            logger.error("Gagal menghapus direktori {}: {}", directory, e.getMessage());
+        }
+    }
+
+    /**
+     * Hapus semua file dalam list
+     * 
+     * @param filePaths list path file
+     * @return jumlah file yang berhasil dihapus
+     */
+    public int deleteFiles(List<String> filePaths) {
+        int deletedCount = 0;
+        for (String filePath : filePaths) {
+            try {
+                if (deleteFile(filePath)) {
+                    deletedCount++;
+                }
+            } catch (Exception e) {
+                logger.warn("Gagal menghapus file {}: {}", filePath, e.getMessage());
+            }
+        }
+        logger.info("Berhasil menghapus {} dari {} file", deletedCount, filePaths.size());
+        return deletedCount;
+    }
+
+    // ========== UTILITY METHODS ==========
 
     /**
      * Dapatkan Path absolut dari relative path
@@ -199,16 +318,79 @@ public class FileStorageService {
     }
 
     /**
-     * Hapus file
+     * Dapatkan ukuran file dalam bytes
      */
-    public boolean deleteFile(String relativePath) {
+    public long getFileSize(String relativePath) {
         try {
             Path filePath = getFilePath(relativePath);
-            return Files.deleteIfExists(filePath);
+            if (Files.exists(filePath)) {
+                return Files.size(filePath);
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Gagal menghapus file: " + e.getMessage(), e);
+            logger.warn("Gagal mendapatkan ukuran file: {}", relativePath);
+        }
+        return 0;
+    }
+
+    /**
+     * Hitung total ukuran folder course
+     */
+    public long getCourseFolderSize(Integer courseId) {
+        String courseFolderName = "course-" + courseId;
+        long totalSize = 0;
+        
+        totalSize += getFolderSize(videosLocation.resolve(courseFolderName));
+        totalSize += getFolderSize(documentsLocation.resolve(courseFolderName));
+        
+        return totalSize;
+    }
+
+    private long getFolderSize(Path folder) {
+        if (!Files.exists(folder)) {
+            return 0;
+        }
+
+        try (Stream<Path> walk = Files.walk(folder)) {
+            return walk.filter(Files::isRegularFile)
+                      .mapToLong(path -> {
+                          try {
+                              return Files.size(path);
+                          } catch (IOException e) {
+                              return 0;
+                          }
+                      })
+                      .sum();
+        } catch (IOException e) {
+            return 0;
         }
     }
+
+    /**
+     * Hitung jumlah file dalam folder course
+     */
+    public int getCourseFileCount(Integer courseId) {
+        String courseFolderName = "course-" + courseId;
+        int count = 0;
+        
+        count += getFileCount(videosLocation.resolve(courseFolderName));
+        count += getFileCount(documentsLocation.resolve(courseFolderName));
+        
+        return count;
+    }
+
+    private int getFileCount(Path folder) {
+        if (!Files.exists(folder)) {
+            return 0;
+        }
+
+        try (Stream<Path> walk = Files.walk(folder)) {
+            return (int) walk.filter(Files::isRegularFile).count();
+        } catch (IOException e) {
+            return 0;
+        }
+    }
+
+    // ========== VALIDATION METHODS ==========
 
     /**
      * Validasi file video
@@ -287,7 +469,8 @@ public class FileStorageService {
                extension.equals(".pptx");
     }
 
-    // Getters untuk path
+    // ========== GETTERS ==========
+
     public Path getRootLocation() {
         return rootLocation;
     }

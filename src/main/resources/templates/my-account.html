@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Dikoding Muda Nusantara</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    
+    <style>
+        :root {
+            --color-primary: #1a56db;
+            --color-primary-dark: #1e40af;
+            --color-primary-light: #e0e7ff;
+            --color-text: #111827;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-bg: #ffffff;
+            --color-bg-subtle: #f9fafb;
+            --color-border: #e5e7eb;
+            --color-success: #059669;
+            --color-success-light: #d1fae5;
+            --color-warning: #d97706;
+            --color-warning-light: #fef3c7;
+            --color-danger: #dc2626;
+            --color-danger-light: #fee2e2;
+            --color-info: #0284c7;
+            --color-info-light: #e0f2fe;
+            --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            color: var(--color-text);
+            background-color: var(--color-bg-subtle);
+            line-height: 1.6;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        /* Navbar */
+        .navbar-main {
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0.875rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand span {
+            color: var(--color-primary);
+        }
+
+        .nav-link-main {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .nav-link-main:hover {
+            color: var(--color-text);
+            background: var(--color-bg-subtle);
+        }
+
+        .nav-link-main.active {
+            color: var(--color-primary);
+        }
+
+        /* User Profile Dropdown */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 0.875rem;
+        }
+
+        .user-avatar.large {
+            width: 100px;
+            height: 100px;
+            font-size: 2rem;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: var(--color-bg);
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Account Layout */
+        .account-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* Sidebar */
+        .account-sidebar {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+        }
+
+        .profile-card {
+            text-align: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-card .user-avatar {
+            margin: 0 auto 1rem;
+        }
+
+        .profile-card .profile-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-card .profile-role {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-card .profile-email {
+            font-size: 0.8125rem;
+            color: var(--color-text-secondary);
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-menu-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .nav-menu-link:hover {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+        }
+
+        .nav-menu-link.active {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+
+        .nav-menu-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .account-content {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+
+        /* Tabs */
+        .account-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 1.5rem;
+        }
+
+        .account-tab {
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .account-tab:hover {
+            color: var(--color-text);
+        }
+
+        .account-tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            padding: 1.5rem;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Section */
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-description {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            background: var(--color-bg);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--color-danger);
+        }
+
+        .form-control:disabled {
+            background: var(--color-bg-subtle);
+            color: var(--color-text-muted);
+        }
+
+        .invalid-feedback {
+            font-size: 0.8125rem;
+            color: var(--color-danger);
+            margin-top: 0.375rem;
+        }
+
+        .form-text {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            margin-top: 0.375rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-border);
+        }
+
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--color-bg-subtle);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Info Card */
+        .info-card {
+            background: var(--color-bg-subtle);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.625rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+
+        .alert-danger {
+            background: var(--color-danger-light);
+            color: var(--color-danger);
+        }
+
+        .alert-warning {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .role-badge.student {
+            background: var(--color-info-light);
+            color: var(--color-info);
+        }
+
+        .role-badge.lecturer {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+
+        .role-badge.admin {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+        }
+
+        /* Password Strength */
+        .password-strength {
+            height: 4px;
+            background: var(--color-border);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .password-strength-bar.weak {
+            width: 25%;
+            background: var(--color-danger);
+        }
+
+        .password-strength-bar.fair {
+            width: 50%;
+            background: var(--color-warning);
+        }
+
+        .password-strength-bar.good {
+            width: 75%;
+            background: var(--color-info);
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: var(--color-success);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-copyright {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .account-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .account-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .page-header {
+                padding: 1.5rem 0;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .account-tabs {
+                overflow-x: auto;
+                padding: 0 1rem;
+            }
+
+            .account-tab {
+                padding: 0.875rem 1rem;
+                white-space: nowrap;
+            }
+
+            .tab-content {
+                padding: 1rem;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar-main">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <a href="/" class="navbar-brand">
+                    Dikoding<span>Muda</span>
+                </a>
+                
+                <div class="d-none d-lg-flex align-items-center gap-1">
+                    <a href="/courses" class="nav-link-main">Kursus</a>
+                    <a href="/categories" class="nav-link-main">Kategori</a>
+                    <a href="/instructors" class="nav-link-main">Pengajar</a>
+                    <a href="/about" class="nav-link-main">Tentang</a>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown text-end" th:if="${user != null}">
+                        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
+                           id="userDropdown">
+                            <div class="user-profile">
+                                <div class="user-info d-none d-md-block">
+                                    <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}"></div>
+                                    <div class="user-role" th:text="${role}"></div>
+                                </div>
+                                <div class="user-avatar" th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}"></div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item active" href="/my-account">My Account</a></li>
+                            <li th:if="${role == 'Student'}"><a class="dropdown-item" href="/my-courses">My Learning</a></li>
+                            <li th:if="${role == 'Student'}"><a class="dropdown-item" href="/wishlist">Wishlist</a></li>
+                            <li th:if="${role == 'Lecturer'}"><a class="dropdown-item" href="/lecturer/dashboard">Dashboard</a></li>
+                            <li th:if="${role == 'Admin'}"><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1 class="page-title">My Account</h1>
+            <p class="page-subtitle">Kelola informasi akun dan keamanan akunmu</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="py-4">
+        <div class="container">
+            <div class="account-layout">
+                
+                <!-- Sidebar -->
+                <aside class="account-sidebar">
+                    <div class="profile-card">
+                        <div class="user-avatar large" th:text="${accountInfo.initials}">HA</div>
+                        <h3 class="profile-name" th:text="${accountInfo.fullName}">Nama User</h3>
+                        <span th:class="'role-badge ' + ${#strings.toLowerCase(role)}" th:text="${accountInfo.roleDisplay}">Role</span>
+                        <p class="profile-email mt-2" th:text="${accountInfo.email}">email@example.com</p>
+                    </div>
+                    
+                    <ul class="nav-menu">
+                        <li class="nav-menu-item">
+                            <a href="#profile" class="nav-menu-link active" data-tab="profile">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                Profil
+                            </a>
+                        </li>
+                        <li class="nav-menu-item">
+                            <a href="#security" class="nav-menu-link" data-tab="security">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                Keamanan
+                            </a>
+                        </li>
+                        <li class="nav-menu-item" th:if="${role == 'Student' or role == 'Lecturer'}">
+                            <a href="#balance" class="nav-menu-link" data-tab="balance">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                    <line x1="1" y1="10" x2="23" y2="10"/>
+                                </svg>
+                                Saldo
+                            </a>
+                        </li>
+                        <li class="nav-menu-item">
+                            <a href="#account-info" class="nav-menu-link" data-tab="account-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="16" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                </svg>
+                                Info Akun
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="account-content">
+                    
+                    <!-- Tabs -->
+                    <div class="account-tabs">
+                        <a href="#profile" class="account-tab active" data-tab="profile">Profil</a>
+                        <a href="#security" class="account-tab" data-tab="security">Keamanan</a>
+                        <a th:if="${role == 'Student' or role == 'Lecturer'}" href="#balance" class="account-tab" data-tab="balance">Saldo</a>
+                        <a href="#account-info" class="account-tab" data-tab="account-info">Info Akun</a>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        
+                        <!-- Alert Messages -->
+                        <div th:if="${successMessage}" class="alert alert-success">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span th:text="${successMessage}">Success message</span>
+                        </div>
+                        
+                        <div th:if="${errorMessage}" class="alert alert-danger">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            <span th:text="${errorMessage}">Error message</span>
+                        </div>
+
+                        <!-- Profile Tab -->
+                        <div id="profile" class="tab-pane active">
+                            <h3 class="section-title">Informasi Profil</h3>
+                            <p class="section-description">Perbarui informasi profil dan alamat email akunmu</p>
+                            
+                            <form th:action="@{/my-account/update-profile}" method="post" th:object="${profileDTO}">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nama Depan *</label>
+                                            <input type="text" class="form-control" th:field="*{firstName}" 
+                                                   th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
+                                                   placeholder="Masukkan nama depan">
+                                            <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback" th:errors="*{firstName}">Error</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nama Belakang</label>
+                                            <input type="text" class="form-control" th:field="*{lastName}"
+                                                   th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
+                                                   placeholder="Masukkan nama belakang">
+                                            <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback" th:errors="*{lastName}">Error</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Username *</label>
+                                    <input type="text" class="form-control" th:field="*{username}"
+                                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                           placeholder="Masukkan username">
+                                    <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback" th:errors="*{username}">Error</div>
+                                    <p class="form-text">Username akan digunakan sebagai identitas unikmu</p>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" th:field="*{email}"
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                           placeholder="Masukkan email">
+                                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}">Error</div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                            <polyline points="17 21 17 13 7 13 7 21"/>
+                                            <polyline points="7 3 7 8 15 8"/>
+                                        </svg>
+                                        Simpan Perubahan
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary">Reset</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Security Tab -->
+                        <div id="security" class="tab-pane" th:classappend="${activeTab == 'security'} ? 'active' : ''">
+                            <h3 class="section-title">Ubah Password</h3>
+                            <p class="section-description">Pastikan akunmu menggunakan password yang panjang dan acak untuk tetap aman</p>
+                            
+                            <form th:action="@{/my-account/change-password}" method="post" th:object="${passwordDTO}" id="passwordForm">
+                                <div class="form-group">
+                                    <label class="form-label">Password Saat Ini *</label>
+                                    <div class="position-relative">
+                                        <input type="password" class="form-control" th:field="*{currentPassword}"
+                                               th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''"
+                                               id="currentPassword" placeholder="Masukkan password saat ini">
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" onclick="togglePassword('currentPassword')">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div th:if="${#fields.hasErrors('currentPassword')}" class="invalid-feedback d-block" th:errors="*{currentPassword}">Error</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Password Baru *</label>
+                                    <div class="position-relative">
+                                        <input type="password" class="form-control" th:field="*{newPassword}"
+                                               th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid' : ''"
+                                               id="newPassword" placeholder="Masukkan password baru" onkeyup="checkPasswordStrength(this.value)">
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" onclick="togglePassword('newPassword')">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength">
+                                        <div id="passwordStrengthBar" class="password-strength-bar"></div>
+                                    </div>
+                                    <p class="form-text" id="passwordStrengthText">Minimal 8 karakter</p>
+                                    <div th:if="${#fields.hasErrors('newPassword')}" class="invalid-feedback d-block" th:errors="*{newPassword}">Error</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Konfirmasi Password Baru *</label>
+                                    <div class="position-relative">
+                                        <input type="password" class="form-control" th:field="*{confirmPassword}"
+                                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
+                                               id="confirmPassword" placeholder="Konfirmasi password baru">
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3" onclick="togglePassword('confirmPassword')">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback d-block" th:errors="*{confirmPassword}">Error</div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                        </svg>
+                                        Ubah Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Balance Tab (for Student and Lecturer) -->
+                        <div id="balance" class="tab-pane" th:if="${role == 'Student' or role == 'Lecturer'}">
+                            <h3 class="section-title">Saldo</h3>
+                            <p class="section-description">Kelola saldo akun untuk pembelian kursus</p>
+                            
+                            <div class="info-card" style="background: linear-gradient(135deg, var(--color-primary-light) 0%, #dbeafe 100%);">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <p class="text-muted mb-1" style="font-size: 0.875rem;">Saldo Saat Ini</p>
+                                        <h2 class="mb-0" style="font-size: 2rem; font-weight: 700; color: var(--color-primary);" th:text="${accountInfo.formattedBalance}">Rp 0</h2>
+                                    </div>
+                                    <div>
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-primary);">
+                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                            <line x1="1" y1="10" x2="23" y2="10"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mb-4">
+                                <a href="/topup" class="btn btn-primary" th:if="${role == 'Student'}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                    Top Up Saldo
+                                </a>
+                                <a href="/transactions" class="btn btn-secondary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="1" x2="12" y2="23"/>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                    </svg>
+                                    Riwayat Transaksi
+                                </a>
+                                <a href="/lecturer/earnings" class="btn btn-secondary" th:if="${role == 'Lecturer'}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="20" x2="18" y2="10"/>
+                                        <line x1="12" y1="20" x2="12" y2="4"/>
+                                        <line x1="6" y1="20" x2="6" y2="14"/>
+                                    </svg>
+                                    Lihat Pendapatan
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Account Info Tab -->
+                        <div id="account-info" class="tab-pane">
+                            <h3 class="section-title">Informasi Akun</h3>
+                            <p class="section-description">Detail informasi akunmu</p>
+                            
+                            <!-- Stats for Student -->
+                            <div th:if="${role == 'Student'}" class="stats-row">
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${accountInfo.enrolledCourses != null ? accountInfo.enrolledCourses : 0}">0</div>
+                                    <div class="stat-label">Kursus Diikuti</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${accountInfo.completedCourses != null ? accountInfo.completedCourses : 0}">0</div>
+                                    <div class="stat-label">Kursus Selesai</div>
+                                </div>
+                            </div>
+
+                            <!-- Stats for Lecturer -->
+                            <div th:if="${role == 'Lecturer'}" class="stats-row">
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${accountInfo.totalCourses != null ? accountInfo.totalCourses : 0}">0</div>
+                                    <div class="stat-label">Kursus Dibuat</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${accountInfo.totalStudents != null ? accountInfo.totalStudents : 0}">0</div>
+                                    <div class="stat-label">Total Pelajar</div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <div class="info-row">
+                                    <span class="info-label">User ID</span>
+                                    <span class="info-value" th:text="${accountInfo.userId}">#123</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Username</span>
+                                    <span class="info-value" th:text="${accountInfo.username}">username</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value" th:text="${accountInfo.email}">email@example.com</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Role</span>
+                                    <span class="info-value">
+                                        <span th:class="'role-badge ' + ${#strings.toLowerCase(role)}" th:text="${accountInfo.roleDisplay}">Role</span>
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Bergabung Sejak</span>
+                                    <span class="info-value" th:text="${accountInfo.joinDate != null ? #dates.format(accountInfo.joinDate, 'dd MMMM yyyy') : '-'}">01 Januari 2024</span>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                    <line x1="12" y1="9" x2="12" y2="13"/>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                </svg>
+                                <span>User ID dan tanggal bergabung tidak dapat diubah.</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-copyright">
+                2025 Dikoding Muda Nusantara. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    
+    <script>
+        // Tab switching
+        document.querySelectorAll('[data-tab]').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tabId = this.getAttribute('data-tab');
+                
+                // Update active tab
+                document.querySelectorAll('.account-tab, .nav-menu-link').forEach(function(tab) {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('[data-tab="' + tabId + '"]').forEach(function(tab) {
+                    tab.classList.add('active');
+                });
+                
+                // Show tab content
+                document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                    pane.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                
+                // Update URL hash
+                window.location.hash = tabId;
+            });
+        });
+
+        // Handle initial hash
+        if (window.location.hash) {
+            const tabId = window.location.hash.substring(1);
+            const tabEl = document.querySelector('[data-tab="' + tabId + '"]');
+            if (tabEl) {
+                tabEl.click();
+            }
+        }
+
+        // Check for activeTab from server
+        const activeTabFromServer = '[[${activeTab}]]';
+        if (activeTabFromServer && activeTabFromServer !== '') {
+            const tabEl = document.querySelector('[data-tab="' + activeTabFromServer + '"]');
+            if (tabEl) {
+                tabEl.click();
+            }
+        }
+
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            strengthBar.className = 'password-strength-bar';
+            
+            if (password.length === 0) {
+                strengthBar.style.width = '0';
+                strengthText.textContent = 'Minimal 8 karakter';
+            } else if (strength <= 1) {
+                strengthBar.classList.add('weak');
+                strengthText.textContent = 'Lemah - Tambahkan huruf besar, angka, atau simbol';
+            } else if (strength <= 2) {
+                strengthBar.classList.add('fair');
+                strengthText.textContent = 'Cukup - Tambahkan variasi karakter';
+            } else if (strength <= 3) {
+                strengthBar.classList.add('good');
+                strengthText.textContent = 'Bagus - Password cukup kuat';
+            } else {
+                strengthBar.classList.add('strong');
+                strengthText.textContent = 'Kuat - Password sangat aman';
+            }
+        }
+
+        // Form validation
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('Konfirmasi password tidak sesuai!');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
