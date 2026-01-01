@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tentang Kami - NusaTech | Dikoding Muda Nusantara</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    
+    <style>
+        :root {
+            --color-primary: #8B1538;
+            --color-primary-dark: #6d102c;
+            --color-primary-light: #f8e8ec;
+            --color-secondary: #D4A84B;
+            --color-secondary-dark: #c49b2f;
+            --color-text: #2d2d2d;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-bg: #ffffff;
+            --color-bg-subtle: #fdf8f3;
+            --color-border: #e5e7eb;
+            --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            line-height: 1.6;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--color-text);
+        }
+
+        .navbar-brand-custom img {
+            height: 40px;
+        }
+
+        .navbar-brand-custom span {
+            color: var(--color-primary);
+        }
+
+        .nav-link-custom {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .nav-link-custom:hover {
+            color: var(--color-primary);
+            background: var(--color-primary-light);
+        }
+
+        .nav-link-custom.active {
+            color: var(--color-primary);
+        }
+
+        .btn-primary-custom {
+            background: var(--color-primary);
+            color: white;
+            font-weight: 600;
+            padding: 0.625rem 1.5rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--color-primary-dark);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #8B1538 0%, #6d102c 100%);
+            color: white;
+            padding: 6rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: white;
+            border-radius: 50%;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-tagline {
+            font-size: 1.5rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            color: var(--color-secondary);
+        }
+
+        .hero-description {
+            font-size: 1.125rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-alt {
+            background: var(--color-bg-subtle);
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--color-text-secondary);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        /* Visi Misi */
+        .visi-misi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .visi-misi-card {
+            background: var(--color-bg);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-border);
+            transition: var(--transition);
+        }
+
+        .visi-misi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .visi-misi-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--color-primary-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--color-primary);
+        }
+
+        .visi-misi-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+        }
+
+        .visi-misi-text {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: var(--color-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-border);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-primary);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        /* Team Section */
+        .team-grid-top {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .team-grid-bottom {
+            display: flex;
+            justify-content: center;
+        }
+
+        .team-card {
+            background: var(--color-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-border);
+            transition: var(--transition);
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .team-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .team-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .team-role {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--color-text);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo img {
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            padding: 0.5rem;
+        }
+
+        .footer-logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .footer-copyright {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .team-grid-top {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-tagline {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .visi-misi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .team-grid-top {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-section {
+                padding: 4rem 0;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 3rem 0;
+            }
+            
+            .section-title {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar-custom">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <a href="/" class="navbar-brand-custom">
+                    <img th:src="@{/images/logo.png}" alt="NusaTech" 
+                         onerror="this.onerror=null; this.src='/images/logo.svg';">
+                    <span>NusaTech</span>
+                </a>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/" class="nav-link-custom">Beranda</a>
+                    <a href="/courses" class="nav-link-custom">Kursus</a>
+                    <a href="/about" class="nav-link-custom active">Tentang</a>
+                    
+                    <th:block th:if="${user == null}">
+                        <a href="/login" class="nav-link-custom">Masuk</a>
+                        <a href="/register" class="btn-primary-custom">Daftar</a>
+                    </th:block>
+                    
+                    <th:block th:if="${user != null}">
+                        <a th:href="${role == 'Lecturer' ? '/lecturer/dashboard' : (role == 'Admin' ? '/admin/dashboard' : '/student/dashboard')}" 
+                           class="btn-primary-custom">
+                            Dashboard
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-logo">
+                    <img th:src="@{/images/logo.png}" alt="NusaTech Logo" 
+                         onerror="this.onerror=null; this.src='/images/logo.svg';">
+                </div>
+                <h1 class="hero-title">NusaTech</h1>
+                <p class="hero-tagline">Dikoding Muda Nusantara</p>
+                <p class="hero-description">
+                    Platform Pembelajaran Coding untuk Generasi Muda Indonesia<br>
+                    Mendukung Indonesia Emas 2045
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visi Misi Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Visi & Misi</h2>
+            <p class="section-subtitle">Komitmen kami untuk memajukan pendidikan teknologi di Indonesia</p>
+            
+            <div class="visi-misi-grid">
+                <div class="visi-misi-card">
+                    <div class="visi-misi-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="visi-misi-title">Visi</h3>
+                    <p class="visi-misi-text">
+                        Menjadi platform pembelajaran coding terdepan di Indonesia yang menghasilkan 
+                        talenta digital berkualitas dan siap bersaing di kancah global, 
+                        mendukung visi Indonesia Emas 2045.
+                    </p>
+                </div>
+                
+                <div class="visi-misi-card">
+                    <div class="visi-misi-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="visi-misi-title">Misi</h3>
+                    <p class="visi-misi-text">
+                        Menyediakan akses pendidikan teknologi berkualitas untuk semua kalangan, 
+                        dengan kurikulum yang relevan dengan kebutuhan industri dan 
+                        pengajar yang berpengalaman di bidangnya.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">NusaTech dalam Angka</h2>
+            <p class="section-subtitle">Pencapaian kami dalam mengembangkan talenta digital Indonesia</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" th:text="${totalStudents}">1,500</div>
+                    <div class="stat-label">Pelajar Aktif</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" th:text="${totalCourses}">50</div>
+                    <div class="stat-label">Kursus Tersedia</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" th:text="${totalLecturers}">25</div>
+                    <div class="stat-label">Pengajar Ahli</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Tim Kami</h2>
+            <p class="section-subtitle">Orang-orang hebat di balik NusaTech</p>
+            
+            <!-- Top Row - 4 people -->
+            <div class="team-grid-top">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Gabriel+Edbert+Liandrew&background=8B1538&color=fff&size=120" 
+                             alt="Gabriel Edbert Liandrew">
+                    </div>
+                    <h4 class="team-name">Gabriel Edbert Liandrew</h4>
+                    <p class="team-role">CEO & Founder</p>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Muhammad+Umar&background=D4A84B&color=fff&size=120" 
+                             alt="Muhammad Umar">
+                    </div>
+                    <h4 class="team-name">Muhammad Umar</h4>
+                    <p class="team-role">CTO</p>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Hanif+Imaduddin&background=3498db&color=fff&size=120" 
+                             alt="Hanif Imaduddin">
+                    </div>
+                    <h4 class="team-name">Hanif Imaduddin</h4>
+                    <p class="team-role">Head of Content</p>
+                </div>
+                
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Naufal+Arkan+Wahib&background=27ae60&color=fff&size=120" 
+                             alt="Naufal Arkan Wahib">
+                    </div>
+                    <h4 class="team-name">Naufal Arkan Wahib</h4>
+                    <p class="team-role">Head of Marketing</p>
+                </div>
+            </div>
+            
+            <!-- Bottom Row - 1 person centered -->
+            <div class="team-grid-bottom">
+                <div class="team-card" style="max-width: 280px;">
+                    <div class="team-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Putu+Padmanaba&background=9B59B6&color=fff&size=120" 
+                             alt="Putu Padmanaba">
+                    </div>
+                    <h4 class="team-name">Putu Padmanaba</h4>
+                    <p class="team-role">Head of Product</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-logo">
+                <img th:src="@{/images/logo.png}" alt="NusaTech" 
+                     onerror="this.onerror=null; this.src='/images/logo.svg';">
+                <span class="footer-logo-text">NusaTech</span>
+            </div>
+            <p class="footer-copyright">
+                © 2025 NusaTech - Dikoding Muda Nusantara. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

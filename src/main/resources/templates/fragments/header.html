@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+    NusaTech - Dikoding Muda Nusantara
+    Header Fragment
+-->
+
+<!-- Header Fragment -->
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <img th:src="@{/images/logo.png}" alt="NusaTech" height="45" 
+                     onerror="this.onerror=null; this.src='/images/logo.svg';">
+            </a>
+            
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation -->
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Center Menu -->
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link px-3" th:href="@{/}" th:classappend="${#httpServletRequest.requestURI == '/'} ? 'active fw-semibold' : ''">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" th:href="@{/courses}" th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/course')} ? 'active fw-semibold' : ''">Kursus</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" th:href="@{/categories}">Kategori</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" th:href="@{/about}">Tentang</a>
+                    </li>
+                </ul>
+                
+                <!-- Right Menu -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Guest: Login/Register -->
+                    <th:block th:if="${user == null}">
+                        <a th:href="@{/login}" class="btn btn-outline-primary px-3">Masuk</a>
+                        <a th:href="@{/register}" class="btn btn-primary px-3">Daftar</a>
+                    </th:block>
+                    
+                    <!-- Logged In: User Dropdown -->
+                    <th:block th:if="${user != null}">
+                        <!-- Cart for Students -->
+                        <a th:if="${role == 'Student'}" th:href="@{/cart}" class="btn btn-light position-relative me-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <span th:if="${cartCount != null and cartCount > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" th:text="${cartCount}">0</span>
+                        </a>
+                        
+                        <!-- User Dropdown -->
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="d-none d-md-block text-end me-2">
+                                    <div class="fw-semibold small" style="color: var(--text-dark);" th:text="${user.firstName + ' ' + user.lastName}">User Name</div>
+                                    <div class="small" style="color: var(--text-muted);" th:text="${role}">Role</div>
+                                </div>
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 42px; height: 42px; background-color: var(--bg-light); color: var(--primary); border: 2px solid var(--primary);"
+                                     th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}">NT</div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                                <!-- Student Menu -->
+                                <li th:if="${role == 'Student'}"><a class="dropdown-item py-2" th:href="@{/my-courses}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    Kursus Saya
+                                </a></li>
+                                <li th:if="${role == 'Student'}"><a class="dropdown-item py-2" th:href="@{/my-account}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                    Akun Saya
+                                </a></li>
+                                
+                                <!-- Lecturer Menu -->
+                                <li th:if="${role == 'Lecturer'}"><a class="dropdown-item py-2" th:href="@{/lecturer/dashboard}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                    Dashboard
+                                </a></li>
+                                <li th:if="${role == 'Lecturer'}"><a class="dropdown-item py-2" th:href="@{/lecturer/courses}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    Kursus Saya
+                                </a></li>
+                                
+                                <!-- Admin Menu -->
+                                <li th:if="${role == 'Admin'}"><a class="dropdown-item py-2" th:href="@{/admin/dashboard}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                    Dashboard Admin
+                                </a></li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger" th:href="@{/logout}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                    Keluar
+                                </a></li>
+                            </ul>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Spacer for fixed navbar -->
+    <div style="height: 76px;"></div>
+</header>
+
+</html>

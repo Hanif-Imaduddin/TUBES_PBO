@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Diskusi | NusaTech</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/index.css}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B1538;
+            --primary-hover: #6d102c;
+            --secondary: #D4A84B;
+            --bg-light: #fdf8f3;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        
+        .form-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            padding: 2rem;
+        }
+        
+        .form-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .form-body {
+            padding: 2rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+        
+        textarea.form-control {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        .btn-submit {
+            background: var(--primary);
+            border-color: var(--primary);
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 10px;
+        }
+        
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        .btn-cancel {
+            color: #6c757d;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 10px;
+        }
+        
+        .btn-cancel:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+        
+        .tips-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .tips-card h6 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .tips-card ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+        
+        .tips-card li {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .char-count {
+            font-size: 0.8125rem;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a th:href="@{/}">Beranda</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/courses/{slug}(slug=${course.slug})}" th:text="${course.title}">Course</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/discussion/lesson/{id}(id=${lesson.lessonId})}">Diskusi</a></li>
+                    <li class="breadcrumb-item active">Buat Diskusi</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="container pb-5">
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Buat Diskusi Baru
+                        </h2>
+                        <p>Materi: <span th:text="${lesson.title}">Judul Materi</span></p>
+                    </div>
+                    
+                    <div class="form-body">
+                        <form th:action="@{/discussion/create}" method="post">
+                            <input type="hidden" name="lessonId" th:value="${lesson.lessonId}">
+                            
+                            <div class="mb-4">
+                                <label for="title" class="form-label">Judul Diskusi (Opsional)</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="title" 
+                                       name="title" 
+                                       placeholder="Contoh: Cara menggunakan async/await di JavaScript"
+                                       maxlength="255">
+                                <div class="char-count mt-1">
+                                    <span id="titleCount">0</span>/255 karakter
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="content" class="form-label">Isi Diskusi <span class="text-danger">*</span></label>
+                                <textarea class="form-control" 
+                                          id="content" 
+                                          name="content" 
+                                          placeholder="Jelaskan pertanyaan atau topik yang ingin Anda diskusikan secara detail. Sertakan contoh kode jika diperlukan..."
+                                          required></textarea>
+                                <div class="char-count mt-1">
+                                    Minimal 20 karakter
+                                </div>
+                            </div>
+                            
+                            <!-- Tips -->
+                            <div class="tips-card mb-4">
+                                <h6>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="16" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                    </svg>
+                                    Tips Membuat Diskusi yang Baik
+                                </h6>
+                                <ul>
+                                    <li>Gunakan judul yang jelas dan spesifik</li>
+                                    <li>Jelaskan masalah atau pertanyaan Anda secara detail</li>
+                                    <li>Sertakan contoh kode jika membahas programming</li>
+                                    <li>Sebutkan apa yang sudah Anda coba sebelumnya</li>
+                                    <li>Gunakan bahasa yang sopan dan mudah dipahami</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="d-flex gap-3 justify-content-end">
+                                <a th:href="@{/discussion/lesson/{id}(id=${lesson.lessonId})}" class="btn btn-cancel">
+                                    Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-submit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                        <line x1="22" y1="2" x2="11" y2="13"/>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                    </svg>
+                                    Buat Diskusi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        // Character count for title
+        document.getElementById('title').addEventListener('input', function() {
+            document.getElementById('titleCount').textContent = this.value.length;
+        });
+        
+        // Validation for content
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const content = document.getElementById('content').value.trim();
+            if (content.length < 20) {
+                e.preventDefault();
+                alert('Isi diskusi minimal 20 karakter');
+            }
+        });
+    </script>
+</body>
+</html>

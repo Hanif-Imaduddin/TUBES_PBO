@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+
+<!-- User Modal Fragment -->
+<div class="modal-overlay" id="userModal" th:fragment="userModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="userModalTitle">Tambah Pengguna</h3>
+            <button class="modal-close" onclick="closeModal('userModal')" type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="userForm">
+                <input type="hidden" id="userId" name="userId">
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" for="userFirstName">Nama Depan <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="userFirstName" 
+                                   name="firstName" 
+                                   placeholder="Masukkan nama depan"
+                                   required 
+                                   minlength="2" 
+                                   maxlength="100">
+                            <div class="invalid-feedback" id="firstNameError">Nama depan wajib diisi (min. 2 karakter)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" for="userLastName">Nama Belakang</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="userLastName" 
+                                   name="lastName" 
+                                   placeholder="Masukkan nama belakang"
+                                   maxlength="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="userUsername">Username <span class="text-danger">*</span></label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="userUsername" 
+                           name="username" 
+                           placeholder="Masukkan username"
+                           required 
+                           minlength="3" 
+                           maxlength="50"
+                           pattern="^[a-zA-Z0-9_]+$">
+                    <div class="form-text">Hanya huruf, angka, dan underscore (_)</div>
+                    <div class="invalid-feedback" id="usernameError">Username wajib diisi (3-50 karakter, hanya huruf, angka, underscore)</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="userEmail">Email <span class="text-danger">*</span></label>
+                    <input type="email" 
+                           class="form-control" 
+                           id="userEmail" 
+                           name="email" 
+                           placeholder="Masukkan alamat email"
+                           required 
+                           maxlength="150">
+                    <div class="invalid-feedback" id="emailError">Email wajib diisi dengan format yang valid</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="userPassword">Password <span class="text-danger" id="passwordRequired">*</span></label>
+                    <div class="input-group">
+                        <input type="password" 
+                               class="form-control" 
+                               id="userPassword" 
+                               name="password" 
+                               placeholder="Masukkan password"
+                               minlength="6" 
+                               maxlength="100">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="form-text" id="passwordHint">Minimal 6 karakter</div>
+                    <div class="invalid-feedback" id="passwordError">Password wajib diisi (min. 6 karakter)</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="userRole">Role <span class="text-danger">*</span></label>
+                    <select class="form-select" id="userRole" name="role" required>
+                        <option value="">-- Pilih Role --</option>
+                        <option value="student">Student</option>
+                        <option value="lecturer">Lecturer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <div class="invalid-feedback" id="roleError">Role wajib dipilih</div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" onclick="closeModal('userModal')">Batal</button>
+            <button type="button" class="btn btn-primary" onclick="saveUser()" id="saveUserBtn">
+                <span id="saveUserText">Simpan</span>
+                <span id="saveUserLoading" class="d-none">
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    Menyimpan...
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal Fragment -->
+<div class="modal-overlay" id="deleteModal" th:fragment="deleteModal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title">Konfirmasi Hapus</h3>
+            <button class="modal-close" onclick="closeModal('deleteModal')" type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="mb-0">Apakah Anda yakin ingin menghapus <strong id="deleteItemName">item ini</strong>?</p>
+            <p class="text-muted small mt-2 mb-0">Tindakan ini tidak dapat dibatalkan.</p>
+            <input type="hidden" id="deleteItemId">
+            <input type="hidden" id="deleteItemType">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" onclick="closeModal('deleteModal')">Batal</button>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()" id="confirmDeleteBtn">
+                <span id="deleteText">Hapus</span>
+                <span id="deleteLoading" class="d-none">
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    Menghapus...
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container Fragment -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" th:fragment="toastContainer">
+    <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="successToastMessage">
+                Operasi berhasil!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="errorToastMessage">
+                Terjadi kesalahan!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+</html>

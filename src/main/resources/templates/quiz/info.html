@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${quiz.title} + ' | NusaTech'">Quiz | NusaTech</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/index.css}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B1538;
+            --primary-hover: #6d102c;
+            --secondary: #D4A84B;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg-light: #fdf8f3;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+        }
+        
+        .quiz-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .quiz-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .quiz-icon svg {
+            width: 40px;
+            height: 40px;
+            color: white;
+        }
+        
+        .stat-card {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .btn-start {
+            background: var(--primary);
+            border-color: var(--primary);
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        
+        .btn-start:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        .btn-back {
+            color: var(--primary);
+            border-color: var(--primary);
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .badge-passed {
+            background: var(--success);
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .badge-failed {
+            background: var(--danger);
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .attempt-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .attempt-score {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        .attempt-score.passed { color: var(--success); }
+        .attempt-score.failed { color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Main Quiz Card -->
+                <div class="card quiz-card">
+                    <div class="card-body p-5">
+                        <div class="quiz-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        
+                        <h2 class="text-center mb-3" th:text="${quiz.title}">Quiz Title</h2>
+                        <p class="text-muted text-center mb-4" th:text="${quiz.description}">Description</p>
+                        
+                        <!-- Passed Badge -->
+                        <div class="text-center mb-4" th:if="${hasPassed}">
+                            <span class="badge badge-passed rounded-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                Anda Sudah Lulus Quiz Ini
+                            </span>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Stats -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${quiz.questions != null ? quiz.questions.size() : 0}">10</div>
+                                    <div class="stat-label">Soal</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${quiz.passingScore} + '%'">70%</div>
+                                    <div class="stat-label">Passing Score</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${quiz.timeLimit != null ? quiz.timeLimit : '∞'}">30</div>
+                                    <div class="stat-label" th:text="${quiz.timeLimit != null ? 'Menit' : 'Tanpa Batas'}">Menit</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-value" th:text="${remainingAttempts}">3</div>
+                                    <div class="stat-label">Sisa Percobaan</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Best Score -->
+                        <div class="alert alert-success d-flex align-items-center mb-4" th:if="${bestAttempt != null}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                            </svg>
+                            <div>
+                                <strong>Nilai Terbaik:</strong> 
+                                <span th:text="${bestAttempt.score} + '%'">85%</span>
+                                <span th:if="${bestAttempt.isPassed}" class="badge bg-success ms-2">LULUS</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Warning -->
+                        <div class="alert alert-warning" th:if="${!canStart}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            Anda sudah mencapai batas maksimal percobaan untuk quiz ini.
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div class="alert alert-danger" th:if="${error}">
+                            <span th:text="${error}">Error message</span>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3">
+                            <form th:action="@{/quiz/{id}/start(id=${quiz.quizId})}" method="post" th:if="${canStart}">
+                                <button type="submit" class="btn btn-start btn-primary w-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                    Mulai Quiz
+                                </button>
+                            </form>
+                            
+                            <a th:href="@{/learn/{slug}/{lessonId}(slug=${quiz.lesson.section.course.slug}, lessonId=${quiz.lesson.lessonId})}" 
+                               class="btn btn-back btn-outline-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                    <path d="m15 18-6-6 6-6"/>
+                                </svg>
+                                Kembali ke Materi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Previous Attempts -->
+                <div class="card quiz-card mt-4" th:if="${previousAttempts != null && !previousAttempts.isEmpty()}">
+                    <div class="card-body p-4">
+                        <h5 class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            Riwayat Percobaan
+                        </h5>
+                        
+                        <div th:each="attempt, stat : ${previousAttempts}" class="attempt-item">
+                            <div>
+                                <div class="fw-semibold">Percobaan #<span th:text="${previousAttempts.size() - stat.index}">1</span></div>
+                                <small class="text-muted" th:text="${#temporals.format(attempt.completedAt, 'dd MMM yyyy HH:mm')}">01 Jan 2025 10:00</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="attempt-score" th:classappend="${attempt.isPassed} ? 'passed' : 'failed'"
+                                     th:text="${attempt.score} + '%'">85%</div>
+                                <span class="badge" th:classappend="${attempt.isPassed} ? 'bg-success' : 'bg-danger'"
+                                      th:text="${attempt.isPassed} ? 'LULUS' : 'TIDAK LULUS'">LULUS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

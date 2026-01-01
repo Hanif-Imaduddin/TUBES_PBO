@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${lesson.title} + ' - ' + ${course.title}">Belajar - NusaTech</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-primary: #8B1538;
+            --color-primary-dark: #6d102c;
+            --color-primary-light: #f8e8ec;
+            --color-secondary: #D4A84B;
+            --color-text: #2d2d2d;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-bg: #fff;
+            --color-bg-subtle: #fdf8f3;
+            --color-bg-dark: #111827;
+            --color-border: #e5e7eb;
+            --color-success: #059669;
+            --color-success-light: #d1fae5;
+            --color-warning: #d97706;
+            --color-warning-light: #fef3c7;
+            --color-error: #dc2626;
+            --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --sidebar-width: 320px;
+            --header-height: 60px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --transition: all .2s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-primary);
+            color: var(--color-text);
+            background: var(--color-bg-dark);
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* Layout */
+        .learn-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .learn-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+        }
+
+        .course-title {
+            font-size: .9375rem;
+            font-weight: 600;
+            color: var(--color-text);
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 6px;
+            background: var(--color-border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-success);
+            border-radius: 3px;
+            transition: width .3s ease;
+        }
+
+        .progress-text {
+            font-size: .8125rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .btn-toggle-sidebar {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sidebar */
+        .learn-sidebar {
+            position: fixed;
+            top: var(--header-height);
+            right: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: var(--color-bg);
+            border-left: 1px solid var(--color-border);
+            overflow-y: auto;
+            z-index: 90;
+            transition: transform .3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-title {
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--color-text-muted);
+            margin-bottom: .25rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: .9375rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        /* Section List */
+        .section-list {
+            padding: .5rem 0;
+        }
+
+        .section-item {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .section-item:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .section-header:hover {
+            background: var(--color-bg-subtle);
+        }
+
+        .section-info {
+            flex: 1;
+        }
+
+        .section-number {
+            font-size: .75rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            margin-bottom: .125rem;
+        }
+
+        .section-name {
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .section-toggle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-muted);
+            transition: transform .2s ease;
+        }
+
+        .section-item.open .section-toggle {
+            transform: rotate(180deg);
+        }
+
+        .lesson-list {
+            display: none;
+            padding: 0 .75rem .75rem;
+        }
+
+        .section-item.open .lesson-list {
+            display: block;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            padding: .75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lesson-item:hover {
+            background: var(--color-bg-subtle);
+        }
+
+        .lesson-item.active {
+            background: var(--color-primary-light);
+        }
+
+        .lesson-item.completed .lesson-status {
+            background: var(--color-success);
+            border-color: var(--color-success);
+            color: #fff;
+        }
+
+        .lesson-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: .75rem;
+            color: var(--color-text-muted);
+        }
+
+        .lesson-item.active .lesson-status {
+            border-color: var(--color-primary);
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .lesson-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .lesson-name {
+            font-size: .8125rem;
+            font-weight: 500;
+            color: var(--color-text);
+            margin-bottom: .25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .lesson-meta {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-size: .75rem;
+            color: var(--color-text-muted);
+        }
+
+        .lesson-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+        }
+
+        /* Main Content */
+        .learn-main {
+            flex: 1;
+            margin-top: var(--header-height);
+            margin-right: var(--sidebar-width);
+            min-height: calc(100vh - var(--header-height));
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: var(--color-bg-dark);
+        }
+
+        /* Video Container */
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16 / 9;
+            max-height: calc(100vh - var(--header-height) - 300px);
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Text Container */
+        .text-container {
+            background: var(--color-bg);
+            min-height: 400px;
+        }
+
+        .text-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .text-content h1, .text-content h2, .text-content h3 {
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        .text-content p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+        }
+
+        .text-content pre {
+            background: var(--color-bg-subtle);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .text-content code {
+            font-family: 'Fira Code', monospace;
+            font-size: .875rem;
+        }
+
+        /* PDF Container */
+        .pdf-container {
+            background: var(--color-bg-subtle);
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pdf-embed {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+
+        /* Info Panel (Below Content) */
+        .info-panel {
+            background: var(--color-bg);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .lesson-title-main {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: .25rem;
+        }
+
+        .lesson-meta-main {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: .875rem;
+            color: var(--color-text-muted);
+        }
+
+        .btn-complete {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-complete.incomplete {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .btn-complete.incomplete:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .btn-complete.completed {
+            background: var(--color-success-light);
+            color: var(--color-success);
+        }
+
+        /* Tabs */
+        .info-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 2rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--color-text);
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Description Tab */
+        .description-content {
+            max-width: 800px;
+            line-height: 1.7;
+            color: var(--color-text-secondary);
+        }
+
+        /* Discussion Tab */
+        .discussion-form {
+            margin-bottom: 2rem;
+        }
+
+        .discussion-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: .9375rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: var(--transition);
+        }
+
+        .discussion-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+
+        .discussion-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: .75rem;
+        }
+
+        .btn-post {
+            padding: .625rem 1.25rem;
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-post:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .discussion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .discussion-item {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .discussion-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: .875rem;
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .discussion-content {
+            flex: 1;
+        }
+
+        .discussion-header {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: .5rem;
+        }
+
+        .discussion-author {
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .discussion-time {
+            font-size: .75rem;
+            color: var(--color-text-muted);
+        }
+
+        .discussion-badge {
+            font-size: .6875rem;
+            font-weight: 600;
+            padding: .125rem .5rem;
+            border-radius: 10px;
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
+
+        .discussion-text {
+            font-size: .9375rem;
+            line-height: 1.6;
+            color: var(--color-text-secondary);
+            margin-bottom: .75rem;
+        }
+
+        .discussion-footer {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-discussion-action {
+            display: inline-flex;
+            align-items: center;
+            gap: .375rem;
+            font-size: .8125rem;
+            color: var(--color-text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: .25rem .5rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .btn-discussion-action:hover {
+            background: var(--color-bg-subtle);
+            color: var(--color-text);
+        }
+
+        /* Notes Tab */
+        .notes-container {
+            max-width: 800px;
+        }
+
+        .notes-input {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: .9375rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+
+        .notes-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: .75rem;
+        }
+
+        .notes-status {
+            font-size: .8125rem;
+            color: var(--color-text-muted);
+        }
+
+        .notes-status.saving {
+            color: var(--color-warning);
+        }
+
+        .notes-status.saved {
+            color: var(--color-success);
+        }
+
+        /* Navigation Buttons */
+        .lesson-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--color-border);
+            background: var(--color-bg-subtle);
+        }
+
+        .btn-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-size: .875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .btn-nav:hover {
+            background: var(--color-bg-subtle);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn-nav.disabled {
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        .btn-nav.primary {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+        .btn-nav.primary:hover {
+            background: var(--color-primary-dark);
+        }
+
+        /* Video Controls Custom */
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,.8));
+            padding: 2rem 1rem 1rem;
+            opacity: 0;
+            transition: opacity .3s ease;
+        }
+
+        .video-container:hover .video-controls {
+            opacity: 1;
+        }
+
+        .video-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,.3);
+            border-radius: 2px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .video-progress-fill {
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .video-progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .video-progress:hover .video-progress-fill::after {
+            opacity: 1;
+        }
+
+        .video-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .video-buttons-left, .video-buttons-right {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-video {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .btn-video:hover {
+            background: rgba(255,255,255,.1);
+        }
+
+        .video-time {
+            font-size: .8125rem;
+            color: rgba(255,255,255,.8);
+            margin-left: .5rem;
+        }
+
+        .speed-selector {
+            position: relative;
+        }
+
+        .speed-btn {
+            padding: .375rem .75rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: .8125rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .speed-btn:hover {
+            background: rgba(255,255,255,.1);
+        }
+
+        .speed-menu {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            padding: .5rem 0;
+            display: none;
+            min-width: 100px;
+        }
+
+        .speed-menu.show {
+            display: block;
+        }
+
+        .speed-option {
+            padding: .5rem 1rem;
+            font-size: .8125rem;
+            color: var(--color-text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .speed-option:hover {
+            background: var(--color-bg-subtle);
+        }
+
+        .speed-option.active {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--color-text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: .5;
+        }
+
+        .empty-state p {
+            font-size: .9375rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .learn-sidebar {
+                transform: translateX(100%);
+            }
+
+            .learn-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .learn-main {
+                margin-right: 0;
+            }
+
+            .btn-toggle-sidebar {
+                display: flex;
+            }
+
+            .header-center {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .lesson-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .info-tabs {
+                padding: 0 1rem;
+                overflow-x: auto;
+            }
+
+            .tab-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 85;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="learn-header">
+        <div class="header-left">
+            <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                <span>Kembali</span>
+            </a>
+            <span class="course-title" th:text="${course.title}">Nama Kursus</span>
+        </div>
+        
+        <div class="header-center">
+            <div class="progress-wrapper">
+                <div class="progress-bar">
+                    <div class="progress-fill" th:style="'width:' + ${progress} + '%'"></div>
+                </div>
+                <span class="progress-text"><span th:text="${progress}">0</span>% selesai</span>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <button class="btn-toggle-sidebar" onclick="toggleSidebar()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Layout -->
+    <div class="learn-layout">
+        <!-- Main Content -->
+        <main class="learn-main">
+            <!-- Content Area - Changes based on lesson type -->
+            <div class="content-area" th:if="${lesson.contentType.name() == 'video'}">
+                <!-- Video Content -->
+                <div th:replace="~{student/fragments/learn-video :: video-content}"></div>
+            </div>
+            <div class="content-area" th:if="${lesson.contentType.name() == 'text'}">                
+                <!-- Text Content -->
+                <div th:replace="~{student/fragments/learn-text :: text-content}"></div>
+            </div>
+            <div class="content-area" th:if="${lesson.contentType.name() == 'pdf'}">                
+                <!-- PDF Content -->
+                <div th:replace="~{student/fragments/learn-pdf :: pdf-content}"></div>
+            </div>
+            
+            <!-- Quiz Content -->
+            <div class="content-area" th:if="${lesson.contentType.name() == 'quiz'}" style="background: var(--color-bg);">
+                <div style="max-width: 600px; margin: 0 auto; padding: 4rem 2rem; text-align: center;">
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #8B1538, #D4A84B); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3 style="font-weight: 700; margin-bottom: 0.75rem;">Quiz: <span th:text="${lesson.title}">Quiz Title</span></h3>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 2rem;" th:text="${lesson.description != null ? lesson.description : 'Uji pemahaman Anda dengan mengerjakan quiz ini.'}">
+                        Uji pemahaman Anda dengan mengerjakan quiz ini.
+                    </p>
+                    <a th:if="${quiz != null}" th:href="@{/quiz/{id}(id=${quiz.quizId})}" 
+                       style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: #8B1538; color: white; border-radius: 10px; font-weight: 600; font-size: 1rem; text-decoration: none; transition: all 0.2s ease;"
+                       onmouseover="this.style.background='#6d102c'" 
+                       onmouseout="this.style.background='#8B1538'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        Mulai Quiz
+                    </a>
+                    <div th:unless="${quiz != null}" style="padding: 1rem; background: #fff3cd; border-radius: 10px; color: #856404;">
+                        Quiz belum tersedia untuk materi ini.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <!-- Header -->
+                <div class="info-header">
+                    <div>
+                        <h1 class="lesson-title-main" th:text="${lesson.title}">Judul Materi</h1>
+                        <div class="lesson-meta-main">
+                            <span th:text="${lesson.contentType.name() == 'video'} ? 'Video' : (${lesson.contentType.name() == 'text'} ? 'Artikel' : 'PDF')">Tipe</span>
+                            <span th:if="${lesson.duration > 0}">
+                                <span th:text="${lesson.duration}">10</span> menit
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn-complete" 
+                            th:classappend="${isCompleted} ? 'completed' : 'incomplete'"
+                            th:data-lesson-id="${lesson.lessonId}"
+                            onclick="toggleComplete(this)">
+                        <svg th:if="${!isCompleted}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        <svg th:if="${isCompleted}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <span th:text="${isCompleted} ? 'Selesai' : 'Tandai Selesai'">Tandai Selesai</span>
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="info-tabs">
+                    <button class="tab-btn active" onclick="showTab('description')">Deskripsi</button>
+                    <button class="tab-btn" onclick="showTab('discussion')">
+                        Diskusi
+                        <span th:if="${discussionCount != null && discussionCount > 0}" 
+                              style="background: var(--color-primary); color: white; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 10px; margin-left: 0.375rem;"
+                              th:text="${discussionCount}">0</span>
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content active" id="tab-description">
+                    <div class="description-content">
+                        <p th:if="${lesson.description}" th:utext="${lesson.description}">Deskripsi materi akan tampil di sini.</p>
+                        <p th:unless="${lesson.description}" class="text-muted">Tidak ada deskripsi untuk materi ini.</p>
+                    </div>
+                </div>
+                
+                <!-- Discussion Tab Content -->
+                <div class="tab-content" id="tab-discussion">
+                    <div class="discussion-content">
+                        <!-- Discussion Header -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h6 style="margin: 0; font-weight: 600;">Diskusi Materi</h6>
+                            <a th:href="@{/discussion/create/{id}(id=${lesson.lessonId})}" 
+                               style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; background: #8B1538; color: white; border-radius: 6px; font-size: 0.875rem; font-weight: 500; text-decoration: none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Buat Diskusi
+                            </a>
+                        </div>
+                        
+                        <!-- Recent Discussions -->
+                        <div th:if="${recentDiscussions != null && !recentDiscussions.isEmpty()}">
+                            <div th:each="disc : ${recentDiscussions}" 
+                                 style="padding: 1rem; background: var(--color-bg-subtle); border-radius: 8px; margin-bottom: 0.75rem; border: 1px solid var(--color-border);">
+                                <a th:href="@{/discussion/{id}(id=${disc.discussionId})}" 
+                                   style="font-weight: 600; color: var(--color-text); text-decoration: none; display: block; margin-bottom: 0.5rem;">
+                                    <span th:if="${disc.title != null}" th:text="${disc.title}">Judul</span>
+                                    <span th:unless="${disc.title != null}" th:text="${#strings.abbreviate(disc.content, 60)}">Konten</span>
+                                    <span th:if="${disc.isResolved}" style="background: #28a745; color: white; font-size: 0.6875rem; padding: 0.125rem 0.375rem; border-radius: 4px; margin-left: 0.5rem;">✓ Solved</span>
+                                </a>
+                                <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.8125rem; color: var(--color-text-muted);">
+                                    <span th:text="${disc.user.firstName + ' ' + disc.user.lastName}">User</span>
+                                    <span>·</span>
+                                    <span th:text="${#temporals.format(disc.createdAt, 'dd MMM')}">01 Jan</span>
+                                    <span>·</span>
+                                    <span th:text="${disc.replyCount} + ' balasan'">0 balasan</span>
+                                </div>
+                            </div>
+                            
+                            <!-- View All Link -->
+                            <a th:href="@{/discussion/lesson/{id}(id=${lesson.lessonId})}" 
+                               style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; color: #8B1538; font-weight: 500; text-decoration: none; border: 1px dashed #8B1538; border-radius: 8px; margin-top: 1rem;">
+                                Lihat Semua Diskusi
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m9 18 6-6-6-6"/>
+                                </svg>
+                            </a>
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div th:if="${recentDiscussions == null || recentDiscussions.isEmpty()}" 
+                             style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; opacity: 0.5;">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <p style="margin-bottom: 0.5rem;">Belum ada diskusi untuk materi ini</p>
+                            <p style="font-size: 0.875rem;">Punya pertanyaan? Mulai diskusi baru!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="lesson-nav">
+                    <a th:href="${prevLesson != null} ? @{/learn/{slug}/{id}(slug=${course.slug}, id=${prevLesson.lessonId})} : '#'" 
+                       class="btn-nav" 
+                       th:classappend="${prevLesson == null} ? 'disabled' : ''">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                        <span>Sebelumnya</span>
+                    </a>
+                    <a th:href="${nextLesson != null} ? @{/learn/{slug}/{id}(slug=${course.slug}, id=${nextLesson.lessonId})} : '#'" 
+                       class="btn-nav primary" 
+                       th:classappend="${nextLesson == null} ? 'disabled' : ''">
+                        <span>Selanjutnya</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="learn-sidebar" id="learnSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Konten Kursus</div>
+                <div class="sidebar-subtitle" th:text="${course.totalLessons} + ' Materi'">12 Materi</div>
+            </div>
+
+            <div class="section-list">
+                <div th:each="section, sectionStat : ${sections}" class="section-item" th:classappend="${section.hasActiveLesson} ? 'open' : ''">
+                    <div class="section-header" th:onclick="'toggleSectionList(' + ${sectionStat.index} + ')'">
+                        <div class="section-info">
+                            <div class="section-number">Section <span th:text="${sectionStat.index + 1}">1</span></div>
+                            <div class="section-name" th:text="${section.title}">Nama Section</div>
+                        </div>
+                        <span class="section-toggle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="lesson-list">
+                        <a th:each="lessonItem : ${section.lessons}" 
+                           th:href="@{/learn/{slug}/{id}(slug=${course.slug}, id=${lessonItem.lessonId})}"
+                           class="lesson-item"
+                           th:classappend="${lessonItem.lessonId == lesson.lessonId} ? 'active' : (${lessonItem.isCompleted} ? 'completed' : '')">
+                            <span class="lesson-status">
+                                <svg th:if="${lessonItem.isCompleted}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <svg th:unless="${lessonItem.isCompleted}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon th:if="${lessonItem.contentType == 'video'}" points="5 3 19 12 5 21 5 3"/>
+                                    <path th:if="${lessonItem.contentType == 'text'}" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <path th:if="${lessonItem.contentType == 'pdf'}" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                </svg>
+                            </span>
+                            <div class="lesson-info">
+                                <div class="lesson-name" th:text="${lessonItem.title}">Nama Materi</div>
+                                <div class="lesson-meta">
+                                    <span class="lesson-type-badge">
+                                        <span th:text="${lessonItem.contentType == 'video'} ? 'Video' : (${lessonItem.contentType == 'text'} ? 'Artikel' : 'PDF')">Video</span>
+                                    </span>
+                                    <span th:if="${lessonItem.duration > 0}" th:text="${lessonItem.duration} + ' menit'">5 menit</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script th:inline="javascript">
+        const courseSlug = /*[[${course.slug}]]*/ '';
+        const lessonId = /*[[${lesson.lessonId}]]*/ 0;
+        
+        // Toggle Sidebar
+        function toggleSidebar() {
+            document.getElementById('learnSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        // Toggle Section List
+        function toggleSectionList(index) {
+            const sections = document.querySelectorAll('.section-item');
+            sections[index].classList.toggle('open');
+        }
+
+        // Show Tab
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // Toggle Complete
+        function toggleComplete(btn) {
+            const lessonId = btn.dataset.lessonId;
+            const isCompleted = btn.classList.contains('completed');
+            
+            fetch('/learn/api/progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lessonId: parseInt(lessonId), completed: !isCompleted })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btn.classList.toggle('completed');
+                    btn.classList.toggle('incomplete');
+                    btn.querySelector('span').textContent = btn.classList.contains('completed') ? 'Selesai' : 'Tandai Selesai';
+                    
+                    // Update sidebar
+                    const lessonItem = document.querySelector(`.lesson-item[href*="/${lessonId}"]`);
+                    if (lessonItem) {
+                        lessonItem.classList.toggle('completed');
+                    }
+                    
+                    // Update progress bar
+                    if (data.progress !== undefined) {
+                        document.querySelector('.progress-fill').style.width = data.progress + '%';
+                        document.querySelector('.progress-text span').textContent = data.progress;
+                    }
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        // Page loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Learn page loaded for lesson: ' + lessonId);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Diskusi - ' + ${lesson.title} + ' | NusaTech'">Diskusi | NusaTech</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/index.css}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B1538;
+            --primary-hover: #6d102c;
+            --secondary: #D4A84B;
+            --success: #28a745;
+            --bg-light: #fdf8f3;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .discussion-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .discussion-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: var(--primary);
+        }
+        
+        .discussion-card.pinned {
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .discussion-card.resolved {
+            opacity: 0.7;
+        }
+        
+        .discussion-body {
+            padding: 1.25rem;
+        }
+        
+        .discussion-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        
+        .discussion-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .discussion-title:hover {
+            color: var(--primary);
+        }
+        
+        .discussion-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        .badge-pinned {
+            background: var(--secondary);
+            color: #333;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .badge-resolved {
+            background: var(--success);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .discussion-content {
+            color: #6c757d;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .discussion-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .discussion-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .author-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .author-info {
+            font-size: 0.875rem;
+        }
+        
+        .author-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .author-time {
+            color: #6c757d;
+        }
+        
+        .discussion-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .stat-item svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .btn-upvote {
+            border: 1px solid #dee2e6;
+            background: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .btn-upvote:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-upvote.voted {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            color: #dee2e6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-create {
+            background: var(--primary);
+            border-color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .btn-create:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/}">Beranda</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/courses/{slug}(slug=${course.slug})}" th:text="${course.title}">Course</a></li>
+                    <li class="breadcrumb-item active">Diskusi</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h4 mb-1">Diskusi</h1>
+                    <p class="text-muted mb-0" th:text="'Materi: ' + ${lesson.title}">Materi</p>
+                </div>
+                <a th:href="@{/discussion/create/{id}(id=${lesson.lessonId})}" class="btn btn-primary btn-create">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Buat Diskusi
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container pb-5">
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- Stats -->
+        <div class="mb-4">
+            <span class="text-muted" th:text="${discussionCount} + ' diskusi'">0 diskusi</span>
+        </div>
+        
+        <!-- Discussions List -->
+        <div th:if="${discussions != null && !discussions.isEmpty()}">
+            <div th:each="discussion : ${discussions}" 
+                 class="discussion-card"
+                 th:classappend="${discussion.isPinned} ? 'pinned' : (${discussion.isResolved} ? 'resolved' : '')">
+                <div class="discussion-body">
+                    <div class="discussion-header">
+                        <a th:href="@{/discussion/{id}(id=${discussion.discussionId})}" class="discussion-title">
+                            <span th:if="${discussion.title != null}" th:text="${discussion.title}">Judul Diskusi</span>
+                            <span th:unless="${discussion.title != null}" th:text="${#strings.abbreviate(discussion.content, 80)}">Konten Diskusi</span>
+                        </a>
+                        <div class="discussion-badges">
+                            <span th:if="${discussion.isPinned}" class="badge badge-pinned">📌 Pinned</span>
+                            <span th:if="${discussion.isResolved}" class="badge badge-resolved">✓ Solved</span>
+                        </div>
+                    </div>
+                    
+                    <p class="discussion-content" th:text="${discussion.content}">Konten diskusi...</p>
+                    
+                    <div class="discussion-meta">
+                        <div class="discussion-author">
+                            <div class="author-avatar" th:text="${#strings.substring(discussion.user.firstName, 0, 1)}">U</div>
+                            <div class="author-info">
+                                <span class="author-name" th:text="${discussion.user.firstName + ' ' + discussion.user.lastName}">User Name</span>
+                                <span class="author-time">
+                                    · <span th:text="${#temporals.format(discussion.createdAt, 'dd MMM yyyy')}">01 Jan 2025</span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="discussion-stats">
+                            <button class="btn-upvote" 
+                                    th:classappend="${userVotes[discussion.discussionId]} ? 'voted' : ''"
+                                    th:data-id="${discussion.discussionId}"
+                                    onclick="toggleUpvote(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                                </svg>
+                                <span th:text="${discussion.upvoteCount}">0</span>
+                            </button>
+                            
+                            <span class="stat-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <span th:text="${discussion.replyCount}">0</span> balasan
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div th:if="${discussions == null || discussions.isEmpty()}" class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <h5>Belum ada diskusi</h5>
+            <p class="text-muted mb-4">Jadilah yang pertama memulai diskusi untuk materi ini!</p>
+            <a th:href="@{/discussion/create/{id}(id=${lesson.lessonId})}" class="btn btn-primary btn-create">
+                Buat Diskusi Pertama
+            </a>
+        </div>
+        
+        <!-- Back Link -->
+        <div class="mt-4">
+            <a th:href="@{/learn/{slug}/{id}(slug=${course.slug}, id=${lesson.lessonId})}" class="btn btn-outline-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                Kembali ke Materi
+            </a>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        function toggleUpvote(btn) {
+            const discussionId = btn.dataset.id;
+            
+            fetch('/discussion/' + discussionId + '/upvote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btn.classList.toggle('voted', data.hasVoted);
+                    btn.querySelector('span').textContent = data.upvoteCount;
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <!-- NusaTech Logo - Dikoding Muda Nusantara -->
+  <defs>
+    <linearGradient id="maroonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B1538"/>
+      <stop offset="100%" style="stop-color:#6d102c"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4A84B"/>
+      <stop offset="100%" style="stop-color:#c49b2f"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Logo Icon -->
+  <g transform="translate(5, 5)">
+    <!-- Code brackets -->
+    <path d="M15 10 L5 20 L15 30" fill="none" stroke="url(#maroonGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M25 10 L35 20 L25 30" fill="none" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Center dot -->
+    <circle cx="20" cy="20" r="4" fill="url(#maroonGrad)"/>
+  </g>
+  
+  <!-- Brand Text -->
+  <text x="50" y="32" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="24" font-weight="700">
+    <tspan fill="#8B1538">Nusa</tspan><tspan fill="#D4A84B">Tech</tspan>
+  </text>
+</svg>
