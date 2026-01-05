@@ -78,4 +78,14 @@ public class Balance {
     public void setLastUpdateDate(LocalDate lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
     }
+    
+    public Double add(Double amount){
+        this.amount = this.amount + amount;
+        return this.amount;
+    }
+    
+    public Double withdraw(Double amount){
+        this.amount = this.amount - amount;
+        return this.amount;
+    }
 }

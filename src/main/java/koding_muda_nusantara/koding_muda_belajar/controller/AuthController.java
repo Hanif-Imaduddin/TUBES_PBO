@@ -39,7 +39,7 @@ public class AuthController {
 
     // ==================== HOME ====================
     
-    @GetMapping("/")
+    @GetMapping("/") // end point
     public String home(Model model,HttpSession session) {
         User user = (User) session.getAttribute("user");
         

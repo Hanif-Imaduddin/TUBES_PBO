@@ -13,7 +13,9 @@ import koding_muda_nusantara.koding_muda_belajar.dto.ChangePasswordDTO;
 import koding_muda_nusantara.koding_muda_belajar.dto.UpdateProfileDTO;
 import koding_muda_nusantara.koding_muda_belajar.exception.BadRequestException;
 import koding_muda_nusantara.koding_muda_belajar.exception.ResourceNotFoundException;
+import koding_muda_nusantara.koding_muda_belajar.model.Balance;
 import koding_muda_nusantara.koding_muda_belajar.model.User;
+import koding_muda_nusantara.koding_muda_belajar.repository.BalanceRepository;
 import koding_muda_nusantara.koding_muda_belajar.repository.UserRepository;
 
 @Service
@@ -25,6 +27,9 @@ public class AccountService {
 
     @Autowired(required = false)
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private BalanceRepository balanceRepository;
 
     // Repositories untuk stats (opsional)
     @Autowired(required = false)
@@ -212,5 +217,9 @@ public class AccountService {
                 accountInfo.setTotalEarnings(BigDecimal.ZERO);
             }
         }
+    }
+    
+    public Balance getAccountBalance(Integer userId){
+        return balanceRepository.getReferenceById(userId);
     }
 }

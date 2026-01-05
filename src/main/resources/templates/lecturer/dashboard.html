@@ -64,26 +64,6 @@
                     <div class="stat-header">
                         <div class="stat-icon yellow">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="1" x2="12" y2="23"></line>
-                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                            </svg>
-                        </div>
-                        <span class="stat-trend up" th:if="${earningsTrend != null and earningsTrend > 0}">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                <polyline points="17 6 23 6 23 12"></polyline>
-                            </svg>
-                            +<span th:text="${earningsTrend}">12</span>%
-                        </span>
-                    </div>
-                    <div class="stat-value" th:text="${totalEarnings != null} ? 'Rp ' + ${#numbers.formatInteger(totalEarnings, 3, 'POINT')} : 'Rp 0'">Rp 12.500.000</div>
-                    <div class="stat-label">Total Pendapatan</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon red">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                             </svg>
                         </div>
@@ -102,22 +82,8 @@
 
             <!-- Dashboard Grid -->
             <div class="dashboard-grid">
-                <!-- Left Column -->
+                <!-- Left Column - Kursus Saya -->
                 <div>
-                    <!-- Earnings Chart -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h2 class="card-title">Pendapatan Bulanan</h2>
-                            <a href="/lecturer/earnings" class="card-link">Lihat Detail</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-placeholder" id="earningsChart">
-                                Grafik Pendapatan
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Courses -->
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title">Kursus Saya</h2>
@@ -136,8 +102,8 @@
                                     <div class="course-info">
                                         <h3 class="course-title" th:text="${course.title}">Judul Kursus</h3>
                                         <div class="course-meta">
-                                            <span th:text="${course.students != null ? course.students : 0} + ' pelajar'">0 pelajar</span>
-                                            <span th:text="${course.rating != null ? course.rating : '-'} + ' rating'">- rating</span>
+                                            <span th:text="${course.totalStudents != null ? course.totalStudents : 0} + ' pelajar'">0 pelajar</span>
+                                            <span th:text="${course.averageRating != null and course.averageRating > 0 ? #numbers.formatDecimal(course.averageRating, 1, 1) : '-'} + ' rating'">- rating</span>
                                         </div>
                                     </div>
                                     <span th:class="'course-status status-' + ${course.status.name().toLowerCase()}" 
@@ -160,104 +126,55 @@
                     </div>
                 </div>
 
-                <!-- Right Column -->
+                <!-- Right Column - Review Terbaru -->
                 <div>
-                    <!-- Recent Activity -->
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Aktivitas Terbaru</h2>
+                            <h2 class="card-title">Review Terbaru</h2>
                         </div>
-                        <div class="card-body">
-                            <!-- Dynamic Activity Items -->
-                            <div th:if="${activities != null and !activities.isEmpty()}">
-                                <div th:each="activity : ${activities}" class="activity-item">
-                                    <div th:class="'activity-icon ' + ${activity.type}">
-                                        <svg th:if="${activity.type == 'sale'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                        </svg>
-                                        <svg th:if="${activity.type == 'review'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                        <svg th:if="${activity.type == 'enroll'}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                            <circle cx="8.5" cy="7" r="4"></circle>
-                                            <line x1="20" y1="8" x2="20" y2="14"></line>
-                                            <line x1="23" y1="11" x2="17" y2="11"></line>
-                                        </svg>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text" th:utext="${activity.text}">Aktivitas</div>
-                                        <div class="activity-time" th:text="${activity.time}">5 menit yang lalu</div>
-                                    </div>
+                        <div class="card-body p-0">
+                            <!-- Review List -->
+                            <div class="review-list">
+                                <div th:if="${recentReviews != null and !recentReviews.isEmpty()}">
+                                    <a th:each="review : ${recentReviews}" 
+                                       th:href="@{/courses/{slug}(slug=${review.courseSlug})}" 
+                                       class="review-item">
+                                        <div class="review-header">
+                                            <div class="review-user">
+                                                <div class="review-avatar" th:text="${#strings.substring(review.studentFirstName, 0, 1) + (#strings.isEmpty(review.studentLastName) ? '' : #strings.substring(review.studentLastName, 0, 1))}">U</div>
+                                                <div class="review-user-info">
+                                                    <div class="review-user-name" th:text="${review.studentFirstName + ' ' + (review.studentLastName != null ? review.studentLastName : '')}">Nama User</div>
+                                                    <div class="review-course-title" th:text="${review.courseTitle}">Nama Kursus</div>
+                                                </div>
+                                            </div>
+                                            <div class="review-rating">
+                                                <span class="rating-stars">
+                                                    <span th:each="i : ${#numbers.sequence(1, 5)}" 
+                                                          th:class="${i <= review.rating} ? 'star filled' : 'star'">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+                                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                        </svg>
+                                                    </span>
+                                                </span>
+                                                <span class="rating-value" th:text="${review.rating + '.0'}">5.0</span>
+                                            </div>
+                                        </div>
+                                        <div class="review-content" th:if="${review.reviewText != null and !review.reviewText.isEmpty()}">
+                                            <p th:text="${#strings.abbreviate(review.reviewText, 150)}">Review text content...</p>
+                                        </div>
+                                        <div class="review-meta">
+                                            <span class="review-date" th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy HH:mm')}">01 Jan 2025</span>
+                                            <span class="review-link-hint">Klik untuk melihat kursus</span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </div>
-
-                            <!-- Sample Activities (remove when using real data) -->
-                            <div th:if="${activities == null or activities.isEmpty()}">
-                                <div class="activity-item">
-                                    <div class="activity-icon sale">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text"><strong>Ahmad Rizky</strong> membeli kursus JavaScript</div>
-                                        <div class="activity-time">5 menit yang lalu</div>
-                                    </div>
-                                </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-icon review">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text"><strong>Siti Nurhaliza</strong> memberi rating 5 bintang</div>
-                                        <div class="activity-time">1 jam yang lalu</div>
-                                    </div>
-                                </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-icon enroll">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                            <circle cx="8.5" cy="7" r="4"></circle>
-                                            <line x1="20" y1="8" x2="20" y2="14"></line>
-                                            <line x1="23" y1="11" x2="17" y2="11"></line>
-                                        </svg>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text"><strong>12 pelajar baru</strong> bergabung hari ini</div>
-                                        <div class="activity-time">3 jam yang lalu</div>
-                                    </div>
-                                </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-icon sale">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text"><strong>Dewi Anggraini</strong> membeli kursus React.js</div>
-                                        <div class="activity-time">5 jam yang lalu</div>
-                                    </div>
-                                </div>
-
-                                <div class="activity-item">
-                                    <div class="activity-icon review">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                        </svg>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-text"><strong>Budi Hartono</strong> menambahkan ulasan baru</div>
-                                        <div class="activity-time">Kemarin</div>
-                                    </div>
+                                
+                                <!-- Empty state -->
+                                <div class="review-empty" th:if="${recentReviews == null or recentReviews.isEmpty()}">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    <p>Belum ada review</p>
                                 </div>
                             </div>
                         </div>
@@ -267,6 +184,144 @@
         </div>
     </main>
 </div>
+
+<style>
+/* Review List Styles */
+.review-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.review-item {
+    display: block;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s;
+}
+
+.review-item:hover {
+    background-color: #f9fafb;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.review-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.review-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.review-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.review-user-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.875rem;
+}
+
+.review-course-title {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.rating-stars .star {
+    color: #d1d5db;
+}
+
+.rating-stars .star.filled {
+    color: #fbbf24;
+}
+
+.rating-value {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.875rem;
+}
+
+.review-content {
+    margin-bottom: 0.5rem;
+}
+
+.review-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.review-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.review-link-hint {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.review-item:hover .review-link-hint {
+    opacity: 1;
+}
+
+.review-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #9ca3af;
+}
+
+.review-empty svg {
+    margin-bottom: 1rem;
+}
+
+.review-empty p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+</style>
 
 <!-- Scripts -->
 <th:block th:replace="~{fragments/lecturer-layout :: scripts}"></th:block>
