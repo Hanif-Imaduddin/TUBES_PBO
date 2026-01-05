@@ -17,9 +17,12 @@ import java.util.List;
 import java.util.Optional;
 import koding_muda_nusantara.koding_muda_belajar.enums.EnrollmentStatus;
 import koding_muda_nusantara.koding_muda_belajar.enums.PaymentStatus;
+import koding_muda_nusantara.koding_muda_belajar.model.Balance;
 import koding_muda_nusantara.koding_muda_belajar.model.CartItem;
+import koding_muda_nusantara.koding_muda_belajar.model.Lecturer;
 import koding_muda_nusantara.koding_muda_belajar.model.Transaction;
 import koding_muda_nusantara.koding_muda_belajar.model.TransactionItem;
+import koding_muda_nusantara.koding_muda_belajar.repository.BalanceRepository;
 import koding_muda_nusantara.koding_muda_belajar.repository.CartItemRepository;
 import koding_muda_nusantara.koding_muda_belajar.repository.TransactionItemRepository;
 import koding_muda_nusantara.koding_muda_belajar.repository.TransactionRepository;
@@ -44,6 +47,9 @@ public class EnrollmentService {
     
     @Autowired
     private CartItemRepository cartItemRepository;
+    
+    @Autowired
+    private BalanceRepository balanceRepository;
 
     // ==================== CHECK ENROLLMENT ====================
 
@@ -243,6 +249,17 @@ public class EnrollmentService {
                 CartItem cartItem = cartItemRepository.findByStudentUserIdAndCourseCourseId(transaction.getStudent().getUserId(), item.getCourse().getCourseId())
                         .orElseThrow(() -> new RuntimeException("Cart Item tidak ditemukan"));
                 cartItemRepository.delete(cartItem);
+                
+                // Menambahkan saldo ke lecturer
+                Course course = courseRepository.getReferenceById(item.getCourse().getCourseId());
+                Balance lectererBalance = balanceRepository.getReferenceById(course.getLecturer().getUserId());
+                
+                lectererBalance.add(item.getPrice().doubleValue());
+                
+                balanceRepository.save(lectererBalance);
+                System.out.println("=========== Debug Tambah Saldo (\"===========");
+                System.out.println(course.getCourseId() +" "+course.getLecturer().getFirstName()+" "+lectererBalance.getUserId());
+                System.out.println("=========== Debug Tambah Saldo (\"===========");
                 System.out.println(enrollment);
             }
         }

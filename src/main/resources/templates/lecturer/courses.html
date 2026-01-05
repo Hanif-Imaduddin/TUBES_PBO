@@ -1,1131 +1,482 @@
 <!DOCTYPE html>
 <html lang="id" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head th:replace="~{fragments/lecturer-layout :: head(title='Kursus Saya')}">
     <title>Kursus Saya - Dikoding Muda Nusantara</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
-    
-    <style>
-        :root {
-            --color-primary: #1a56db;
-            --color-primary-dark: #1e40af;
-            --color-primary-light: #e0e7ff;
-            --color-text: #111827;
-            --color-text-secondary: #6b7280;
-            --color-text-muted: #9ca3af;
-            --color-bg: #ffffff;
-            --color-bg-subtle: #f9fafb;
-            --color-border: #e5e7eb;
-            --color-success: #059669;
-            --color-success-light: #d1fae5;
-            --color-warning: #d97706;
-            --color-warning-light: #fef3c7;
-            --color-error: #dc2626;
-            --color-error-light: #fee2e2;
-            --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-            --transition: all 0.2s ease;
-            --sidebar-width: 260px;
-        }
+</head>
+<!-- Page Specific Styles -->
+<style>
+    /* Stats Row */
+    .stats-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .stat-mini-card {
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.5rem;
+        min-width: 140px;
+    }
 
-        body {
-            font-family: var(--font-primary);
-            color: var(--color-text);
-            background-color: var(--color-bg-subtle);
-            line-height: 1.6;
-            font-size: 15px;
-            -webkit-font-smoothing: antialiased;
-        }
+    .stat-mini-label {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        margin-bottom: 0.25rem;
+    }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-            transition: var(--transition);
-        }
+    .stat-mini-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-text);
+    }
 
-        .dashboard-layout {
-            display: flex;
-            min-height: 100vh;
-        }
+    .stat-mini-value.text-success {
+        color: var(--color-success);
+    }
 
-        /* Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--color-bg);
-            border-right: 1px solid var(--color-border);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-            transition: var(--transition);
-        }
+    .stat-mini-value.text-warning {
+        color: var(--color-warning);
+    }
 
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--color-border);
-        }
+    /* Filter Select */
+    .filter-select {
+        width: auto;
+        min-width: 150px;
+    }
 
-        .sidebar-logo {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--color-text);
-        }
+    /* Course Cell */
+    .course-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
-        .sidebar-logo span {
-            color: var(--color-primary);
-        }
+    .course-thumb {
+        width: 80px;
+        height: 45px;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        background: var(--color-bg-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 
-        .sidebar-nav {
-            padding: 1rem 0;
-        }
+    .course-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-        .nav-section {
-            padding: 0 1rem;
-            margin-bottom: 1.5rem;
-        }
+    .course-thumb.no-thumbnail {
+        background: linear-gradient(135deg, var(--color-primary-light) 0%, #a7f3d0 100%);
+        color: var(--color-primary);
+        font-size: 0.6875rem;
+        font-weight: 500;
+    }
 
-        .nav-section-title {
-            font-size: 0.6875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--color-text-muted);
-            padding: 0 0.75rem;
-            margin-bottom: 0.5rem;
-        }
+    .course-details h3 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 0.125rem;
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: var(--radius-sm);
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            font-size: 0.9375rem;
-            margin-bottom: 0.25rem;
-            transition: var(--transition);
-        }
+    .course-details p {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+        margin: 0;
+    }
 
-        .nav-item:hover {
-            background: var(--color-bg-subtle);
-            color: var(--color-text);
-        }
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        padding: 0.25rem 0.75rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
 
-        .nav-item.active {
-            background: var(--color-primary-light);
-            color: var(--color-primary);
-        }
+    .status-published {
+        background: var(--color-success-light);
+        color: var(--color-success);
+    }
 
-        .nav-item svg {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
+    .status-draft {
+        background: var(--color-warning-light);
+        color: var(--color-warning);
+    }
 
-        .sidebar-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--color-border);
-            margin-top: auto;
-        }
+    .status-suspended {
+        background: var(--color-error-light);
+        color: var(--color-error);
+    }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+    /* Rating Cell */
+    .rating-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--color-primary-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: var(--color-primary);
-            font-size: 0.875rem;
-        }
+    .rating-star {
+        color: #fbbf24;
+    }
 
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
+    .rating-value {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
 
-        .user-name {
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--color-text);
-        }
+    .rating-count {
+        font-size: 0.8125rem;
+        color: var(--color-text-muted);
+    }
 
-        .user-role {
-            font-size: 0.75rem;
-            color: var(--color-text-muted);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-        }
-
-        .top-header {
-            background: var(--color-bg);
-            border-bottom: 1px solid var(--color-border);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .page-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--color-text);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .btn-primary-custom {
-            background: var(--color-primary);
-            color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
-            padding: 0.625rem 1.25rem;
-            border-radius: var(--radius-sm);
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary-custom:hover {
-            background: var(--color-primary-dark);
-            color: white;
-        }
-
-        .content-area {
-            padding: 2rem;
-        }
-
-        /* Stats Cards */
+    /* Responsive */
+    @media (max-width: 768px) {
         .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.8125rem;
-            color: var(--color-text-muted);
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--color-text);
-        }
-
-        /* Filter Bar */
-        .filter-bar {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
             flex-wrap: wrap;
         }
 
-        .search-box {
-            position: relative;
+        .stat-mini-card {
             flex: 1;
-            min-width: 250px;
-            max-width: 400px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 0.625rem 1rem 0.625rem 2.5rem;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            font-family: inherit;
-            background: var(--color-bg);
-            transition: var(--transition);
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px var(--color-primary-light);
-        }
-
-        .search-box svg {
-            position: absolute;
-            left: 0.875rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--color-text-muted);
-            width: 16px;
-            height: 16px;
-        }
-
-        .filter-select {
-            padding: 0.625rem 2rem 0.625rem 1rem;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            font-family: inherit;
-            background: var(--color-bg);
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--color-primary);
-        }
-
-        /* Course Table */
-        .course-table-card {
-            background: var(--color-bg);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-        }
-
-        .course-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .course-table th {
-            text-align: left;
-            padding: 1rem 1.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--color-text-muted);
-            background: var(--color-bg-subtle);
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .course-table td {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--color-border);
-            vertical-align: middle;
-        }
-
-        .course-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .course-table tr:hover td {
-            background: var(--color-bg-subtle);
-        }
-
-        .course-cell {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .course-thumb {
-            width: 80px;
-            height: 52px;
-            border-radius: var(--radius-sm);
-            background: var(--color-bg-subtle);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6875rem;
-            color: var(--color-text-muted);
-            overflow: hidden;
-        }
-
-        .course-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            min-width: calc(50% - 0.5rem);
         }
 
         .course-details h3 {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: var(--color-text);
-            margin-bottom: 0.25rem;
-            max-width: 280px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            max-width: 150px;
         }
+    }
 
-        .course-details p {
-            font-size: 0.8125rem;
-            color: var(--color-text-muted);
+    @media (max-width: 576px) {
+        .stat-mini-card {
+            min-width: 100%;
         }
-
-        .status-badge {
-            display: inline-flex;
-            padding: 0.25rem 0.75rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-published {
-            background: var(--color-success-light);
-            color: var(--color-success);
-        }
-
-        .status-draft {
-            background: var(--color-warning-light);
-            color: var(--color-warning);
-        }
-
-        .status-suspended {
-            background: var(--color-error-light);
-            color: var(--color-error);
-        }
-
-        .rating-cell {
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-        }
-
-        .rating-star {
-            color: #fbbf24;
-        }
-
-        .rating-value {
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .rating-count {
-            font-size: 0.8125rem;
-            color: var(--color-text-muted);
-        }
-
-        .action-buttons {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-action {
-            width: 34px;
-            height: 34px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border);
-            background: var(--color-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--color-text-secondary);
-        }
-
-        .btn-action:hover {
-            background: var(--color-bg-subtle);
-            color: var(--color-text);
-        }
-
-        .btn-action.edit:hover {
-            background: var(--color-primary-light);
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
-
-        .btn-action.delete:hover {
-            background: var(--color-error-light);
-            border-color: var(--color-error);
-            color: var(--color-error);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-        }
-
-        .empty-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--color-bg-subtle);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            color: var(--color-text-muted);
-        }
-
-        .empty-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--color-text);
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-desc {
-            font-size: 0.9375rem;
-            color: var(--color-text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        /* Pagination */
-        .pagination-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--color-border);
-        }
-
-        .pagination-info {
-            font-size: 0.875rem;
-            color: var(--color-text-secondary);
-        }
-
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .pagination-btn {
-            min-width: 36px;
-            height: 36px;
-            padding: 0 0.5rem;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            background: var(--color-bg);
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pagination-btn:hover:not(:disabled) {
-            background: var(--color-bg-subtle);
-            color: var(--color-text);
-        }
-
-        .pagination-btn.active {
-            background: var(--color-primary);
-            border-color: var(--color-primary);
-            color: white;
-        }
-
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Modal */
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
-
-        .modal-backdrop.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: var(--color-bg);
-            border-radius: var(--radius-md);
-            width: 100%;
-            max-width: 400px;
-            padding: 1.5rem;
-            transform: scale(0.95);
-            transition: var(--transition);
-        }
-
-        .modal-backdrop.show .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .modal-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-icon.danger {
-            background: var(--color-error-light);
-            color: var(--color-error);
-        }
-
-        .modal-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--color-text);
-        }
-
-        .modal-body {
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-body p {
-            font-size: 0.9375rem;
-            color: var(--color-text-secondary);
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: flex-end;
-        }
-
-        .btn-secondary {
-            padding: 0.625rem 1.25rem;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            background: var(--color-bg);
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--color-text);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-secondary:hover {
-            background: var(--color-bg-subtle);
-        }
-
-        .btn-danger {
-            padding: 0.625rem 1.25rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            background: var(--color-error);
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .course-table th:nth-child(4),
-            .course-table td:nth-child(4) {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .top-header {
-                padding: 1rem;
-            }
-
-            .content-area {
-                padding: 1rem;
-            }
-
-            .filter-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                max-width: none;
-            }
-
-            .course-table th:nth-child(3),
-            .course-table td:nth-child(3),
-            .course-table th:nth-child(5),
-            .course-table td:nth-child(5) {
-                display: none;
-            }
-
-            .mobile-toggle {
-                display: flex;
-            }
-        }
-
-        .mobile-toggle {
-            display: none;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            background: var(--color-bg);
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .no-thumbnail {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-            color: var(--color-primary);
-            font-weight: 500;
-        }
-    </style>
-</head>
+    }
+</style>
 <body>
 
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <a href="/" class="sidebar-logo">Dikoding<span>Muda</span></a>
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside th:replace="~{fragments/lecturer-layout :: sidebar(activeMenu='courses')}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header th:replace="~{fragments/lecturer-layout :: topHeader(pageTitle='Kursus Saya', showCreateButton=true)}"></header>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Alert Messages -->
+            <div th:if="${successMessage}" class="alert alert-success">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span th:text="${successMessage}">Berhasil</span>
+            </div>
+            
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span th:text="${errorMessage}">Terjadi kesalahan</span>
             </div>
 
-            <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <div class="nav-section-title">Menu Utama</div>
-                    <a href="/lecturer/dashboard" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        Dashboard
-                    </a>
-                    <a href="/lecturer/courses" class="nav-item active">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        Kursus Saya
-                    </a>
-                    <a href="/lecturer/courses/create" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 8v8"></path>
-                            <path d="M8 12h8"></path>
-                        </svg>
-                        Buat Kursus
-                    </a>
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-label">Total Kursus</div>
+                    <div class="stat-mini-value" th:text="${totalCourses != null} ? ${totalCourses} : 0">0</div>
                 </div>
-
-                <div class="nav-section">
-                    <div class="nav-section-title">Lainnya</div>
-                    <a href="/lecturer/settings" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                        Pengaturan
-                    </a>
-                    <a href="/logout" class="nav-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Keluar
-                    </a>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-label">Published</div>
+                    <div class="stat-mini-value text-success" th:text="${publishedCourses != null} ? ${publishedCourses} : 0">0</div>
                 </div>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar" th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}">BS</div>
-                    <div class="user-info">
-                        <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}">Nama User</div>
-                        <div class="user-role" th:text="${role}">Lecturer</div>
-                    </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-label">Draft</div>
+                    <div class="stat-mini-value text-warning" th:text="${draftCourses != null} ? ${draftCourses} : 0">0</div>
                 </div>
             </div>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Top Header -->
-            <header class="top-header">
-                <div class="d-flex align-items-center gap-3">
-                    <button class="mobile-toggle" onclick="toggleSidebar()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
-                    <h1 class="page-title">Kursus Saya</h1>
+            <!-- Filter Bar -->
+            <form id="filterForm" th:action="@{/lecturer/courses}" method="get" class="filter-bar">
+                <div class="search-box">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input type="text" name="search" class="search-input" placeholder="Cari kursus..." 
+                           th:value="${searchQuery}" id="searchInput">
                 </div>
-                <div class="header-actions">
-                    <a href="/lecturer/courses/create" class="btn-primary-custom">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14"></path>
-                            <path d="M5 12h14"></path>
-                        </svg>
-                        Buat Kursus Baru
-                    </a>
-                </div>
-            </header>
+                <select class="form-select filter-select" name="status" id="statusFilter" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="published" th:selected="${selectedStatus == 'published'}">Published</option>
+                    <option value="draft" th:selected="${selectedStatus == 'draft'}">Draft</option>
+                    <option value="suspended" th:selected="${selectedStatus == 'suspended'}">Suspended</option>
+                </select>
+                <select class="form-select filter-select" name="category" id="categoryFilter" onchange="this.form.submit()">
+                    <option value="">Semua Kategori</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.slug}"
+                            th:text="${cat.name}"
+                            th:selected="${selectedCategory == cat.slug}">
+                    </option>
+                </select>
+                <input type="hidden" name="size" th:value="${size}">
+            </form>
 
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Stats Row -->
-                <div class="stats-row">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Kursus</div>
-                        <div class="stat-value" th:text="${totalCourses}">0</div>
+            <!-- Course Table -->
+            <div class="table-wrapper" th:if="${courses != null and !courses.isEmpty()}">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Kursus</th>
+                            <th>Status</th>
+                            <th>Pelajar</th>
+                            <th class="d-none d-lg-table-cell">Rating</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="course : ${courses}">
+                            <td>
+                                <div class="course-cell">
+                                    <div class="course-thumb" th:classappend="${course.thumbnailUrl == null} ? 'no-thumbnail' : ''">
+                                        <img th:if="${course.thumbnailUrl != null}" 
+                                             th:src="@{/files/view(path=${course.thumbnailUrl})}" 
+                                             alt="Thumbnail">
+                                        <span th:if="${course.thumbnailUrl == null}">No Image</span>
+                                    </div>
+                                    <div class="course-details">
+                                        <h3 th:text="${course.title}">Judul Kursus</h3>
+                                        <p th:text="${course.categoryName}">Kategori</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:classappend="${course.statusClass}"
+                                      th:text="${course.statusDisplay}">Status</span>
+                            </td>
+                            <td>
+                                <span th:text="${course.formattedStudents}">0</span>
+                            </td>
+                            <td class="d-none d-lg-table-cell">
+                                <div class="rating-cell">
+                                    <span class="rating-star">&#9733;</span>
+                                    <span class="rating-value" th:text="${course.formattedRating}">-</span>
+                                    <span class="rating-count" th:text="'(' + ${course.totalReviews} + ')'"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <a th:href="@{/lecturer/courses/{id}/edit(id=${course.courseId})}" 
+                                       class="btn-action edit" title="Edit">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </a>
+                                    <a th:href="@{/courses/{slug}(slug=${course.slug})}" 
+                                       class="btn-action" title="Lihat" target="_blank">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                    </a>
+                                    <a th:href="@{/lecturer/courses/{id}/curriculum(id=${course.courseId})}" 
+                                       class="btn-action" title="Kelola Kurikulum">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                        </svg>
+                                    </a>
+                                    <button class="btn-action delete" title="Hapus" 
+                                            th:data-course-id="${course.courseId}"
+                                            th:data-course-title="${course.title}"
+                                            onclick="showDeleteModal(this)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 6h18"></path>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper" th:if="${totalPages > 0}">
+                    <div class="pagination-info">
+                        Menampilkan <span th:text="${startItem}">1</span>-<span th:text="${endItem}">10</span> 
+                        dari <span th:text="${totalItems}">0</span> kursus
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Published</div>
-                        <div class="stat-value" th:text="${publishedCourses}">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Draft</div>
-                        <div class="stat-value" th:text="${draftCourses}">0</div>
-                    </div>
-                </div>
-
-                <!-- Filter Bar -->
-                <form id="filterForm" th:action="@{/lecturer/courses}" method="get">
-                    <div class="filter-bar">
-                        <div class="search-box">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.3-4.3"></path>
-                            </svg>
-                            <input type="text" name="search" placeholder="Cari kursus..." 
-                                   th:value="${searchQuery}" id="searchInput">
-                        </div>
-                        <select class="filter-select" name="status" id="statusFilter" onchange="this.form.submit()">
-                            <option value="">Semua Status</option>
-                            <option value="published" th:selected="${selectedStatus == 'published'}">Published</option>
-                            <option value="draft" th:selected="${selectedStatus == 'draft'}">Draft</option>
-                            <option value="suspended" th:selected="${selectedStatus == 'suspended'}">Suspended</option>
-                        </select>
-                        <select class="filter-select" name="category" id="categoryFilter" onchange="this.form.submit()">
-                            <option value="">Semua Kategori</option>
-                            <option th:each="cat : ${categories}"
-                                    th:value="${cat.slug}"
-                                    th:text="${cat.name}"
-                                    th:selected="${selectedCategory == cat.slug}">
-                            </option>
-                        </select>
-                        <!-- Hidden field untuk maintain page size -->
-                        <input type="hidden" name="size" th:value="${size}">
-                    </div>
-                </form>
-
-                <!-- Course Table -->
-                <div class="course-table-card">
-                    <!-- Jika ada kursus -->
-                    <div th:if="${#lists.size(courses) > 0}">
-                        <table class="course-table">
-                            <thead>
-                                <tr>
-                                    <th>Kursus</th>
-                                    <th>Status</th>
-                                    <th>Pelajar</th>
-                                    <th>Rating</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="course : ${courses}">
-                                    <td>
-                                        <div class="course-cell">
-                                            <div class="course-thumb" th:classappend="${course.thumbnailUrl == null ? 'no-thumbnail' : ''}">
-                                                <img th:src="${course.thumbnailUrl != null} ? @{/files/view(path=${course.thumbnailUrl})} : '/images/default-course.png'" alt="Course Thumbnail">
-                                                <span th:if="${course.thumbnailUrl == null}">No Image</span>
-                                            </div>
-                                            <div class="course-details">
-                                                <h3 th:text="${course.title}">Judul Kursus</h3>
-                                                <p th:text="${course.categoryName}">Kategori</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge" 
-                                              th:classappend="${course.statusClass}"
-                                              th:text="${course.statusDisplay}">Status</span>
-                                    </td>
-                                    <td>
-                                        <span th:text="${course.formattedStudents}">0</span>
-                                    </td>
-                                    <td>
-                                        <div class="rating-cell">
-                                            <span class="rating-star">&#9733;</span>
-                                            <span class="rating-value" th:text="${course.formattedRating}">-</span>
-                                            <span class="rating-count" th:text="'(' + ${course.totalReviews} + ')'"></span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <a th:href="@{/lecturer/courses/{id}/edit(id=${course.courseId})}" 
-                                               class="btn-action edit" title="Edit">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                </svg>
-                                            </a>
-                                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" 
-                                               class="btn-action" title="Lihat" target="_blank">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </a>
-                                            <button class="btn-action delete" title="Hapus" 
-                                                    th:data-course-id="${course.courseId}"
-                                                    th:data-course-title="${course.title}"
-                                                    onclick="showDeleteModal(this)">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M3 6h18"></path>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <!-- Pagination -->
-                        <div class="pagination-wrapper" th:if="${totalPages > 0}">
-                            <div class="pagination-info">
-                                Menampilkan <span th:text="${startItem}">1</span>-<span th:text="${endItem}">10</span> 
-                                dari <span th:text="${totalItems}">0</span> kursus
-                            </div>
-                            <div class="pagination">
-                                <!-- Previous Button -->
-                                <a th:href="@{/lecturer/courses(page=${currentPage - 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
-                                   class="pagination-btn"
-                                   th:classappend="${currentPage == 0 ? 'disabled' : ''}"
-                                   th:if="${currentPage > 0}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="m15 18-6-6 6-6"></path>
-                                    </svg>
-                                </a>
-                                <button class="pagination-btn" disabled th:if="${currentPage == 0}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="m15 18-6-6 6-6"></path>
-                                    </svg>
-                                </button>
-
-                                <!-- Page Numbers -->
-                                <!-- First page -->
-                                <a th:if="${currentPage > 2}" 
-                                   th:href="@{/lecturer/courses(page=0, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
-                                   class="pagination-btn">1</a>
-                                <span th:if="${currentPage > 3}" class="pagination-btn" style="border: none; cursor: default;">...</span>
-
-                                <!-- Page numbers using #numbers.sequence -->
-                                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                                    <a th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
-                                       th:href="@{/lecturer/courses(page=${i}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
-                                       class="pagination-btn"
-                                       th:classappend="${i == currentPage ? 'active' : ''}"
-                                       th:text="${i + 1}">1</a>
-                                </th:block>
-
-                                <!-- Last page -->
-                                <span th:if="${currentPage < totalPages - 4}" class="pagination-btn" style="border: none; cursor: default;">...</span>
-                                <a th:if="${currentPage < totalPages - 3}" 
-                                   th:href="@{/lecturer/courses(page=${totalPages - 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
-                                   class="pagination-btn"
-                                   th:text="${totalPages}">Last</a>
-
-                                <!-- Next Button -->
-                                <a th:href="@{/lecturer/courses(page=${currentPage + 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
-                                   class="pagination-btn"
-                                   th:if="${currentPage < totalPages - 1}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </a>
-                                <button class="pagination-btn" disabled th:if="${currentPage >= totalPages - 1}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Empty State -->
-                    <div class="empty-state" th:if="${#lists.size(courses) == 0}">
-                        <div class="empty-icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="empty-title">Belum Ada Kursus</h3>
-                        <p class="empty-desc" th:if="${searchQuery != null and !searchQuery.isEmpty()}">
-                            Tidak ditemukan kursus dengan kata kunci "<span th:text="${searchQuery}"></span>"
-                        </p>
-                        <p class="empty-desc" th:if="${searchQuery == null or searchQuery.isEmpty()}">
-                            Mulai buat kursus pertamamu dan bagikan ilmu ke ribuan pelajar Indonesia
-                        </p>
-                        <a href="/lecturer/courses/create" class="btn-primary-custom" 
-                           th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                    <div class="pagination">
+                        <!-- Previous Button -->
+                        <a th:href="@{/lecturer/courses(page=${currentPage - 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                           class="pagination-btn"
+                           th:classappend="${currentPage == 0 ? 'disabled' : ''}"
+                           th:if="${currentPage > 0}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 5v14"></path>
-                                <path d="M5 12h14"></path>
+                                <path d="m15 18-6-6 6-6"></path>
                             </svg>
-                            Buat Kursus Pertama
                         </a>
-                        <a href="/lecturer/courses" class="btn-secondary" 
-                           th:if="${searchQuery != null and !searchQuery.isEmpty()}">
-                            Reset Filter
+                        <button class="pagination-btn" disabled th:if="${currentPage == 0}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m15 18-6-6 6-6"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Page Numbers -->
+                        <a th:if="${currentPage > 2}" 
+                           th:href="@{/lecturer/courses(page=0, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                           class="pagination-btn">1</a>
+                        <span th:if="${currentPage > 3}" class="pagination-btn" style="border: none; cursor: default;">...</span>
+
+                        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                            <a th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+                               th:href="@{/lecturer/courses(page=${i}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                               class="pagination-btn"
+                               th:classappend="${i == currentPage ? 'active' : ''}"
+                               th:text="${i + 1}">1</a>
+                        </th:block>
+
+                        <span th:if="${currentPage < totalPages - 4}" class="pagination-btn" style="border: none; cursor: default;">...</span>
+                        <a th:if="${currentPage < totalPages - 3}" 
+                           th:href="@{/lecturer/courses(page=${totalPages - 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                           class="pagination-btn"
+                           th:text="${totalPages}">Last</a>
+
+                        <!-- Next Button -->
+                        <a th:href="@{/lecturer/courses(page=${currentPage + 1}, size=${size}, status=${selectedStatus}, category=${selectedCategory}, search=${searchQuery})}"
+                           class="pagination-btn"
+                           th:if="${currentPage < totalPages - 1}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"></path>
+                            </svg>
                         </a>
+                        <button class="pagination-btn" disabled th:if="${currentPage >= totalPages - 1}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <!-- Delete Modal -->
-    <div class="modal-backdrop" id="deleteModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-icon danger">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${courses == null or courses.isEmpty()}">
+                <div class="empty-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                     </svg>
                 </div>
-                <h3 class="modal-title">Hapus Kursus</h3>
-            </div>
-            <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus kursus "<span id="deleteCourseTitle"></span>"? Tindakan ini tidak dapat dibatalkan dan semua data terkait akan dihapus permanen.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="hideDeleteModal()">Batal</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    <button type="submit" class="btn-danger">Hapus Kursus</button>
-                </form>
+                <h3 class="empty-title">Belum Ada Kursus</h3>
+                <p class="empty-desc" th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                    Tidak ditemukan kursus dengan kata kunci "<span th:text="${searchQuery}"></span>"
+                </p>
+                <p class="empty-desc" th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                    Mulai buat kursus pertamamu dan bagikan ilmu ke ribuan pelajar Indonesia
+                </p>
+                <a href="/lecturer/courses/create" class="btn btn-primary-custom" 
+                   th:if="${searchQuery == null or searchQuery.isEmpty()}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14"></path>
+                        <path d="M5 12h14"></path>
+                    </svg>
+                    Buat Kursus Pertama
+                </a>
+                <a href="/lecturer/courses" class="btn btn-secondary" 
+                   th:if="${searchQuery != null and !searchQuery.isEmpty()}">
+                    Reset Filter
+                </a>
             </div>
         </div>
+    </main>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-backdrop" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-icon danger">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Hapus Kursus</h3>
+        </div>
+        <div class="modal-body">
+            <p>Apakah Anda yakin ingin menghapus kursus "<span id="deleteCourseTitle"></span>"? Tindakan ini tidak dapat dibatalkan dan semua data terkait akan dihapus permanen.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideDeleteModal()">Batal</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Hapus Kursus</button>
+            </form>
+        </div>
     </div>
+</div>
 
-    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+<!-- Scripts -->
+<th:block th:replace="~{fragments/lecturer-layout :: scripts}"></th:block>
+
+<script>
+    function showDeleteModal(button) {
+        var courseId = button.getAttribute('data-course-id');
+        var courseTitle = button.getAttribute('data-course-title');
+        document.getElementById('deleteModal').classList.add('show');
+        document.getElementById('deleteForm').action = '/lecturer/courses/' + courseId + '/delete';
+        document.getElementById('deleteCourseTitle').textContent = courseTitle;
+    }
+
+    function hideDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDeleteModal();
         }
+    });
 
-        function showDeleteModal(button) {
-            var courseId = button.getAttribute('data-course-id');
-            var courseTitle = button.getAttribute('data-course-title');
-            document.getElementById('deleteModal').classList.add('show');
-            document.getElementById('deleteForm').action = '/lecturer/courses/' + courseId + '/delete';
-            document.getElementById('deleteCourseTitle').textContent = courseTitle;
-        }
+    // Search with debounce
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            document.getElementById('filterForm').submit();
+        }, 500);
+    });
 
-        function hideDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('show');
-        }
-
-        // Close modal on backdrop click
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideDeleteModal();
-            }
-        });
-
-        // Search with debounce
-        let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', function(e) {
+    // Submit form on Enter key in search
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
-                document.getElementById('filterForm').submit();
-            }, 500);
-        });
-
-        // Submit form on Enter key in search
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                clearTimeout(searchTimeout);
-                document.getElementById('filterForm').submit();
-            }
-        });
-    </script>
+            document.getElementById('filterForm').submit();
+        }
+    });
+</script>
 </body>
 </html>

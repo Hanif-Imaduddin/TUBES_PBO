@@ -39,6 +39,19 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<ReviewDTO> findRecentReviewDTOs(Pageable pageable);
     
     /**
+     * Get recent reviews for courses owned by a specific lecturer
+     */
+    @Query("SELECT new koding_muda_nusantara.koding_muda_belajar.dto.ReviewDTO(" +
+       "r.id, u.firstName, u.lastName, c.title, c.slug, r.rating, r.reviewText, r.createdAt) " +
+       "FROM Review r " +
+       "JOIN r.student s " +
+       "JOIN User u ON u.userId = s.userId " +
+       "JOIN r.course c " +
+       "WHERE c.lecturer.userId = :lecturerId " +
+       "ORDER BY r.createdAt DESC")
+    List<ReviewDTO> findRecentReviewDTOsByLecturerId(@Param("lecturerId") Integer lecturerId, Pageable pageable);
+    
+    /**
      * Hitung jumlah review untuk course tertentu
      */
     long countByCourse_CourseId(Integer courseId);

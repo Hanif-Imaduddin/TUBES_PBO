@@ -61,7 +61,8 @@ public class MyAccountController {
         model.addAttribute("profileDTO", profileDTO);
         model.addAttribute("passwordDTO", new ChangePasswordDTO());
         model.addAttribute("pageTitle", "My Account");
-
+        model.addAttribute("balance", user.getBalance());
+        
         return "my-account";
     }
 

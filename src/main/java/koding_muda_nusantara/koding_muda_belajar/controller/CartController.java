@@ -10,6 +10,7 @@ import java.util.List;
 import koding_muda_nusantara.koding_muda_belajar.model.CartItem;
 import koding_muda_nusantara.koding_muda_belajar.model.Course;
 import koding_muda_nusantara.koding_muda_belajar.model.Student;
+import koding_muda_nusantara.koding_muda_belajar.model.User;
 import koding_muda_nusantara.koding_muda_belajar.service.CartService;
 import koding_muda_nusantara.koding_muda_belajar.service.CourseService;
 import koding_muda_nusantara.koding_muda_belajar.service.EnrollmentService;
@@ -60,6 +61,8 @@ public class CartController {
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("student", student);
         model.addAttribute("total", total);
+        model.addAttribute("user", (User)session.getAttribute("user"));
+        model.addAttribute("role", session.getAttribute("userRole"));
         
         return "student/cart";
     }

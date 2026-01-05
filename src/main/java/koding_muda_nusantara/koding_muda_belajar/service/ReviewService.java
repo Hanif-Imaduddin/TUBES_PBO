@@ -55,4 +55,11 @@ public class ReviewService {
     public List<ReviewDTO> getRecentReviewDTOs(int n) {
         return reviewRepository.findRecentReviewDTOs(PageRequest.of(0, n));
     }
+    
+    /**
+     * Get recent reviews for courses owned by a specific lecturer
+     */
+    public List<ReviewDTO> getRecentReviewDTOsByLecturerId(Integer lecturerId, int n) {
+        return reviewRepository.findRecentReviewDTOsByLecturerId(lecturerId, PageRequest.of(0, n));
+    }
 }
